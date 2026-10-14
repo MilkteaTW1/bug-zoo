@@ -1,5 +1,10 @@
 # Changelog / 更新紀錄
 
+## 0.3.1
+
+- README: lists which other AI assistants (Cursor, Gemini CLI) are not supported yet, and why. No behaviour changes.
+  README 補充尚未支援的其他 AI 助手（Cursor、Gemini CLI）與原因。程式行為沒有變動。
+
 ## 0.3.0
 
 - **Monsters for your AI assistant's commands (Claude Code).** `bugzoo setup --ai on` adds `PostToolUse` and `PostToolUseFailure` hooks for the Bash tool. A failing command shows a monster, the fix catches it. The card is a `systemMessage`: shown to you, never sent to the model.
