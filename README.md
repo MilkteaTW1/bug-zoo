@@ -2,6 +2,8 @@
 
 Turn your error messages into collectible monsters.
 
+[![Tests](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml/badge.svg)](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/bug-zoo)](https://www.npmjs.com/package/bug-zoo) [![license](https://img.shields.io/npm/l/bug-zoo)](LICENSE)
+
 **Catch bugs, build a team, battle your friends.**
 
 - **Fix to catch**: a crash spawns a monster; fix the code and re-run the command to catch it.
@@ -103,6 +105,7 @@ With it on, whatever you run **by hand** in a terminal is captured, in any proje
 - Open a new terminal after turning it on. Pause it with `BUGZOO_DISABLE=1`.
 - **Limits**: a language not in the list above needs `bugzoo run <command>`. Runs started by an IDE's Run button (no terminal) are not captured. Wrapped commands have their stderr and stdout piped through bugzoo, so a few tools may drop colours.
 - **Commands that ask questions** (`npm publish`, `npm login`, `npm init`, `npx`, ...) are passed straight through untouched and not recorded, because capturing their output would stop them prompting. `BUGZOO_DISABLE=1` does the same for any command, which is also the fix for programs with a full-screen terminal UI.
+- **What is tested**: the whole test suite runs in CI on Windows, macOS and Linux (Node 18, 20, 22), and the bash wrappers run in a real bash there. The cmd and PowerShell wrappers were checked by hand on Windows; zsh and fish are covered as generated text only.
 - Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
 
 ## Power and fair play
@@ -202,6 +205,8 @@ MIT
 # Bug Zoo（繁體中文）
 
 把你的錯誤訊息變成可收集的怪物。
+
+[![Tests](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml/badge.svg)](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/bug-zoo)](https://www.npmjs.com/package/bug-zoo) [![license](https://img.shields.io/npm/l/bug-zoo)](LICENSE)
 
 **抓 bug、組隊、和朋友對戰。**
 
@@ -304,6 +309,7 @@ bugzoo setup --auto on
 - 開啟後需要**重新開啟終端機**才會生效。暫時停用：`BUGZOO_DISABLE=1`。
 - **限制**：上表以外的語言要用 `bugzoo run <指令>`；從 IDE 的執行按鈕啟動（沒有終端機）不會被捕捉；被包裝的指令，其 stderr 與 stdout 會經過 bugzoo，少數工具可能會失去顏色。
 - **會問問題的指令**（`npm publish`、`npm login`、`npm init`、`npx` 等）會原封不動直通、也不記錄，因為擷取輸出會讓它們不再詢問。`BUGZOO_DISABLE=1` 可對任何指令達到同樣效果，遇到有全螢幕終端介面的程式也用這個。
+- **測試範圍**：完整測試在 CI 上於 Windows、macOS、Linux（Node 18、20、22）執行，bash 包裝也在那裡的真實 bash 中執行。cmd 與 PowerShell 的包裝是在 Windows 上人工驗證；zsh 與 fish 只有產生出來的文字有測試。
 - Windows PowerShell 的執行原則是 `Restricted` 時會忽略設定檔，`bugzoo setup` 會提醒你。
 
 ## 戰鬥力與公平性

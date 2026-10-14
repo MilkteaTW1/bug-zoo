@@ -1,5 +1,14 @@
 # Changelog / 更新紀錄
 
+## 0.1.3
+
+- **Fix**: a healthy command with no history no longer prints "Fix the bug and run the same command again" after every run. This affected `bugzoo run` and every wrapped command.
+  修正：從沒失敗過、正常通過的指令，不會再在每次執行後多印「修好這個 bug…」的提示。
+- **Fix**: Windows-style program paths such as `C:\Python\python.exe` are recognised on macOS and Linux.
+  修正：在 macOS 與 Linux 上也能辨識 Windows 風格的程式路徑。
+- Tests run in CI on Windows, macOS and Linux (Node 18, 20, 22), including the bash wrappers in a real shell.
+  測試改在 Windows、macOS、Linux 的 CI 上執行，包含在真實 shell 裡跑 bash 包裝。
+
 ## 0.1.2
 
 - README: a one-line pitch, three highlights and a sample `bugzoo export` image up front.
