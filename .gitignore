@@ -5,3 +5,4 @@ node_modules/
 Thumbs.db
 bugzoo-score.json
 bugzoo.svg
+.claude/settings.local.json

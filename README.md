@@ -10,7 +10,7 @@ Turn your error messages into collectible monsters.
 - **Power from your real project**: stack depth, blast radius, size and failure rate decide how strong it is.
 - **Battle friends, no server**: climb a ladder or fight a friend's code; no accounts, no database.
 
-*For developers who stare at stack traces all day and would like it to feel a bit more like a game.*
+*For developers who stare at stack traces all day (their own, or their AI assistant's) and would like it to feel a bit more like a game.*
 
 **English** | [繁體中文](#zh-TW)
 
@@ -50,7 +50,7 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
 | `bugzoo ladder` | Show the ladder |
 | `bugzoo rank` | Your score and title |
-| `bugzoo setup` | Language, player name and optional automatic capture (`--lang`, `--name`, `--auto on\|off`) |
+| `bugzoo setup` | Language, player name, optional automatic capture and the AI-assistant hook (`--lang`, `--name`, `--auto on\|off`, `--ai on\|off`) |
 | `bugzoo share` | Write a shareable score + team file (counts only, no error text) |
 | `bugzoo leaderboard <dir>` | Build a score leaderboard from shared files |
 | `bugzoo scan` | Scan this project: size and most-depended-on modules |
@@ -113,6 +113,24 @@ With it on, whatever you run **by hand** in a terminal is captured, in any proje
 - **Commands that ask questions** (`npm publish`, `npm login`, `npm init`, `npx`, ...) are passed straight through untouched and not recorded, because capturing their output would stop them prompting. `BUGZOO_DISABLE=1` does the same for any command, which is also the fix for programs with a full-screen terminal UI.
 - **What is tested**: the whole test suite runs in CI on Windows, macOS and Linux (Node 18, 20, 22), and the bash wrappers run in a real bash there. The cmd and PowerShell wrappers were checked by hand on Windows; zsh and fish are covered as generated text only.
 - Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
+
+## When your AI assistant runs the code (Claude Code)
+
+An AI assistant runs commands without a terminal, so automatic capture stays quiet for them. A hook fills that gap:
+
+```bash
+bugzoo setup --ai on     # adds Bash hooks to ~/.claude/settings.json; --ai off removes them
+```
+
+Restart Claude Code, then work as usual:
+
+1. The assistant runs your code and it fails: **a monster appears** in your conversation.
+2. The assistant fixes it and re-runs the same command: **caught**, with power, evolution and achievements like any other run.
+
+- The card is shown **to you only**. It is sent as the hook's `systemMessage`, never as context for the model, so it costs no tokens and cannot confuse the assistant.
+- Same identity as by hand: `node app.js` run by the assistant and by you is the same target, so it can fail in one place and be caught in the other. `cd proj && node app.js 2>&1 | tail` counts as `node app.js`.
+- Limits: Claude Code only, and only its Bash tool. A command that also changes files (`printf ... > f.js && node f.js`) is a different command from `node f.js`, so it will not match a later clean run. Checked on Windows with Claude Code desktop; the hook format follows Claude Code's documentation.
+- Bug Zoo only edits the hooks it added, refuses to touch a settings file that is not plain JSON, and `--ai off` removes exactly those entries.
 
 ## Power and fair play
 
@@ -234,7 +252,7 @@ MIT
 - **戰鬥力來自你的真實專案**：堆疊深度、影響範圍、專案規模與失敗頻率，決定牠有多強。
 - **和朋友對戰，不需要伺服器**：爬天梯，或直接挑戰朋友的代碼；沒有帳號、沒有資料庫。
 
-*給每天盯著錯誤堆疊的開發者，讓它多一點遊戲的感覺。*
+*給每天盯著錯誤堆疊的開發者（不管是自己寫的，還是 AI 寫的），讓它多一點遊戲的感覺。*
 
 [English](#bug-zoo) | **繁體中文**
 
@@ -274,7 +292,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
 | `bugzoo ladder` | 查看天梯 |
 | `bugzoo rank` | 你的分數與稱號 |
-| `bugzoo setup` | 語言、玩家名稱與選用的自動捕捉（`--lang`、`--name`、`--auto on\|off`） |
+| `bugzoo setup` | 語言、玩家名稱、選用的自動捕捉與 AI 助手 hook（`--lang`、`--name`、`--auto on\|off`、`--ai on\|off`） |
 | `bugzoo share` | 輸出可分享的分數與隊伍檔（只有數量，不含錯誤內容） |
 | `bugzoo leaderboard <資料夾>` | 用分享檔產生分數排行榜 |
 | `bugzoo scan` | 掃描這個專案：規模與最多檔案依賴的模組 |
@@ -337,6 +355,24 @@ bugzoo setup --auto on
 - **會問問題的指令**（`npm publish`、`npm login`、`npm init`、`npx` 等）會原封不動直通、也不記錄，因為擷取輸出會讓它們不再詢問。`BUGZOO_DISABLE=1` 可對任何指令達到同樣效果，遇到有全螢幕終端介面的程式也用這個。
 - **測試範圍**：完整測試在 CI 上於 Windows、macOS、Linux（Node 18、20、22）執行，bash 包裝也在那裡的真實 bash 中執行。cmd 與 PowerShell 的包裝是在 Windows 上人工驗證；zsh 與 fish 只有產生出來的文字有測試。
 - Windows PowerShell 的執行原則是 `Restricted` 時會忽略設定檔，`bugzoo setup` 會提醒你。
+
+## 當 AI 助手幫你跑程式（Claude Code）
+
+AI 助手執行指令時沒有終端機，所以自動捕捉對它們不會有反應。這個 hook 補上這個缺口：
+
+```bash
+bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai off 會移除
+```
+
+重新啟動 Claude Code，然後照平常的方式工作：
+
+1. AI 助手跑你的程式、失敗了：對話裡會**出現一隻怪物**。
+2. AI 助手修好、重跑同一條指令：**捕捉成功**，戰鬥力、進化與成就都和其他執行一樣。
+
+- 卡片**只給你看**：它是以 hook 的 `systemMessage` 送出，不會成為模型的上下文，所以不花 token，也不會讓助手困惑。
+- 和手動執行是同一個身分：助手與你各自執行的 `node app.js` 是同一個目標，可以在一邊失敗、在另一邊捕捉。`cd proj && node app.js 2>&1 | tail` 會當成 `node app.js`。
+- 限制：只支援 Claude Code 的 Bash 工具。同時會改檔案的指令（`printf ... > f.js && node f.js`）和單獨的 `node f.js` 是不同的指令，所以不會和之後的乾淨執行配對。已在 Windows 的 Claude Code 桌面版驗證；hook 格式依 Claude Code 官方文件。
+- Bug Zoo 只會動它自己加的 hook；設定檔不是純 JSON 時絕不覆寫；`--ai off` 只會移除它自己加的項目。
 
 ## 戰鬥力與公平性
 

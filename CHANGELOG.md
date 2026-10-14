@@ -1,5 +1,12 @@
 # Changelog / 更新紀錄
 
+## 0.3.0
+
+- **Monsters for your AI assistant's commands (Claude Code).** `bugzoo setup --ai on` adds `PostToolUse` and `PostToolUseFailure` hooks for the Bash tool. A failing command shows a monster, the fix catches it. The card is a `systemMessage`: shown to you, never sent to the model.
+  AI 助手執行的指令也會出怪物（Claude Code）：`bugzoo setup --ai on` 加入 Bash 的 hook；指令失敗出現怪物、修好就捕捉。卡片以 `systemMessage` 送出，只給你看，不會送給模型。
+- A command run by the assistant and the same command run by hand share one identity.
+  助手與你手動執行的同一條指令視為同一個目標。
+
 ## 0.2.0
 
 - **Battle result cards.** `bugzoo battle --card result.svg` (or answer yes when asked after a fight) saves an SVG with both teams, power, the winner and the number of blows. Fights are deterministic, so the same two teams always give the same card.

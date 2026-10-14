@@ -18,6 +18,7 @@ const { decodeOutput } = require('../src/decode');
 const passthrough = require('../src/passthrough');
 const creatureArt = require('../src/creature');
 const achievements = require('../src/achievements');
+const aihook = require('../src/aihook');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
@@ -31,8 +32,10 @@ const HELP = {
   en: `bugzoo - turn your errors into collectible monsters
 
 Usage:
-  bugzoo setup [--lang zh-TW|en] [--name N] [--auto on|off]
-                              Language, player name and automatic capture
+  bugzoo setup [--lang zh-TW|en] [--name N] [--auto on|off] [--ai on|off]
+                              Language, player name, automatic capture, and
+                              monsters for commands your AI assistant runs
+                              (Claude Code)
   bugzoo run <command...>     Run a command. If it fails, a bug appears.
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
@@ -68,8 +71,9 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
   'zh-TW': `bugzoo - 把你的錯誤變成可收集的怪物
 
 用法：
-  bugzoo setup [--lang zh-TW|en] [--name 名稱] [--auto on|off]
-                              語言、玩家名稱、自動捕捉
+  bugzoo setup [--lang zh-TW|en] [--name 名稱] [--auto on|off] [--ai on|off]
+                              語言、玩家名稱、自動捕捉，以及 AI 助手
+                              （Claude Code）執行的指令也會出怪物
   bugzoo run <指令...>        執行指令，失敗時會出現 bug
                               （開啟自動捕捉後就不用打這個）
   bugzoo dex                  你的圖鑑與等著被捕捉的 bug
@@ -180,18 +184,26 @@ async function runSetup({ flags = {}, ask: prompt }) {
     for (const w of r.warnings) console.log(t(`setup.warn.${w.code}`, w.params));
   }
 
+  // AI coding sessions (Claude Code hook). Off unless asked for; `--ai-file` points at another settings file.
+  const aiFile = typeof flags['ai-file'] === 'string' ? flags['ai-file'] : undefined;
+  if (flags.ai === 'on' || flags.ai === 'off') {
+    const r = flags.ai === 'on' ? aihook.enable(aiFile) : aihook.disable(aiFile);
+    console.log(r.ok ? t(flags.ai === 'on' ? 'setup.aiOn' : 'setup.aiOff', { file: r.file }) : t('setup.aiFail', { error: r.error }));
+  }
+
   const shownLang = i18n.LANG_LABEL[dex.profile.lang || i18n.getLang()];
   console.log(t('setup.status', {
     lang: shownLang,
     name: dex.profile.name || t('setup.noName'),
     auto: t(autostart.status().enabled ? 'common.on' : 'common.off'),
   }));
+  console.log(t('setup.aiStatus', { state: t(aihook.status(aiFile).enabled ? 'common.on' : 'common.off') }));
   return 0;
 }
 
 async function cmdSetup(args) {
   const { flags } = parseFlags(args);
-  const given = ['lang', 'name', 'auto'].some((k) => flags[k] !== undefined);
+  const given = ['lang', 'name', 'auto', 'ai'].some((k) => flags[k] !== undefined);
   return runSetup({ flags, ask: !given && interactive() });
 }
 
@@ -203,7 +215,7 @@ async function ensureSetup(cmd) {
     return;
   }
   i18n.setLang(i18n.detectLang());
-  const skip = new Set(['setup', 'hook', 'help', '--help', '-h', undefined, 'ladder']);
+  const skip = new Set(['setup', 'hook', 'ai-hook', 'help', '--help', '-h', undefined, 'ladder']);
   if (!skip.has(cmd) && interactive()) await runSetup({ flags: {}, ask: true });
 }
 
@@ -692,6 +704,26 @@ async function main() {
     case 'ladder': {
       const rc = cmdLadder(rest);
       process.exit(rc === null ? await showLadder(rest) : rc);
+      break;
+    }
+    case 'ai-hook': {
+      // Called by Claude Code after each Bash tool call. Reads the event on stdin, prints a systemMessage.
+      // `--home DIR` and `--log FILE` exist so the hook can be tried out without touching your real zoo.
+      const hookFlags = parseFlags(rest).flags;
+      if (typeof hookFlags.home === 'string') process.env.BUGZOO_HOME = hookFlags.home;
+      const logFile = typeof hookFlags.log === 'string' ? hookFlags.log : process.env.BUGZOO_AI_LOG;
+      let payload = null;
+      try {
+        payload = JSON.parse(fs.readFileSync(0, 'utf8'));
+      } catch { /* not a hook event */ }
+      const { message } = aihook.handle(payload);
+      const out = message ? { systemMessage: message } : {};
+      if (logFile) {
+        try {
+          fs.appendFileSync(logFile, `${JSON.stringify({ at: new Date().toISOString(), payload, out })}\n`);
+        } catch { /* logging is best-effort */ }
+      }
+      process.stdout.write(JSON.stringify(out));
       break;
     }
     case 'hook': {

@@ -145,6 +145,10 @@ const M = {
     'title.Zookeeper': 'Zookeeper',
     'title.Bug Whisperer': 'Bug Whisperer',
     'rank.points': 'Points: common {c}, uncommon {u}, rare {r}, legendary {l}; each repeat catch +2',
+    'setup.aiOn': 'AI sessions: hook added to {file}. Monsters now appear when commands your AI assistant runs fail or get fixed. Restart Claude Code to load it.',
+    'setup.aiOff': 'AI sessions: hook removed from {file}.',
+    'setup.aiFail': 'Could not change the AI hook: {error}',
+    'setup.aiStatus': 'AI sessions (Claude Code): {state}',
     'common.on': 'on',
     'common.off': 'off',
 
@@ -335,6 +339,10 @@ const M = {
     'title.Zookeeper': '動物園長',
     'title.Bug Whisperer': '蟲語者',
     'rank.points': '計分：普通 {c}、罕見 {u}、稀有 {r}、傳說 {l}；每次重複捕捉 +2',
+    'setup.aiOn': 'AI 協作：已把 hook 加進 {file}。AI 助手執行的指令失敗或修好時，你會看到怪物。請重新啟動 Claude Code 讓它生效。',
+    'setup.aiOff': 'AI 協作：已從 {file} 移除 hook。',
+    'setup.aiFail': '無法變更 AI hook：{error}',
+    'setup.aiStatus': 'AI 協作（Claude Code）：{state}',
     'common.on': '開啟',
     'common.off': '關閉',
 
