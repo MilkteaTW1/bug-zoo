@@ -2,6 +2,14 @@
 
 Turn your error messages into collectible monsters.
 
+**Catch bugs, build a team, battle your friends.**
+
+- **Fix to catch**: a crash spawns a monster; fix the code and re-run the command to catch it.
+- **Power from your real project**: stack depth, blast radius, size and failure rate decide how strong it is.
+- **Battle friends, no server**: climb a ladder or fight a friend's code; no accounts, no database.
+
+*For developers who stare at stack traces all day and would like it to feel a bit more like a game.*
+
 **English** | [繁體中文](#zh-TW)
 
 ![Bug Zoo demo](docs/demo.en.gif)
@@ -45,6 +53,20 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 | `bugzoo scan` | Scan this project: size and most-depended-on modules |
 | `bugzoo hook <shell>` | Print a wrapper snippet for bash, zsh, fish or PowerShell |
 | `bugzoo export` | Export the bestiary as an SVG for your profile |
+
+## Share your zoo
+
+Everything you earn can be pasted somewhere:
+
+```bash
+bugzoo export zoo.svg    # a card grid of your bestiary, ready for a profile README
+bugzoo friend code       # your team as one pasteable code
+bugzoo rank              # your score and title
+```
+
+![A bestiary exported with bugzoo export](docs/bestiary.en.svg)
+
+*A sample `bugzoo export`: rarity colours the border, uncaught monsters are faded.*
 
 ## Catching a bug
 
@@ -181,6 +203,14 @@ MIT
 
 把你的錯誤訊息變成可收集的怪物。
 
+**抓 bug、組隊、和朋友對戰。**
+
+- **修好才抓得到**：程式一壞就出現怪物，修好程式、重跑同一條指令就能捕捉。
+- **戰鬥力來自你的真實專案**：堆疊深度、影響範圍、專案規模與失敗頻率，決定牠有多強。
+- **和朋友對戰，不需要伺服器**：爬天梯，或直接挑戰朋友的代碼；沒有帳號、沒有資料庫。
+
+*給每天盯著錯誤堆疊的開發者，讓它多一點遊戲的感覺。*
+
 [English](#bug-zoo) | **繁體中文**
 
 ![Bug Zoo 示範](docs/demo.zh-TW.gif)
@@ -224,6 +254,20 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo scan` | 掃描這個專案：規模與最多檔案依賴的模組 |
 | `bugzoo hook <shell>` | 輸出 bash、zsh、fish、PowerShell 的包裝設定片段 |
 | `bugzoo export` | 把圖鑑匯出成 SVG，放到你的個人頁 |
+
+## 分享你的動物園
+
+你賺到的一切，都可以貼到別的地方：
+
+```bash
+bugzoo export zoo.svg    # 圖鑑的卡片圖，可直接放進個人頁 README
+bugzoo friend code       # 把你的隊伍變成一段可貼上的代碼
+bugzoo rank              # 你的分數與稱號
+```
+
+![用 bugzoo export 匯出的圖鑑](docs/bestiary.zh-TW.svg)
+
+*`bugzoo export` 的範例：稀有度決定邊框顏色，還沒捕捉到的怪物會變淡。*
 
 ## 捕捉規則
 
