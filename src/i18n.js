@@ -85,7 +85,7 @@ const M = {
     'setup.noName': '(not set)',
     'setup.nameHint': 'No player name yet. Set one with `bugzoo setup --name <name>` before sharing.',
 
-    'setup.auto': 'Catch bugs automatically whenever you run a project by hand (Node, Python, Go, Cargo, Java, npm...)?\n  This edits your user environment variable and terminal profiles; undo any time with `bugzoo setup --auto off`. [Y/n]: ',
+    'setup.auto': 'Also catch bugs automatically whenever you run a project by hand? Optional: `bugzoo run <command>` works without it.\n  Turning it on edits your user environment variable and terminal profiles; undo any time with `bugzoo setup --auto off`. [y/N]: ',
     'setup.autoOn': 'Auto-capture is ON. Open a new terminal; whatever you run by hand there is captured.',
     'setup.step.node': '  - Node programs: any project, started from a terminal (NODE_OPTIONS)',
     'setup.step.cmd': '  - Command Prompt: python, go, cargo, java, npm, ... (AutoRun)',
@@ -232,7 +232,7 @@ const M = {
     'setup.noName': '（未設定）',
     'setup.nameHint': '還沒有玩家名稱。分享前請先用 `bugzoo setup --name <名稱>` 設定。',
 
-    'setup.auto': '要在你「手動執行任何專案」時自動捕捉 bug 嗎？（Node、Python、Go、Cargo、Java、npm…）\n  這會修改你的使用者環境變數與終端機設定檔，之後隨時可用 `bugzoo setup --auto off` 還原。[Y/n]：',
+    'setup.auto': '要連「你手動執行的任何專案」都自動捕捉 bug 嗎？這是選用功能，不開也能用 `bugzoo run <指令>` 玩。\n  開啟會修改你的使用者環境變數與終端機設定檔，之後隨時可用 `bugzoo setup --auto off` 還原。[y/N]：',
     'setup.autoOn': '自動捕捉已開啟。請重新開啟終端機，之後你在裡面手動執行的程式都會被捕捉。',
     'setup.step.node': '  - Node 程式：任何專案，只要是從終端機啟動的（NODE_OPTIONS）',
     'setup.step.cmd': '  - 命令提示字元：python、go、cargo、java、npm…（AutoRun）',

@@ -7,6 +7,7 @@ const { resolve } = require('./capture');
 const { computePower, MIN_RUNS_FOR_RATE } = require('./power');
 
 const MAX_TROPHIES = 200;
+const FAIL_COUNT_INTERVAL_MS = 60 * 1000;
 
 function dexPath() {
   const dir = process.env.BUGZOO_HOME || path.join(os.homedir(), '.bugzoo');
@@ -48,11 +49,20 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   const failed = creatures.length > 0;
 
   // Error rate only tracks commands that have failed before, so clean runs of healthy commands cost nothing.
+  // A command's failures count at most once a minute, so hammering a failing command to inflate
+  // its error rate does nothing. Healthy runs always count.
   let run = dex.runs[key];
   if (run || failed) {
     run = run || { runs: 0, fails: 0 };
-    run.runs += 1;
-    if (failed) run.fails += 1;
+    const sinceLastFail = run.lastFailAt ? now - new Date(run.lastFailAt) : Infinity;
+    const burst = failed && sinceLastFail < FAIL_COUNT_INTERVAL_MS;
+    if (!burst) {
+      run.runs += 1;
+      if (failed) {
+        run.fails += 1;
+        run.lastFailAt = stamp;
+      }
+    }
     dex.runs[key] = run;
   }
   const failRate = run ? run.fails / Math.max(run.runs, MIN_RUNS_FOR_RATE) : 0;

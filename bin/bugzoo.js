@@ -154,7 +154,8 @@ async function runSetup({ flags = {}, ask: prompt }) {
       i18n.setLang(lang);
     }
     if (name === null) name = cleanName(await ask(t('setup.name')));
-    if (auto === null) auto = yes(await ask(t('setup.auto')));
+    // Automatic capture edits the player's environment, so it is opt-in: only an explicit "y" turns it on.
+    if (auto === null) auto = /^y/i.test(await ask(t('setup.auto')));
   }
 
   if (lang) {

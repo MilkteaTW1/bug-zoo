@@ -11,20 +11,27 @@ Turn your error messages into collectible monsters.
 ## Install
 
 ```bash
-npm install -g github:MilkteaTW1/bug-zoo
+npm install -g bug-zoo
 bugzoo setup
 ```
 
-Requires Node.js 18+. No dependencies. Installs straight from GitHub; it is not on the npm registry yet.
+Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
 
-The first time you run any `bugzoo` command it asks for your **language** (繁體中文 / English), a **player name** for the leaderboards, and whether to turn on **automatic capture**. (npm install scripts cannot prompt, so the questions happen on first run.) Change them any time with `bugzoo setup`.
+## Play in 30 seconds
+
+```bash
+bugzoo run node app.js    # 1. your program crashes: a bug appears
+# 2. fix the bug in your code
+bugzoo run node app.js    # 3. same command, clean run: caught!
+```
+
+Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...). No project to try it on? `playground/` has three broken programs; see [playground/GUIDE.md](playground/GUIDE.md).
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `bugzoo setup` | Language, player name and automatic capture (`--lang`, `--name`, `--auto on\|off`) |
-| `bugzoo run <command…>` | Run a command; if it fails a bug appears. Not needed once automatic capture is on |
+| `bugzoo run <command…>` | Run a command; if it fails a bug appears; fix it and re-run to catch it |
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
 | `bugzoo team` | Your strongest catches, with the power breakdown |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight |
@@ -32,33 +39,12 @@ The first time you run any `bugzoo` command it asks for your **language** (繁�
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
 | `bugzoo ladder` | Show the ladder |
 | `bugzoo rank` | Your score and title |
+| `bugzoo setup` | Language, player name and optional automatic capture (`--lang`, `--name`, `--auto on\|off`) |
 | `bugzoo share` | Write a shareable score + team file (counts only, no error text) |
 | `bugzoo leaderboard <dir>` | Build a score leaderboard from shared files |
 | `bugzoo scan` | Scan this project: size and most-depended-on modules |
 | `bugzoo hook <shell>` | Print a wrapper snippet for bash, zsh, fish or PowerShell |
 | `bugzoo export` | Export the bestiary as an SVG for your profile |
-
-## Automatic capture (no `bugzoo run`)
-
-With automatic capture on, just run your program as usual:
-
-```bash
-node app.js
-```
-
-Whatever you run **by hand** in a terminal is captured, in any project, in any folder. Two layers do this:
-
-| Layer | Covers | How |
-|---|---|---|
-| Node preload | any `node` program started from a terminal | `NODE_OPTIONS` (user environment variable) loads `src/register.js`, which records the run on exit |
-| Command wrappers | `python`, `py`, `pytest`, `go`, `cargo`, `java`, `mvn`, `gradle`, `dotnet`, `ruby`, `php`, `deno`, `bun`, `make`, `npm`, `npx`, `pnpm`, `yarn` | cmd `doskey` macros via `AutoRun`, a PowerShell profile block, or a bash/zsh profile block |
-
-- **Only actively started runs count.** The Node preload requires a terminal (TTY); wrappers only apply to lines you type. Editors, bundlers and background tools are ignored, and `node_modules` and npm itself are never tracked.
-- A healthy program with no pending bug writes nothing and prints nothing.
-- `bugzoo setup` shows exactly what it changes and asks first. Undo everything with `bugzoo setup --auto off`; pause with `BUGZOO_DISABLE=1`.
-- Open a new terminal after turning it on.
-- **Limits**: a language not in the list above needs `bugzoo run <command>`. Runs started by an IDE's Run button (no terminal) are not captured. Wrapped commands have their stderr piped through bugzoo, so a few tools may drop colours on stderr.
-- Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
 
 ## Catching a bug
 
@@ -73,7 +59,31 @@ A failing run only *spawns* a bug. You catch it by fixing the code and re-runnin
 
 "Same command" ignores flags and numeric arguments, so `node app.js` and `node ./app.js --debug --port 3000` are the same target.
 
-## Power
+## Automatic capture (optional)
+
+If you would rather not type `bugzoo run`, turn this on:
+
+```bash
+bugzoo setup --auto on
+```
+
+It is **off unless you ask for it**, because it changes your environment: a `NODE_OPTIONS` user environment variable and small blocks in your terminal profiles. `bugzoo setup` lists exactly what it will change and asks first. Undo everything any time with `bugzoo setup --auto off`.
+
+With it on, whatever you run **by hand** in a terminal is captured, in any project, in any folder:
+
+| Layer | Covers | How |
+|---|---|---|
+| Node preload | any `node` program started from a terminal | `NODE_OPTIONS` loads `src/register.js`, which records the run on exit |
+| Command wrappers | `python`, `py`, `pytest`, `go`, `cargo`, `java`, `mvn`, `gradle`, `dotnet`, `ruby`, `php`, `deno`, `bun`, `make`, `npm`, `npx`, `pnpm`, `yarn` | cmd `doskey` macros via `AutoRun`, a PowerShell profile block, or a bash/zsh profile block |
+
+- **Only actively started runs count.** The Node preload requires a terminal (TTY); wrappers only apply to lines you type. Editors, bundlers and background tools are ignored, and `node_modules` and npm itself are never tracked.
+- A healthy program with no pending bug writes nothing and prints nothing.
+- Open a new terminal after turning it on. Pause it with `BUGZOO_DISABLE=1`.
+- **Limits**: a language not in the list above needs `bugzoo run <command>`. Runs started by an IDE's Run button (no terminal) are not captured. Wrapped commands have their stderr and stdout piped through bugzoo, so a few tools may drop colours.
+- **Commands that ask questions** (`npm publish`, `npm login`, `npm init`, `npx`, ...) are passed straight through untouched and not recorded, because capturing their output would stop them prompting. `BUGZOO_DISABLE=1` does the same for any command, which is also the fix for programs with a full-screen terminal UI.
+- Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
+
+## Power and fair play
 
 Every bug has a power, snapshotted while it is alive and banked as a trophy when you catch it. Catching the same `TypeError` in two projects gives two trophies with different power.
 
@@ -87,6 +97,8 @@ Every bug has a power, snapshotted while it is alive and banked as a trophy when
 | rate | failures / max(runs, 5) of that command; a bug you keep hitting grows | +1.0 |
 
 Base: common 10, uncommon 25, rare 60, legendary 150. Your top 3 trophies form your team.
+
+**This is a game, not a skill test.** Power rewards bugs that keep failing, so it can be gamed by breaking things on purpose. Failures of one command count at most once a minute, which only slows that down. Scores and teams are self-reported: the ladder replays fights from the teams you submit but cannot verify how you earned them. Treat rankings as fun between friends, not as proof of how well you debug.
 
 ## Battles and the ladder
 
@@ -140,22 +152,13 @@ Scores are first catches by rarity (common 10, uncommon 25, rare 60, legendary 2
 bugzoo share --name alice --out leaderboard/scores/alice.json
 ```
 
-The file contains only counts and your team: no error messages, paths or commands. A GitHub Action runs `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` and commits the table. Scores are recomputed from the counts and are self-reported, so treat the board as friendly, not tamper-proof.
+The file contains only counts and your team: no error messages, paths or commands. A GitHub Action runs `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` and commits the table.
 
 Running your own ladder? Fork the repo and set `BUGZOO_LADDER_REPO=owner/repo` (or `BUGZOO_LADDER_DIR` for a local folder).
 
-## Playground
-
-No project? `playground/` has three broken programs; see [playground/GUIDE.md](playground/GUIDE.md).
-
-```bash
-cd playground
-node ../bin/bugzoo.js run node app.js
-```
-
 ## How it works
 
-- **Parsing**: finds the last `SomethingError: message` in stderr (works for Node and Python tracebacks), falling back to error codes (`ENOENT`, `SIGSEGV`), then signals.
+- **Parsing**: recognises the error formats of Node, Python, pytest, Java, .NET, Go, Rust, TypeScript, gcc/clang, Gradle and npm, falling back to error codes (`ENOENT`, `SIGSEGV`) and signals. stdout is the backup source for tools that report failures there.
 - **Identity**: the monster is derived from a hash of the error type plus the message with numbers, quoted names and paths stripped, so `Cannot read 'a'` and `Cannot read 'b'` are the same creature.
 - **Rarity**: common (`TypeError`, `KeyError`...), uncommon (`ENOENT`, `RangeError`...), rare (anything else), legendary (`SIGSEGV`, `ENOSPC`, `StackOverflow`...).
 - **Storage**: `~/.bugzoo/dex.json` (override with `BUGZOO_HOME`). Nothing leaves your machine unless you share or submit it.
@@ -164,7 +167,7 @@ node ../bin/bugzoo.js run node app.js
 ## Roadmap
 
 - Evolution when you meet the same monster many times
-- More languages' error formats (Go, Rust, Java)
+- More languages' error formats
 
 ## License
 
@@ -187,26 +190,27 @@ MIT
 ## 安裝
 
 ```bash
-npm install -g github:MilkteaTW1/bug-zoo
+npm install -g bug-zoo
 bugzoo setup
 ```
 
-需要 Node.js 18 以上，沒有任何相依套件。直接從 GitHub 安裝；目前還沒有發佈到 npm 套件庫。
+需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／English）和排行榜用的玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
 
-第一次執行任何 `bugzoo` 指令時，會詢問三件事：
+## 30 秒玩一次
 
-1. **語言**：繁體中文或 English
-2. **玩家名稱**：會顯示在排行榜與天梯上（可以按 Enter 略過）
-3. **自動捕捉**：開啟後不用再打 `bugzoo run`
+```bash
+bugzoo run node app.js    # 1. 你的程式壞了：出現一隻 bug
+# 2. 去把程式裡的 bug 修好
+bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
+```
 
-> npm 的安裝腳本沒辦法互動提問，所以問答放在第一次執行，之後隨時可以用 `bugzoo setup` 修改。
+任何指令都行（`bugzoo run python main.py`、`bugzoo run npm test`…）。沒有專案可以試？`playground/` 裡有三支故意壞掉的程式，說明見 [playground/GUIDE.md](playground/GUIDE.md)。
 
 ## 指令表
 
 | 指令 | 功能 |
 |---|---|
-| `bugzoo setup` | 語言、玩家名稱、自動捕捉（`--lang`、`--name`、`--auto on\|off`） |
-| `bugzoo run <指令…>` | 執行指令，失敗時會出現 bug。開啟自動捕捉後就不用打 |
+| `bugzoo run <指令…>` | 執行指令，失敗時出現 bug；修好後重跑就能捕捉 |
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
 | `bugzoo team` | 你最強的捕獲，含戰鬥力明細 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打 |
@@ -214,33 +218,12 @@ bugzoo setup
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
 | `bugzoo ladder` | 查看天梯 |
 | `bugzoo rank` | 你的分數與稱號 |
+| `bugzoo setup` | 語言、玩家名稱與選用的自動捕捉（`--lang`、`--name`、`--auto on\|off`） |
 | `bugzoo share` | 輸出可分享的分數與隊伍檔（只有數量，不含錯誤內容） |
 | `bugzoo leaderboard <資料夾>` | 用分享檔產生分數排行榜 |
 | `bugzoo scan` | 掃描這個專案：規模與最多檔案依賴的模組 |
 | `bugzoo hook <shell>` | 輸出 bash、zsh、fish、PowerShell 的包裝設定片段 |
 | `bugzoo export` | 把圖鑑匯出成 SVG，放到你的個人頁 |
-
-## 自動捕捉（不用打 bugzoo run）
-
-開啟後，平常怎麼執行就怎麼執行：
-
-```bash
-node app.js
-```
-
-你在終端機**手動執行**的程式，不管哪個專案、哪個資料夾都會被捕捉。這由兩層機制完成：
-
-| 機制 | 涵蓋 | 做法 |
-|---|---|---|
-| Node 預載 | 從終端機啟動的任何 `node` 程式 | 使用者環境變數 `NODE_OPTIONS` 載入 `src/register.js`，程式結束時記錄 |
-| 指令包裝 | `python`、`py`、`pytest`、`go`、`cargo`、`java`、`mvn`、`gradle`、`dotnet`、`ruby`、`php`、`deno`、`bun`、`make`、`npm`、`npx`、`pnpm`、`yarn` | cmd 的 `doskey`（透過 `AutoRun`）、PowerShell 設定檔區塊、bash/zsh 設定檔區塊 |
-
-- **只算主動執行的**：Node 預載需要有終端機（TTY），指令包裝只對你打的那一行生效。編輯器、打包工具等背景程式不會被算進去，`node_modules` 與 npm 本身也不會被追蹤。
-- 正常通過且沒有未解決 bug 的程式，不會寫入、也不會輸出任何東西。
-- `bugzoo setup` 會先列出會改動什麼並詢問你。想全部還原：`bugzoo setup --auto off`；暫時停用：`BUGZOO_DISABLE=1`。
-- 開啟後需要**重新開啟終端機**才會生效。
-- **限制**：上表以外的語言要用 `bugzoo run <指令>`；從 IDE 的執行按鈕啟動（沒有終端機）不會被捕捉；被包裝的指令，其 stderr 會經過 bugzoo，少數工具的 stderr 可能會失去顏色。
-- Windows PowerShell 的執行原則是 `Restricted` 時會忽略設定檔，`bugzoo setup` 會提醒你。
 
 ## 捕捉規則
 
@@ -255,7 +238,31 @@ node app.js
 
 「同一條指令」會忽略旗標與純數字參數，所以 `node app.js` 和 `node ./app.js --debug --port 3000` 視為相同。
 
-## 戰鬥力
+## 自動捕捉（選用）
+
+不想每次都打 `bugzoo run` 的話，可以開啟：
+
+```bash
+bugzoo setup --auto on
+```
+
+**預設是關的，要你主動開才會啟用**，因為它會改動你的環境：使用者環境變數 `NODE_OPTIONS`，以及終端機設定檔裡的小區塊。`bugzoo setup` 會先列出會改什麼並詢問你。想全部還原隨時可以用 `bugzoo setup --auto off`。
+
+開啟後，你在終端機**手動執行**的程式，不管哪個專案、哪個資料夾都會被捕捉：
+
+| 機制 | 涵蓋 | 做法 |
+|---|---|---|
+| Node 預載 | 從終端機啟動的任何 `node` 程式 | `NODE_OPTIONS` 載入 `src/register.js`，程式結束時記錄 |
+| 指令包裝 | `python`、`py`、`pytest`、`go`、`cargo`、`java`、`mvn`、`gradle`、`dotnet`、`ruby`、`php`、`deno`、`bun`、`make`、`npm`、`npx`、`pnpm`、`yarn` | cmd 的 `doskey`（透過 `AutoRun`）、PowerShell 設定檔區塊、bash/zsh 設定檔區塊 |
+
+- **只算主動執行的**：Node 預載需要有終端機（TTY），指令包裝只對你打的那一行生效。編輯器、打包工具等背景程式不會被算進去，`node_modules` 與 npm 本身也不會被追蹤。
+- 正常通過且沒有未解決 bug 的程式，不會寫入、也不會輸出任何東西。
+- 開啟後需要**重新開啟終端機**才會生效。暫時停用：`BUGZOO_DISABLE=1`。
+- **限制**：上表以外的語言要用 `bugzoo run <指令>`；從 IDE 的執行按鈕啟動（沒有終端機）不會被捕捉；被包裝的指令，其 stderr 與 stdout 會經過 bugzoo，少數工具可能會失去顏色。
+- **會問問題的指令**（`npm publish`、`npm login`、`npm init`、`npx` 等）會原封不動直通、也不記錄，因為擷取輸出會讓它們不再詢問。`BUGZOO_DISABLE=1` 可對任何指令達到同樣效果，遇到有全螢幕終端介面的程式也用這個。
+- Windows PowerShell 的執行原則是 `Restricted` 時會忽略設定檔，`bugzoo setup` 會提醒你。
+
+## 戰鬥力與公平性
 
 每隻 bug 都有戰鬥力，在牠還活著時記錄下來，捕捉成功時變成戰利品。同一種 `TypeError` 在兩個專案裡抓到，戰鬥力會不一樣。
 
@@ -269,6 +276,8 @@ node app.js
 | 錯誤率 | 這條指令的失敗次數 ÷ max(執行次數, 5)，一直踩同一個 bug 會越來越強 | +1.0 |
 
 基礎值：普通 10、罕見 25、稀有 60、傳說 150。前三強戰利品組成你的隊伍。
+
+**這是遊戲，不是能力測驗。** 戰鬥力獎勵「一直失敗的 bug」，所以可以靠故意弄壞程式來灌水。同一條指令的失敗每分鐘最多只算一次，這只能讓灌水變慢。分數與隊伍都是自行回報：天梯會用你送出的隊伍重播戰鬥，但無法驗證你是怎麼得到的。排名請當作朋友之間的樂趣，不要當成除錯能力的證明。
 
 ## 對戰與天梯
 
@@ -322,22 +331,13 @@ bugzoo friend remove alice
 bugzoo share --name alice --out leaderboard/scores/alice.json
 ```
 
-分享檔只含數量與隊伍，不含錯誤訊息、路徑或指令。GitHub Action 會執行 `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` 並提交表格。分數由數量重新計算，且為自行回報，所以這是「朋友之間玩」等級的排行榜，不是防篡改的。
+分享檔只含數量與隊伍，不含錯誤訊息、路徑或指令。GitHub Action 會執行 `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` 並提交表格。
 
 想自己架一個天梯？Fork 這個 repo，並設定 `BUGZOO_LADDER_REPO=owner/repo`（或用 `BUGZOO_LADDER_DIR` 指向本機資料夾）。
 
-## 練習場
-
-沒有專案也能玩：`playground/` 裡有三支故意壞掉的程式，說明見 [playground/GUIDE.md](playground/GUIDE.md)。
-
-```bash
-cd playground
-node ../bin/bugzoo.js run node app.js
-```
-
 ## 運作原理
 
-- **解析**：找出 stderr 裡最後一個 `SomethingError: message`（Node 與 Python 的堆疊都適用），其次是錯誤代碼（`ENOENT`、`SIGSEGV`），最後是訊號。
+- **解析**：辨識 Node、Python、pytest、Java、.NET、Go、Rust、TypeScript、gcc/clang、Gradle 與 npm 的錯誤格式，其次是錯誤代碼（`ENOENT`、`SIGSEGV`）與訊號。把錯誤印在 stdout 的工具，會用 stdout 當備援。
 - **身分**：怪物由錯誤類型加上「去掉數字、引號內名稱與路徑的訊息」的雜湊決定，所以 `Cannot read 'a'` 與 `Cannot read 'b'` 是同一隻。
 - **稀有度**：普通（`TypeError`、`KeyError`…）、罕見（`ENOENT`、`RangeError`…）、稀有（其他）、傳說（`SIGSEGV`、`ENOSPC`、`StackOverflow`…）。
 - **儲存位置**：`~/.bugzoo/dex.json`（可用 `BUGZOO_HOME` 覆寫）。除非你主動分享或送出，不會有任何資料離開你的電腦。
@@ -346,7 +346,7 @@ node ../bin/bugzoo.js run node app.js
 ## 之後想做的
 
 - 同一隻怪物遇見很多次後會進化
-- 支援更多語言的錯誤格式（Go、Rust、Java）
+- 支援更多語言的錯誤格式
 
 ## 授權
 
