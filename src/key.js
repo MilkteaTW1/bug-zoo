@@ -27,7 +27,8 @@ function normalizeArgv(argv, cwd) {
       }
       return s;
     });
-  const name = path.basename(String(prog)).replace(/\.(exe|cmd|bat|com)$/i, '');
+  // Split on both separators: a Windows-style path must still reduce to its program name on macOS/Linux.
+  const name = String(prog).split(/[\\/]/).pop().replace(/\.(exe|cmd|bat|com)$/i, '');
   return [name, ...kept];
 }
 

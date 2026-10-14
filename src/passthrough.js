@@ -1,7 +1,5 @@
 'use strict';
 
-const path = require('node:path');
-
 /**
  * Commands that need a real terminal (prompts, one-time passwords, installers asking "ok to proceed?").
  * Capturing their output would turn their stdout into a pipe, and many of them stop prompting when it
@@ -17,7 +15,8 @@ const PROMPTING_SUBCOMMANDS = {
 const ALWAYS = new Set(['npx']);
 
 function programName(argv) {
-  return path.basename(String(argv[0] || '')).replace(/\.(exe|cmd|bat|com|ps1)$/i, '').toLowerCase();
+  // Both separators, so `C:\Program Files\nodejs\npm.cmd` is recognised on any OS.
+  return String(argv[0] || '').split(/[\\/]/).pop().replace(/\.(exe|cmd|bat|com|ps1)$/i, '').toLowerCase();
 }
 
 function needsTerminal(argv) {
