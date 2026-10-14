@@ -1,5 +1,12 @@
 # Changelog / 更新紀錄
 
+## 0.1.2
+
+- README: a one-line pitch, three highlights and a sample `bugzoo export` image up front.
+  README 最前面加入一句話口號、三個亮點，以及 `bugzoo export` 的範例圖。
+- Added this changelog. 新增更新紀錄。
+- No behaviour changes. 程式行為沒有變動。
+
 ## 0.1.1
 
 - **Automatic capture is opt-in.** `bugzoo setup` asks with a default of no; `bugzoo run` works without it.
