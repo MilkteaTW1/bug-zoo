@@ -52,7 +52,8 @@ function outcomeBanner(result) {
       return `${RED}${BOLD}${t('out.escapedTag')}${RESET}${RED} ${t('out.failed', { names: names(result.escaped) })}${RESET}\n` +
         `${YELLOW}${t('out.failed2', { names: names(result.pending) })}${RESET}`;
     case 'wild':
-      return `${DIM}${t('out.wild')}${RESET}`;
+      // "wild" is also the outcome of a healthy run with no history; only a real bug deserves the hint.
+      return result.pending.length > 0 ? `${DIM}${t('out.wild')}${RESET}` : '';
     default:
       return '';
   }

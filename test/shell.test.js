@@ -11,6 +11,19 @@ const W = require('../src/wrappers');
 const BIN = path.resolve(__dirname, '..', 'bin', 'bugzoo.js');
 const have = (cmd) => spawnSync('sh', ['-c', `command -v ${cmd}`], { encoding: 'utf8' }).status === 0;
 
+// Runs on every platform: a command that has never failed must not be decorated at all.
+test('`bugzoo run` of a healthy command with no history adds no output of its own', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bz-clean-'));
+  fs.writeFileSync(path.join(dir, 'ok.js'), "console.log('fine');\n");
+  const env = { ...process.env, BUGZOO_HOME: path.join(dir, 'home'), BUGZOO_LANG: 'en', NODE_OPTIONS: '' };
+  delete env.BUGZOO_ACTIVE;
+  const r = spawnSync(process.execPath, [BIN, 'run', 'node', 'ok.js'], { cwd: dir, env, encoding: 'utf8' });
+  assert.equal(r.status, 0);
+  assert.equal(r.stdout.replace(/\r\n/g, '\n'), 'fine\n');
+  assert.equal(r.stderr, '');
+  assert.ok(!fs.existsSync(path.join(dir, 'home', 'dex.json')), 'nothing should be written either');
+});
+
 // These exercise the generated bash/zsh functions in a real shell, so they only run where one exists.
 const skip = process.platform === 'win32' || !have('bash') || !have('python3');
 
