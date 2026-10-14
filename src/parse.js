@@ -18,7 +18,10 @@ function parseError(stderr, exitCode) {
   }
 
   const code = text.match(/\b(E[A-Z]{3,}|SIG[A-Z]+)\b/);
-  if (code) return { type: code[1], message: firstLine(text) };
+  if (code) {
+    const line = text.split(/\r?\n/).find((l) => l.includes(code[1])) || firstLine(text);
+    return { type: code[1], message: line.trim().replace(/^Error:\s*/, '').slice(0, 160) };
+  }
 
   if (/segmentation fault/i.test(text)) return { type: 'SIGSEGV', message: 'Segmentation fault' };
   if (/\bpanic\b/i.test(text)) return { type: 'Panic', message: firstLine(text) };
