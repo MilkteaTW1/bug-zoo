@@ -48,4 +48,14 @@ function makeCreature(type, message) {
   };
 }
 
-module.exports = { makeCreature, rarityOf, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };
+const PREFIX_ZH = ['陰森', '毛茸', '毒舌', '搖晃', '憂鬱', '電擊', '陰暗', '小不點', '碎屑', '詛咒', '故障', '小筆'];
+const SUFFIX_ZH = ['小怪', '蝙蝠', '啃咬蟲', '飛蛾', '蟾蜍', '鬼火', '甲蟲', '小鬼', '爬蟲', '蝸牛', '精靈', '蟎'];
+
+/** Chinese display name for a creature id; same hash and indices as the English name. */
+function zhName(id) {
+  const h = hash(id);
+  const n = (i) => parseInt(h.slice(i * 2, i * 2 + 2), 16);
+  return PREFIX_ZH[n(0) % PREFIX_ZH.length] + SUFFIX_ZH[n(1) % SUFFIX_ZH.length];
+}
+
+module.exports = { makeCreature, rarityOf, zhName, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };

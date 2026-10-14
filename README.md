@@ -13,13 +13,34 @@ A wild TypeError appeared!  * NEW *
    Cannot read properties of null (reading 'x')
 ```
 
+[繁體中文說明](README.zh-TW.md)
+
 ## Install
 
 ```bash
 npm install -g bug-zoo
+bugzoo setup
 ```
 
 Requires Node.js 18+. No dependencies.
+
+The first time you run any `bugzoo` command it asks for your **language** (繁體中文 / English), a **player name** for the leaderboards, and whether to turn on **automatic capture**. (npm install scripts cannot prompt, so the questions happen on first run.) Change them any time with `bugzoo setup`.
+
+## Automatic capture (no `bugzoo run`)
+
+With automatic capture on, just run your program as usual:
+
+```bash
+node app.js
+```
+
+`bugzoo setup` sets `NODE_OPTIONS` for your user account so Node preloads a tiny script (`src/register.js`) that records the run when the program exits. It works in cmd, PowerShell, bash and npm scripts.
+
+- Only scripts inside **your project folder** are tracked, never `node_modules` or npm itself.
+- A healthy program with no pending bug writes nothing and prints nothing.
+- Turn it off with `bugzoo setup --auto off`; pause it with `BUGZOO_DISABLE=1`.
+- Open a new terminal after turning it on.
+- This covers Node only. For Python, Go and others use `bugzoo hook` or `bugzoo run`.
 
 ## Usage
 

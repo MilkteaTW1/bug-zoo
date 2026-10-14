@@ -67,11 +67,12 @@ const indexOf = (order, name) => order.findIndex((n) => lower(n) === lower(name)
 function checkChallenge(order, challenger, defender, reach = REACH) {
   const ci = indexOf(order, challenger);
   const di = indexOf(order, defender);
-  if (ci < 0) return { ok: false, reason: `${challenger} is not on the ladder (share a team first)` };
-  if (di < 0) return { ok: false, reason: `${defender} is not on the ladder` };
-  if (ci === di) return { ok: false, reason: 'you cannot challenge yourself' };
-  if (di > ci) return { ok: false, reason: `${order[di]} is ranked below you` };
-  if (ci - di > reach) return { ok: false, reason: `you can only challenge up to ${reach} ranks above you` };
+  // `code` + `params` let the CLI translate the reason; `reason` stays English for CI logs and tests.
+  if (ci < 0) return { ok: false, code: 'notOnLadder', params: { name: challenger }, reason: `${challenger} is not on the ladder (share a team first)` };
+  if (di < 0) return { ok: false, code: 'notOnLadder', params: { name: defender }, reason: `${defender} is not on the ladder` };
+  if (ci === di) return { ok: false, code: 'self', params: {}, reason: 'you cannot challenge yourself' };
+  if (di > ci) return { ok: false, code: 'below', params: { name: order[di] }, reason: `${order[di]} is ranked below you` };
+  if (ci - di > reach) return { ok: false, code: 'reach', params: { reach }, reason: `you can only challenge up to ${reach} ranks above you` };
   return { ok: true, ci, di };
 }
 
@@ -136,14 +137,14 @@ function processChallenges(state, players, challenges) {
 
 const teamPower = (p) => p.team.reduce((s, m) => s + m.power, 0);
 
-function toText(order, players, { me, reach = REACH } = {}) {
+function toText(order, players, { me, reach = REACH, tags: words = {} } = {}) {
   const myIdx = me ? indexOf(order, me) : -1;
   const lines = [];
   order.forEach((name, i) => {
     const p = players.get(lower(name));
     const tags = [];
-    if (i === myIdx) tags.push('you');
-    else if (myIdx > -1 && i < myIdx && myIdx - i <= reach) tags.push('challengeable');
+    if (i === myIdx) tags.push(words.you || 'you');
+    else if (myIdx > -1 && i < myIdx && myIdx - i <= reach) tags.push(words.challengeable || 'challengeable');
     lines.push(`${String(i + 1).padStart(3)}. ${name.padEnd(18)} power ${String(teamPower(p)).padStart(4)}  ` +
       `${p.team.map((m) => m.name).join(', ')}${tags.length ? `  <${tags.join(', ')}>` : ''}`);
   });

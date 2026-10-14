@@ -52,7 +52,7 @@ const sideKey = (s) => `${s.name}|${s.team.map((m) => `${m.name}:${m.power}`).jo
 /**
  * Sequential team duel. Deterministic: both players computing the same match
  * (in either order) get the same result.
- * Returns { winner: <side name>, loser, log: [string] }.
+ * Returns { winner: <side name>, loser, log: [{ att, def, dmg, crit, faint, hp }] }.
  */
 function duel(s1, s2) {
   const [A, B] = sideKey(s1) <= sideKey(s2) ? [s1, s2] : [s2, s1];
@@ -72,8 +72,7 @@ function duel(s1, s2) {
     const crit = rand() < 0.1;
     const dmg = Math.max(1, Math.round(att.power * (0.75 + rand() * 0.5) * (crit ? 1.5 : 1)));
     def.hp -= dmg;
-    log.push(`${att.name} hits ${def.name} for ${dmg}${crit ? ' (critical!)' : ''}` +
-      (def.hp <= 0 ? ` - ${def.name} faints!` : ` (${def.hp} hp left)`));
+    log.push({ att: att.name, def: def.name, dmg, crit, faint: def.hp <= 0, hp: Math.max(0, def.hp) });
     if (def.hp <= 0) {
       if (turnA) ib += 1;
       else ia += 1;
