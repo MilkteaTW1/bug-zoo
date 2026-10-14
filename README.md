@@ -34,13 +34,19 @@ With automatic capture on, just run your program as usual:
 node app.js
 ```
 
-`bugzoo setup` sets `NODE_OPTIONS` for your user account so Node preloads a tiny script (`src/register.js`) that records the run when the program exits. It works in cmd, PowerShell, bash and npm scripts.
+Whatever you run **by hand** in a terminal is captured, in any project, in any folder. Two layers do this:
 
-- Only scripts inside **your project folder** are tracked, never `node_modules` or npm itself.
+| Layer | Covers | How |
+|---|---|---|
+| Node preload | any `node` program started from a terminal | `NODE_OPTIONS` (user environment variable) loads `src/register.js`, which records the run on exit |
+| Command wrappers | `python`, `py`, `pytest`, `go`, `cargo`, `java`, `mvn`, `gradle`, `dotnet`, `ruby`, `php`, `deno`, `bun`, `make`, `npm`, `npx`, `pnpm`, `yarn` | cmd `doskey` macros via `AutoRun`, a PowerShell profile block, or a bash/zsh profile block |
+
+- **Only actively started runs count.** The Node preload requires a terminal (TTY); wrappers only apply to lines you type. Editors, bundlers and background tools are ignored, and `node_modules` and npm itself are never tracked.
 - A healthy program with no pending bug writes nothing and prints nothing.
-- Turn it off with `bugzoo setup --auto off`; pause it with `BUGZOO_DISABLE=1`.
+- `bugzoo setup` shows exactly what it changes and asks first. Undo everything with `bugzoo setup --auto off`; pause with `BUGZOO_DISABLE=1`.
 - Open a new terminal after turning it on.
-- This covers Node only. For Python, Go and others use `bugzoo hook` or `bugzoo run`.
+- **Limits**: a language not in the list above needs `bugzoo run <command>`. Runs started by an IDE's Run button (no terminal) are not captured. Wrapped commands have their stderr piped through bugzoo, so a few tools may drop colours on stderr.
+- Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
 
 ## Usage
 

@@ -72,7 +72,7 @@ test('preload: failing program spawns a bug, fixed program catches it - no `bugz
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bugzoo-pre-'));
   const home = path.join(dir, 'home');
   const env = {
-    ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: 'en',
+    ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: 'en', BUGZOO_FORCE: '1', // pipes are not a TTY
     NODE_OPTIONS: `--require "${REGISTER}"`,
   };
   delete env.BUGZOO_ACTIVE;

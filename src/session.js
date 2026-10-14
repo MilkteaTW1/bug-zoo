@@ -11,7 +11,7 @@ const i18n = require('./i18n');
 
 /** Identity of "the same command in the same folder". */
 function commandKey(argv, cwd = process.cwd()) {
-  return hash([cwd, ...normalizeArgv(argv)].join('\0'));
+  return hash([cwd, ...normalizeArgv(argv, cwd)].join('\0'));
 }
 
 /**

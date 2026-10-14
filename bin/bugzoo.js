@@ -160,6 +160,8 @@ async function runSetup({ flags = {}, ask: prompt }) {
   if (auto !== null) {
     const r = auto ? autostart.enable() : autostart.disable();
     console.log(r.ok ? t(auto ? 'setup.autoOn' : 'setup.autoOff') : t('setup.autoFail', { error: r.error }));
+    for (const s of r.steps) console.log(t(`setup.step.${s.code}`, s.params));
+    for (const w of r.warnings) console.log(t(`setup.warn.${w.code}`, w.params));
   }
 
   const shownLang = i18n.LANG_LABEL[dex.profile.lang || i18n.getLang()];
@@ -191,6 +193,29 @@ async function ensureSetup(cmd) {
 
 // --- commands ----------------------------------------------------------------------------------
 
+/** Windows: find an executable the way cmd would (PATH + PATHEXT), so real .exe files need no shell. */
+function resolveWindowsExe(name) {
+  if (/[\\/]/.test(name) && fs.existsSync(name)) return name;
+  const exts = (process.env.PATHEXT || '.COM;.EXE;.BAT;.CMD').split(';').filter(Boolean);
+  const names = path.extname(name) ? [name] : exts.map((e) => name + e);
+  for (const dir of (process.env.PATH || '').split(path.delimiter).filter(Boolean)) {
+    for (const n of names) {
+      const f = path.join(dir, n);
+      if (fs.existsSync(f)) return f;
+    }
+  }
+  return null;
+}
+
+function launch(argv, stdio, env) {
+  if (process.platform !== 'win32') return spawn(argv[0], argv.slice(1), { stdio, env });
+  const file = resolveWindowsExe(argv[0]);
+  if (file && /\.(exe|com)$/i.test(file)) return spawn(file, argv.slice(1), { stdio, env });
+  // .cmd/.bat shims (npm, yarn...) need a shell; hand it one pre-quoted string.
+  const quote = (a) => (/[\s"&|<>^]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a);
+  return spawn([file || argv[0], ...argv.slice(1)].map(quote).join(' '), { stdio, env, shell: true });
+}
+
 function run(argv) {
   if (argv.length === 0) {
     console.error(t('misc.runUsage'));
@@ -198,10 +223,7 @@ function run(argv) {
   }
   const stdio = ['inherit', 'inherit', 'pipe'];
   const env = { ...process.env, BUGZOO_ACTIVE: '1' }; // keeps the Node preload from counting this run twice
-  // On Windows, npm-style .cmd shims need a shell; pass one pre-quoted string to avoid arg-concat warnings.
-  const child = process.platform === 'win32'
-    ? spawn(argv.map((a) => (/[\s"]/.test(a) ? `"${a.replace(/"/g, '\\"')}"` : a)).join(' '), { stdio, shell: true, env })
-    : spawn(argv[0], argv.slice(1), { stdio, env });
+  const child = launch(argv, stdio, env);
   let captured = '';
   child.stderr.on('data', (chunk) => {
     process.stderr.write(chunk);

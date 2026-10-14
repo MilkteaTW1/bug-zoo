@@ -4,6 +4,9 @@
  * Preloaded into every Node process via NODE_OPTIONS (`bugzoo setup`).
  * Watches the program it is loaded into and records the run when it exits,
  * so the player never has to type `bugzoo run`. Must stay cheap and must never throw.
+ *
+ * It only acts on programs the player started from a terminal (stdio is a TTY),
+ * so editors, bundlers and other tools spawning Node in the background are left alone.
  */
 (function bugzooRegister() {
   const path = require('node:path');
@@ -13,13 +16,18 @@
   const script = process.argv[1];
   if (!script) return; // REPL, -e, --test
 
-  const cwd = process.cwd();
+  const interactive = process.env.BUGZOO_FORCE || process.stdin.isTTY || process.stdout.isTTY || process.stderr.isTTY;
+  if (!interactive) return;
+
   const abs = path.resolve(script);
-  const rel = path.relative(cwd, abs);
-  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) return; // only the player's own project
-  if (/(^|[\\/])node_modules[\\/]/.test(rel)) return;
+  if (/(^|[\\/])node_modules[\\/]/.test(abs)) return; // tools, not the player's program
+  const nodeDir = path.dirname(process.execPath);
+  if (abs.startsWith(nodeDir + path.sep)) return; // npm, corepack...
   const pkg = path.resolve(__dirname, '..');
   if ([path.join(pkg, 'bin'), path.join(pkg, 'src'), path.join(pkg, 'test')].some((d) => abs.startsWith(d + path.sep))) return;
+
+  const cwd = process.cwd();
+  const argv = ['node', abs, ...process.argv.slice(2)];
 
   let lastError = null;
   process.on('uncaughtExceptionMonitor', (err) => {
@@ -28,7 +36,6 @@
 
   process.on('exit', (code) => {
     try {
-      const argv = ['node', rel, ...process.argv.slice(2)];
       const failed = code !== 0;
 
       if (!failed) {

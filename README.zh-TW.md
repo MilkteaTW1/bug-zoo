@@ -41,14 +41,19 @@ node app.js
 
 程式壞了就會出現怪物，修好再跑一次同一條指令就算捕捉成功。
 
-原理：`bugzoo setup` 會替你的使用者帳號設定 `NODE_OPTIONS`，讓 Node 啟動時自動載入一小段預載腳本（`src/register.js`）。這在 cmd、PowerShell、bash 和 npm 腳本裡都有效。
+你在終端機**手動執行**的程式，不管哪個專案、哪個資料夾都會被捕捉。這由兩層機制完成：
 
-- 只追蹤**你專案資料夾內**的腳本，不會碰 `node_modules` 或 npm 本身。
-- 正常通過且沒有未解決 bug 的程式，不會寫入任何東西、不會輸出任何東西。
-- 隨時可以關閉：`bugzoo setup --auto off`。
-- 暫時停用：設定環境變數 `BUGZOO_DISABLE=1`。
-- 設定後需要**重新開啟終端機**才會生效。
-- 這個機制只涵蓋 Node。其他語言（Python、Go…）請用 `bugzoo hook` 或 `bugzoo run`。
+| 機制 | 涵蓋 | 做法 |
+|---|---|---|
+| Node 預載 | 從終端機啟動的任何 `node` 程式 | 使用者環境變數 `NODE_OPTIONS` 載入 `src/register.js`，程式結束時記錄 |
+| 指令包裝 | `python`、`py`、`pytest`、`go`、`cargo`、`java`、`mvn`、`gradle`、`dotnet`、`ruby`、`php`、`deno`、`bun`、`make`、`npm`、`npx`、`pnpm`、`yarn` | cmd 的 `doskey`（透過 `AutoRun`）、PowerShell 設定檔區塊、bash/zsh 設定檔區塊 |
+
+- **只算主動執行的**：Node 預載需要有終端機（TTY），指令包裝只對你打的那一行生效。編輯器、打包工具等背景程式不會被算進去，`node_modules` 與 npm 本身也不會被追蹤。
+- 正常通過且沒有未解決 bug 的程式，不會寫入、也不會輸出任何東西。
+- `bugzoo setup` 會先列出會改動什麼並詢問你。想全部還原：`bugzoo setup --auto off`；暫時停用：`BUGZOO_DISABLE=1`。
+- 開啟後需要**重新開啟終端機**才會生效。
+- **限制**：上表以外的語言要用 `bugzoo run <指令>`；從 IDE 的執行按鈕啟動（沒有終端機）不會被捕捉；被包裝的指令，其 stderr 會經過 bugzoo，少數工具的 stderr 可能會失去顏色。
+- Windows PowerShell 的執行原則是 `Restricted` 時會忽略設定檔，`bugzoo setup` 會提醒你。
 
 ## 捕捉規則
 
