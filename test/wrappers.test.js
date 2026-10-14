@@ -66,6 +66,52 @@ test('command identity resolves file arguments, wherever they live', () => {
   assert.deepEqual(c, a);
 });
 
+function preloadEnv(extra = {}) {
+  const home = tmp('bugzoo-home-');
+  return {
+    ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: 'en', BUGZOO_FORCE: '1',
+    NODE_OPTIONS: `--require "${auto.REGISTER_ARG}"`, ...extra,
+  };
+}
+
+test('preload prints the card after the stack trace and keeps exit code 1', () => {
+  const dir = tmp('bugzoo-order-');
+  fs.writeFileSync(path.join(dir, 'app.js'), 'const o = null;\no.x;\n');
+  const r = spawnSync(process.execPath, ['app.js'], { cwd: dir, env: preloadEnv(), encoding: 'utf8' });
+  assert.equal(r.status, 1);
+  assert.ok(r.stderr.indexOf('TypeError: Cannot read properties') < r.stderr.indexOf('A wild TypeError appeared!'));
+  assert.match(r.stderr, /app\.js:2\r?\no\.x;/); // source line and caret like Node's own output
+  assert.match(r.stderr, /Node\.js v/);
+});
+
+test('preload leaves a program that handles uncaught exceptions itself alone', () => {
+  const dir = tmp('bugzoo-own-');
+  fs.writeFileSync(path.join(dir, 'app.js'),
+    "process.on('uncaughtException', () => { console.log('mine'); });\nsetTimeout(() => console.log('still running'), 20);\nnull.x;\n");
+  const r = spawnSync(process.execPath, ['app.js'], { cwd: dir, env: preloadEnv(), encoding: 'utf8' });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /mine[\s\S]*still running/);
+  assert.ok(!/wild/.test(r.stderr));
+});
+
+test('preload does not touch worker threads: the parent still gets the error event', () => {
+  const dir = tmp('bugzoo-worker-');
+  fs.writeFileSync(path.join(dir, 'app.js'),
+    "const { Worker } = require('node:worker_threads');\nnew Worker('null.x', { eval: true }).on('error', (e) => console.log('worker-error', e.name));\n");
+  const r = spawnSync(process.execPath, ['app.js'], { cwd: dir, env: preloadEnv(), encoding: 'utf8' });
+  assert.equal(r.status, 0);
+  assert.match(r.stdout, /worker-error TypeError/);
+  assert.ok(!/wild/.test(r.stderr));
+});
+
+test('preload preserves process.exit codes of healthy-looking failures', () => {
+  const dir = tmp('bugzoo-exit-');
+  fs.writeFileSync(path.join(dir, 'app.js'), 'process.exit(3);\n');
+  const r = spawnSync(process.execPath, ['app.js'], { cwd: dir, env: preloadEnv(), encoding: 'utf8' });
+  assert.equal(r.status, 3);
+  assert.match(r.stderr, /A wild MysteryError appeared!/);
+});
+
 test('preload covers a project outside the current folder, but only terminal-started runs', () => {
   const project = tmp('bugzoo-proj-');
   const elsewhere = tmp('bugzoo-cwd-');

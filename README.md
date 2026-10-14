@@ -13,6 +13,10 @@ A wild TypeError appeared!  * NEW *
    Cannot read properties of null (reading 'x')
 ```
 
+![Bug Zoo demo](docs/demo.en.gif)
+
+*A bug appears, you fix it, it is caught, your team fights. Real output; Node-internal stack frames trimmed.*
+
 [繁體中文說明](README.zh-TW.md)
 
 ## Install
@@ -107,7 +111,7 @@ Common dev commands (`node`, `npm`, `python`, `cargo`, `go`, ...) are then route
 
 ## Demo
 
-`node demo/demo.js` plays a scripted session (bug appears, bad fix escapes, real fix catches, team, battle) that you can screen-record into a GIF.
+The GIFs above are rendered from real output by `python tools/make-gif.py` (needs Pillow and Windows fonts; writes `docs/demo.en.gif` and `docs/demo.zh-TW.gif`). `node demo/demo.js` plays a similar session live in your terminal.
 
 ## Leaderboard (no database)
 

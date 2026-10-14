@@ -14,6 +14,10 @@
    錯誤大小：戰鬥力 17
 ```
 
+![Bug Zoo 示範](docs/demo.zh-TW.gif)
+
+*bug 出現、你修好它、捕捉成功、隊伍對戰。內容是真實輸出，僅省略了 Node 內部的堆疊行。*
+
 [English README](README.md)
 
 ## 安裝與設定
