@@ -43,7 +43,8 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 |---|---|
 | `bugzoo run <command…>` | Run a command; if it fails a bug appears; fix it and re-run to catch it |
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
-| `bugzoo team` | Your strongest catches, with the power breakdown |
+| `bugzoo team` | Your strongest catches: power breakdown, form and the next evolution |
+| `bugzoo achievements` | Your 13 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
@@ -129,6 +130,20 @@ Every bug has a power, snapshotted while it is alive and banked as a trophy when
 Base: common 10, uncommon 25, rare 60, legendary 150. Your top 3 trophies form your team.
 
 **This is a game, not a skill test.** Power rewards bugs that keep failing, so it can be gamed by breaking things on purpose. Failures of one command count at most once a minute, which only slows that down. Scores and teams are self-reported: the ladder replays fights from the teams you submit but cannot verify how you earned them. Treat rankings as fun between friends, not as proof of how well you debug.
+
+## Evolution and achievements
+
+Meeting the same bug again and again is not wasted: its form changes.
+
+| Catches of the same bug | Form | Power |
+|---|---|---|
+| 1-2 | base | x1.00 |
+| 3 | Evolved `*` | x1.15 |
+| 10 | Ascended `**` | x1.35 |
+
+The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how many catches are left until the next one.
+
+`bugzoo achievements` lists 13 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
 ## Battles and the ladder
 
@@ -252,7 +267,8 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 |---|---|
 | `bugzoo run <指令…>` | 執行指令，失敗時出現 bug；修好後重跑就能捕捉 |
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
-| `bugzoo team` | 你最強的捕獲，含戰鬥力明細 |
+| `bugzoo team` | 你最強的捕獲：戰鬥力明細、型態與下一次進化 |
+| `bugzoo achievements` | 你的 13 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
@@ -338,6 +354,20 @@ bugzoo setup --auto on
 基礎值：普通 10、罕見 25、稀有 60、傳說 150。前三強戰利品組成你的隊伍。
 
 **這是遊戲，不是能力測驗。** 戰鬥力獎勵「一直失敗的 bug」，所以可以靠故意弄壞程式來灌水。同一條指令的失敗每分鐘最多只算一次，這只能讓灌水變慢。分數與隊伍都是自行回報：天梯會用你送出的隊伍重播戰鬥，但無法驗證你是怎麼得到的。排名請當作朋友之間的樂趣，不要當成除錯能力的證明。
+
+## 進化與成就
+
+一直遇到同一個 bug 並不是白費：牠的型態會改變。
+
+| 同一隻 bug 的捕捉次數 | 型態 | 戰鬥力 |
+|---|---|---|
+| 1–2 次 | 一般 | ×1.00 |
+| 3 次 | 第二型態 `*` | ×1.15 |
+| 10 次 | 覺醒型態 `**` | ×1.35 |
+
+加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及距離下一次進化還差幾次。
+
+`bugzoo achievements` 列出 13 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
 ## 對戰與天梯
 

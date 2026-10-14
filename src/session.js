@@ -42,6 +42,8 @@ function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = 
   }
   const banner = render.outcomeBanner(result);
   if (banner) out.push('', banner);
+  const more = render.extras(result);
+  if (more.length > 0) out.push(...(banner ? [] : ['']), ...more);
   return out.length > 0 ? `${out.join('\n')}\n\n` : '';
 }
 

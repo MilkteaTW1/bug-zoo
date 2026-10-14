@@ -5,6 +5,10 @@
 - **Battle result cards.** `bugzoo battle --card result.svg` (or answer yes when asked after a fight) saves an SVG with both teams, power, the winner and the number of blows. Fights are deterministic, so the same two teams always give the same card.
   戰鬥結果分享卡：`bugzoo battle --card result.svg`（或在對戰後回答 y）會存成 SVG，含雙方隊伍、戰鬥力、勝負與回合數。戰鬥是固定的，同樣兩支隊伍永遠產生同一張卡。
 - Cards and exports are localised (English, 繁體中文). 卡片與匯出圖支援中英文。
+- **Evolution.** Catching the same bug 3 times evolves it (power x1.15, `*`), 10 times ascends it (x1.35, `**`). The bonus applies when a team is formed; recorded trophies never change. `bugzoo team` shows the form and the next evolution.
+  進化：同一隻 bug 捕捉 3 次進化（戰鬥力 ×1.15、`*`），10 次覺醒（×1.35、`**`）。加成在組隊時套用，已記錄的戰利品不會改變。
+- **Achievements.** 13 achievements, announced when earned and listed with `bugzoo achievements`.
+  成就：13 個成就，達成時通知，並可用 `bugzoo achievements` 查看。
 
 ## 0.1.3
 

@@ -13,7 +13,7 @@ const MAX_CODE = 4000;
  * small enough to paste into a chat, and it needs no server to exchange.
  */
 function encodeCode(name, team) {
-  const compact = { n: cleanName(name), t: team.map((m) => [m.name, m.type, m.rarity, m.power]) };
+  const compact = { n: cleanName(name), t: team.map((m) => [m.name, m.type, m.rarity, m.power, m.stage || 0]) };
   const raw = zlib.deflateRawSync(Buffer.from(JSON.stringify(compact), 'utf8'));
   return PREFIX + raw.toString('base64url');
 }
@@ -27,7 +27,7 @@ function decodeCode(code) {
     const o = JSON.parse(json.toString('utf8'));
     return normalizeFriend({
       name: o.n,
-      team: (o.t || []).map(([name, type, rarity, power]) => ({ name, type, rarity, power })),
+      team: (o.t || []).map(([name, type, rarity, power, stage]) => ({ name, type, rarity, power, stage })),
     });
   } catch {
     return null;

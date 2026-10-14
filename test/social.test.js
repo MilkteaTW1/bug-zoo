@@ -12,7 +12,7 @@ const remote = require('../src/remote');
 const opponents = require('../src/opponents');
 const acceptor = require('../src/accept');
 const ladder = require('../src/ladder');
-const { maxPower } = require('../src/power');
+const { maxEvolvedPower } = require('../src/power');
 
 const BIN = path.resolve(__dirname, '..', 'bin', 'bugzoo.js');
 const tmp = (p) => fs.mkdtempSync(path.join(os.tmpdir(), p));
@@ -26,7 +26,7 @@ test('a friend code round-trips name and team', () => {
   const code = friends.encodeCode('alice', t);
   assert.ok(code.startsWith('BZ1.'));
   assert.ok(code.length < 400, `code is chat-sized (${code.length})`);
-  assert.deepEqual(friends.decodeCode(code), { name: 'alice', team: t });
+  assert.deepEqual(friends.decodeCode(code), { name: 'alice', team: t.map((x) => ({ ...x, stage: 0 })) });
 });
 
 test('garbage and tampered codes are rejected', () => {
@@ -40,7 +40,7 @@ test('garbage and tampered codes are rejected', () => {
 test('a code cannot claim more power than the rarity allows', () => {
   const big = zlib.deflateRawSync(JSON.stringify({ n: 'cheat', t: [['a', 'T', 'common', 99999]] })).toString('base64url');
   const f = friends.decodeCode(`BZ1.${big}`);
-  assert.equal(f.team[0].power, maxPower('common'));
+  assert.equal(f.team[0].power, maxEvolvedPower('common'));
 });
 
 test('names are cleaned so they cannot break tables', () => {

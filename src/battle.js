@@ -2,7 +2,7 @@
 
 const { hash } = require('./parse');
 const { RARITIES, cleanName } = require('./score');
-const { maxPower } = require('./power');
+const { maxEvolvedPower, stageOf, evolutionMult } = require('./power');
 
 const TEAM_SIZE = 3;
 
@@ -15,11 +15,23 @@ const BOT = {
   ],
 };
 
-function topTeam(trophies, n = TEAM_SIZE) {
-  return [...trophies]
+/**
+ * Trophies with evolution applied. `creatures` is the dex's creature table: its `captures` count
+ * decides the form. Without it every monster stays in its base form.
+ */
+function boostTrophies(trophies, creatures = null) {
+  return trophies.map((tr) => {
+    const captures = creatures && creatures[tr.id] ? creatures[tr.id].captures || 0 : 0;
+    const stage = stageOf(captures);
+    return { ...tr, power: Math.round(tr.power * evolutionMult(stage)), stage, captures };
+  });
+}
+
+function topTeam(trophies, creatures = null, n = TEAM_SIZE) {
+  return boostTrophies(trophies, creatures)
     .sort((a, b) => b.power - a.power)
     .slice(0, n)
-    .map(({ name, type, rarity, power }) => ({ name, type, rarity, power }));
+    .map(({ name, type, rarity, power, stage }) => ({ name, type, rarity, power, stage }));
 }
 
 /** Untrusted team from a shared file: clean strings, clamp power to what the rarity can reach. */
@@ -31,7 +43,8 @@ function validateTeam(arr) {
     const name = cleanName(m.name || '');
     const type = cleanName(m.type || '');
     if (!name || !type || !Number.isInteger(m.power) || m.power < 1) return null;
-    team.push({ name, type, rarity: m.rarity, power: Math.min(m.power, maxPower(m.rarity)) });
+    const stage = Number.isInteger(m.stage) ? Math.min(Math.max(m.stage, 0), 2) : 0;
+    team.push({ name, type, rarity: m.rarity, power: Math.min(m.power, maxEvolvedPower(m.rarity)), stage });
   }
   return team;
 }
@@ -86,4 +99,4 @@ function duel(s1, s2) {
   return { winner: winner.name, loser: loser.name, log };
 }
 
-module.exports = { TEAM_SIZE, BOT, topTeam, validateTeam, duel, rng };
+module.exports = { TEAM_SIZE, BOT, boostTrophies, topTeam, validateTeam, duel, rng };

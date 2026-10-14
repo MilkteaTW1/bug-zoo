@@ -18,7 +18,7 @@ test('every English message has a Traditional Chinese translation and vice versa
   const keysOf = (lang) => {
     const start = src.indexOf(lang === 'en' ? '  en: {' : "  'zh-TW': {");
     const end = lang === 'en' ? src.indexOf("  'zh-TW': {") : src.indexOf('\nlet current');
-    return new Set([...src.slice(start, end).matchAll(/^\s{4}'([\w.]+)':/gm)].map((m) => m[1]));
+    return new Set([...src.slice(start, end).matchAll(/^\s{4}'([^']+)':/gm)].map((m) => m[1]));
   };
   const en = keysOf('en');
   const zh = keysOf('zh');

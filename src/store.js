@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { resolve } = require('./capture');
-const { computePower, MIN_RUNS_FOR_RATE } = require('./power');
+const { computePower, MIN_RUNS_FOR_RATE, stageOf } = require('./power');
+const achievements = require('./achievements');
 
 const MAX_TROPHIES = 200;
 const FAIL_COUNT_INTERVAL_MS = 60 * 1000;
@@ -24,9 +25,12 @@ function load() {
     dex.trophies = dex.trophies || [];
     dex.battles = dex.battles || { wins: 0, losses: 0 };
     dex.friends = dex.friends || [];
+    dex.achievements = dex.achievements || {};
     return dex;
   } catch {
-    return { creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [] };
+    return {
+      creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {},
+    };
   }
 }
 
@@ -97,8 +101,12 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   const escaped = pick(result.escaped);
 
   const trophies = [];
+  const evolved = [];
   for (const e of captured) {
+    const before = stageOf(e.captures);
     e.captures += 1;
+    const after = stageOf(e.captures);
+    if (after > before) evolved.push({ entry: e, stage: after });
     e.lastCaptured = stamp;
     const p = prevInfo[e.id] || fresh[e.id] || computePower({ rarity: e.rarity });
     trophies.push({
@@ -118,11 +126,13 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
     delete dex.pending[key];
   }
 
+  const unlocked = achievements.evaluate(dex, stamp);
+
   if (failed || prev || run) save(dex);
 
   return {
     outcome: result.outcome, encounters, captured, escaped, trophies,
-    pending: pick(result.pending), powers: fresh,
+    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked,
   };
 }
 

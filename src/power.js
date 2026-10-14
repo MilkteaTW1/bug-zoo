@@ -30,4 +30,31 @@ function maxPower(rarity) {
   return Math.round((BASE[rarity] || BASE.common) * MAX_MULT);
 }
 
-module.exports = { BASE, MAX_MULT, MIN_RUNS_FOR_RATE, computePower, maxPower };
+/**
+ * Evolution: how many times the same creature has been caught decides its form.
+ * The multiplier applies when a team is formed; a trophy's recorded power never changes.
+ */
+const EVOLUTION = [
+  { at: 0, mult: 1 },
+  { at: 3, mult: 1.15 },
+  { at: 10, mult: 1.35 },
+];
+
+function stageOf(captures) {
+  let stage = 0;
+  EVOLUTION.forEach((e, i) => {
+    if (captures >= e.at) stage = i;
+  });
+  return stage;
+}
+
+const evolutionMult = (stage) => EVOLUTION[Math.min(Math.max(stage, 0), EVOLUTION.length - 1)].mult;
+
+/** The most any shared monster can show: the rarity cap at the final form. */
+function maxEvolvedPower(rarity) {
+  return Math.round(maxPower(rarity) * EVOLUTION[EVOLUTION.length - 1].mult);
+}
+
+module.exports = {
+  BASE, MAX_MULT, MIN_RUNS_FOR_RATE, EVOLUTION, computePower, maxPower, maxEvolvedPower, stageOf, evolutionMult,
+};

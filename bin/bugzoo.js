@@ -17,6 +17,7 @@ const session = require('../src/session');
 const { decodeOutput } = require('../src/decode');
 const passthrough = require('../src/passthrough');
 const creatureArt = require('../src/creature');
+const achievements = require('../src/achievements');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
@@ -35,7 +36,8 @@ Usage:
   bugzoo run <command...>     Run a command. If it fails, a bug appears.
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
-  bugzoo team                 Your strongest catches (power per catch)
+  bugzoo team                 Your strongest catches, with their evolution
+  bugzoo achievements         Your achievements
   bugzoo battle [--card f.svg]
                               Show the ladder, your friends and a practice
                               opponent; type a number to fight. --card saves a
@@ -71,7 +73,8 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
   bugzoo run <指令...>        執行指令，失敗時會出現 bug
                               （開啟自動捕捉後就不用打這個）
   bugzoo dex                  你的圖鑑與等著被捕捉的 bug
-  bugzoo team                 你最強的捕獲（每隻的戰鬥力）
+  bugzoo team                 你最強的捕獲與牠們的進化狀況
+  bugzoo achievements         你的成就
   bugzoo battle [--card f.svg]
                               列出天梯、好友與練習對手，輸入編號就開打；
                               --card 會存成可分享的戰鬥結果卡
@@ -300,6 +303,7 @@ function cmdRank() {
   console.log(t('rank.score', { score: s.score }));
   console.log(t('rank.caught', { c: c.common, u: c.uncommon, r: c.rare, l: c.legendary, rep: s.repeats, seen: s.seen }));
   console.log(t('rank.battles', { w: dex.battles.wins, l: dex.battles.losses }));
+  console.log(t('ach.title', { n: Object.keys(dex.achievements || {}).length, total: achievements.IDS.length }));
   console.log(t('rank.points', { c: POINTS.common, u: POINTS.uncommon, r: POINTS.rare, l: POINTS.legendary }));
 }
 
@@ -307,7 +311,7 @@ function sharePayload(dex, name) {
   const s = summarize(dex);
   return {
     v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: battle.topTeam(dex.trophies), updated: new Date().toISOString(),
+    team: battle.topTeam(dex.trophies, dex.creatures), updated: new Date().toISOString(),
   };
 }
 
@@ -451,7 +455,7 @@ async function showLadder(args) {
 async function cmdBattle(args) {
   const { flags, positional } = parseFlags(args);
   const dex = store.load();
-  const mine = battle.topTeam(dex.trophies);
+  const mine = battle.topTeam(dex.trophies, dex.creatures);
   if (mine.length === 0) {
     console.error(t('battle.noTrophy'));
     return 2;
@@ -509,7 +513,9 @@ async function cmdBattle(args) {
   const practice = row && row.section === 'practice';
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
+    const earned = achievements.evaluate(dex);
     store.save(dex);
+    for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   }
 
   // Only a win over someone up to 3 ranks above you moves the ladder.
@@ -570,7 +576,7 @@ async function cmdFriend(args) {
   }
 
   if (sub === 'code') {
-    const team = battle.topTeam(dex.trophies);
+    const team = battle.topTeam(dex.trophies, dex.creatures);
     if (team.length === 0) {
       console.error(t('friend.needTeam'));
       return 2;
@@ -601,8 +607,10 @@ async function cmdFriend(args) {
     }
     const r = friends.upsert(dex.friends, found);
     dex.friends = r.friends;
+    const earned = achievements.evaluate(dex);
     store.save(dex);
     console.log(t(r.updated ? 'friend.updated' : 'friend.added', { name: found.name, p: friends.teamPower(found.team) }));
+    for (const line of render.achievementLines(earned)) console.log(line);
     return 0;
   }
 
@@ -648,9 +656,19 @@ async function main() {
     case 'dex':
       console.log(render.dexList(store.load()));
       break;
-    case 'team':
-      console.log(render.teamList(store.load().trophies));
+    case 'team': {
+      const dex = store.load();
+      console.log(render.teamList(dex.trophies, dex.creatures));
       break;
+    }
+    case 'achievements':
+    case 'badges': {
+      const dex = store.load();
+      const earned = achievements.evaluate(dex); // catch up on anything earned before this feature existed
+      if (earned.length > 0) store.save(dex);
+      console.log(render.achievementList(dex.achievements));
+      break;
+    }
     case 'battle':
     case 'challenge': // the old name; the ladder is now part of `battle`
       process.exit(await cmdBattle(rest));

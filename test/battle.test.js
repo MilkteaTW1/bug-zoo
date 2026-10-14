@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { computePower, maxPower } = require('../src/power');
+const { computePower, maxPower, maxEvolvedPower } = require('../src/power');
 const { scanProject, errorFrames, analyze, moduleKey } = require('../src/scan');
 const { duel, topTeam, validateTeam } = require('../src/battle');
 const { snippet } = require('../src/hook');
@@ -89,7 +89,7 @@ test('topTeam picks the three strongest trophies', () => {
 
 test('shared teams are clamped and bad ones rejected', () => {
   const ok = validateTeam([{ name: 'x', type: 'T', rarity: 'common', power: 99999 }]);
-  assert.equal(ok[0].power, maxPower('common'));
+  assert.equal(ok[0].power, maxEvolvedPower('common'));
   assert.equal(validateTeam([]), null);
   assert.equal(validateTeam([{ name: 'x', type: 'T', rarity: 'mythic', power: 5 }]), null);
   assert.equal(validateTeam([{ name: 'x', type: 'T', rarity: 'common', power: 'big' }]), null);
