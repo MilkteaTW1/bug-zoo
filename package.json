@@ -5,7 +5,7 @@
   "bin": {
     "bugzoo": "bin/bugzoo.js"
   },
-  "files": ["bin", "src", "LICENSE", "README.md", "README.zh-TW.md"],
+  "files": ["bin", "src", "LICENSE", "README.md"],
   "scripts": {
     "test": "node --test"
   },
