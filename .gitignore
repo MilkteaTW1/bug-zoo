@@ -1,0 +1,7 @@
+node_modules/
+.bugzoo/
+*.log
+.DS_Store
+Thumbs.db
+bugzoo-score.json
+bugzoo.svg

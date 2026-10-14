@@ -1,0 +1,17 @@
+{
+  "name": "bug-zoo",
+  "version": "0.1.0",
+  "description": "Turn your error messages into collectible monsters. A terminal bestiary for developers.",
+  "bin": {
+    "bugzoo": "bin/bugzoo.js"
+  },
+  "files": ["bin", "src", "LICENSE", "README.md"],
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["cli", "errors", "bestiary", "pokedex", "developer-tools", "fun"],
+  "license": "MIT"
+}

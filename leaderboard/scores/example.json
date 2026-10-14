@@ -1,0 +1,13 @@
+{
+  "v": 2,
+  "name": "example-player",
+  "caught": { "common": 3, "uncommon": 1, "rare": 0, "legendary": 0 },
+  "repeats": 2,
+  "seen": 5,
+  "score": 89,
+  "team": [
+    { "name": "Wobblemite", "type": "RangeError", "rarity": "uncommon", "power": 62 },
+    { "name": "Wobblegnaw", "type": "TypeError", "rarity": "common", "power": 31 }
+  ],
+  "updated": "2026-10-14T00:00:00.000Z"
+}

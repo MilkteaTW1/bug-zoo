@@ -1,0 +1,12 @@
+{
+  "v": 2,
+  "name": "code-monkey",
+  "caught": { "common": 1, "uncommon": 1, "rare": 0, "legendary": 0 },
+  "repeats": 0,
+  "seen": 3,
+  "score": 35,
+  "team": [
+    { "name": "Crumbcrawler", "type": "RangeError", "rarity": "uncommon", "power": 40 }
+  ],
+  "updated": "2026-10-14T00:00:00.000Z"
+}
