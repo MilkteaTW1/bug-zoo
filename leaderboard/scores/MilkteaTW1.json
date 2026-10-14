@@ -1,0 +1,34 @@
+{
+  "v": 2,
+  "name": "MilkteaTW1",
+  "caught": {
+    "common": 1,
+    "uncommon": 2,
+    "rare": 0,
+    "legendary": 0
+  },
+  "repeats": 0,
+  "seen": 3,
+  "score": 60,
+  "team": [
+    {
+      "name": "Wobbletoad",
+      "type": "ENOENT",
+      "rarity": "uncommon",
+      "power": 56
+    },
+    {
+      "name": "Nibtoad",
+      "type": "RangeError",
+      "rarity": "uncommon",
+      "power": 56
+    },
+    {
+      "name": "Wobblebat",
+      "type": "TypeError",
+      "rarity": "common",
+      "power": 25
+    }
+  ],
+  "updated": "2026-10-14T05:06:52.883Z"
+}

@@ -1,8 +1,11 @@
 {
   "v": 1,
   "order": [
+    "MilkteaTW1",
     "example-player",
     "code-monkey"
   ],
-  "processed": []
+  "processed": [
+    "20261014T050652Z-MilkteaTW1-vs-example-player.json"
+  ]
 }
