@@ -15,6 +15,10 @@ const store = require('../src/store');
 const render = require('../src/render');
 const session = require('../src/session');
 const autostart = require('../src/autostart');
+const friends = require('../src/friends');
+const remote = require('../src/remote');
+const opponents = require('../src/opponents');
+const acceptor = require('../src/accept');
 const i18n = require('../src/i18n');
 
 const { t } = i18n;
@@ -29,20 +33,17 @@ Usage:
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
   bugzoo team                 Your strongest catches (power per catch)
-  bugzoo battle <file.json>   Fight another player's shared team
-  bugzoo battle --bot         Practice against the Legacy Codebase
+  bugzoo battle               Show the ladder, your friends and a practice
+                              opponent; type a number to fight
+  bugzoo friend               List friends   (also: code | add <code|url|file|name>
+                              | remove <name> | refresh)
+  bugzoo ladder [dir]         Show the ladder
   bugzoo scan                 Scan this project: size and most-depended-on modules
   bugzoo rank                 Show your score and title
   bugzoo share [--name N] [--out file]
                               Write a shareable score + team file (no error text)
   bugzoo leaderboard <dir|file...> [--out file.md]
-                              Build a leaderboard from shared score files
-  bugzoo ladder [dir]         Show the challenge ladder (default dir: leaderboard)
-  bugzoo challenge [dir] [--rank N | --name X]
-                              Pick someone above you and fight; a win is recorded as
-                              a challenge file, and the ladder promotes you when merged
-  bugzoo ladder process [dir] [--out LADDER.md]
-                              Apply pending challenges (what CI runs)
+                              Build a score leaderboard from shared files
   bugzoo hook <bash|zsh|fish|powershell>
                               Print a snippet that wraps common dev commands
   bugzoo export [file]        Export the bestiary as an SVG (default: bugzoo.svg)
@@ -55,8 +56,7 @@ flags and numeric arguments are ignored when matching):
   some bugs gone       those are caught
   a new bug appears    escaped - the new bug becomes your target
 
-Power grows with stack depth, how many files depend on the broken file,
-project size and how often the command fails.
+Beating someone up to 3 ranks above you on the ladder takes their spot.
 `,
   'zh-TW': `bugzoo - 把你的錯誤變成可收集的怪物
 
@@ -67,20 +67,16 @@ project size and how often the command fails.
                               （開啟自動捕捉後就不用打這個）
   bugzoo dex                  你的圖鑑與等著被捕捉的 bug
   bugzoo team                 你最強的捕獲（每隻的戰鬥力）
-  bugzoo battle <檔案.json>   挑戰別人分享的隊伍
-  bugzoo battle --bot         和 Legacy Codebase 練習
+  bugzoo battle               列出天梯、好友與練習對手，輸入編號就開打
+  bugzoo friend               列出好友（也可用：code | add <代碼|網址|檔案|名稱>
+                              | remove <名稱> | refresh）
+  bugzoo ladder [資料夾]      查看天梯
   bugzoo scan                 掃描這個專案：規模與最多檔案依賴的模組
   bugzoo rank                 查看你的分數與稱號
   bugzoo share [--name 名稱] [--out 檔案]
                               輸出可分享的分數與隊伍檔（不含錯誤內容）
   bugzoo leaderboard <資料夾|檔案...> [--out file.md]
-                              用分享檔產生排行榜
-  bugzoo ladder [資料夾]      查看挑戰天梯（預設資料夾：leaderboard）
-  bugzoo challenge [資料夾] [--rank N | --name X]
-                              選一個排名在你上面的人對戰；贏了會產生挑戰檔，
-                              合併後天梯就會讓你晉升
-  bugzoo ladder process [資料夾] [--out LADDER.md]
-                              套用待處理的挑戰（CI 會執行）
+                              用分享檔產生分數排行榜
   bugzoo hook <bash|zsh|fish|powershell>
                               輸出會把常見開發指令包起來的設定片段
   bugzoo export [檔案]        把圖鑑匯出成 SVG（預設 bugzoo.svg）
@@ -92,7 +88,7 @@ project size and how often the command fails.
   部分 bug 消失    消失的那些捕捉成功
   出現新的 bug     逃走了，新的 bug 變成你的目標
 
-戰鬥力取決於堆疊深度、有多少檔案依賴出錯的檔案、專案規模，以及指令失敗的頻率。
+在天梯上打贏排名在你上面 3 名以內的人，就能奪下他的名次。
 `,
 };
 
@@ -129,6 +125,15 @@ function ask(question) {
 
 const normalizeLang = (v) => (/^zh/i.test(v) ? 'zh-TW' : /^en/i.test(v) ? 'en' : null);
 const yes = (a) => !/^n/i.test(a);
+
+function openUrl(url) {
+  const [cmd, args] = process.platform === 'win32'
+    ? ['rundll32', ['url.dll,FileProtocolHandler', url]]
+    : process.platform === 'darwin' ? ['open', [url]] : ['xdg-open', [url]];
+  try {
+    spawn(cmd, args, { stdio: 'ignore', detached: true }).on('error', () => {}).unref();
+  } catch { /* the URL is printed anyway */ }
+}
 
 // --- setup: language, player name, automatic capture ------------------------------------------
 
@@ -187,11 +192,11 @@ async function ensureSetup(cmd) {
     return;
   }
   i18n.setLang(i18n.detectLang());
-  const skip = new Set(['setup', 'hook', 'help', '--help', '-h', undefined]);
+  const skip = new Set(['setup', 'hook', 'help', '--help', '-h', undefined, 'ladder']);
   if (!skip.has(cmd) && interactive()) await runSetup({ flags: {}, ask: true });
 }
 
-// --- commands ----------------------------------------------------------------------------------
+// --- run ---------------------------------------------------------------------------------------
 
 /** Windows: find an executable the way cmd would (PATH + PATHEXT), so real .exe files need no shell. */
 function resolveWindowsExe(name) {
@@ -240,6 +245,8 @@ function run(argv) {
   });
   return null;
 }
+
+// --- profile, sharing, scores ------------------------------------------------------------------
 
 function cmdRank() {
   const dex = store.load();
@@ -295,66 +302,6 @@ function cmdLeaderboard(args) {
   return 0;
 }
 
-/** English creature name -> what to show, for the player's own team. */
-function ownLabeler(dex) {
-  const names = new Map(dex.trophies.map((tr) => [tr.name, render.shownName(tr)]));
-  return (n) => names.get(n) || n;
-}
-
-const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} (${m.power})`).join(', ');
-
-function cmdBattle(args) {
-  const { flags, positional } = parseFlags(args);
-  const dex = store.load();
-  const mine = battle.topTeam(dex.trophies);
-  if (mine.length === 0) {
-    console.error(t('battle.noTrophy'));
-    return 2;
-  }
-  const me = { name: (dex.profile && dex.profile.name) || t('battle.you'), team: mine };
-
-  let foe;
-  if (flags.bot) {
-    foe = battle.BOT;
-  } else if (positional[0]) {
-    let raw;
-    try {
-      raw = JSON.parse(fs.readFileSync(positional[0], 'utf8'));
-    } catch {
-      console.error(t('battle.badFile', { file: positional[0] }));
-      return 2;
-    }
-    const team = battle.validateTeam(raw && raw.team);
-    const name = cleanName((raw && raw.name) || '');
-    if (!team || !name) {
-      console.error(t('battle.noTeam'));
-      return 2;
-    }
-    if (name.toLowerCase() === me.name.toLowerCase()) {
-      console.error(t('battle.own', { name }));
-      return 2;
-    }
-    foe = { name, team };
-  } else {
-    console.error(t('battle.usage'));
-    return 2;
-  }
-
-  const labelOf = ownLabeler(dex);
-  console.log(`${me.name}: ${showTeam(me, labelOf)}`);
-  console.log(`${foe.name}: ${showTeam(foe, (n) => n)}\n`);
-  const result = battle.duel(me, foe);
-  for (const ev of result.log) console.log(`  ${render.battleLine(ev, labelOf)}`);
-
-  const won = result.winner === me.name && result.loser !== me.name;
-  console.log(`\n${t(won ? 'battle.win' : 'battle.lose', { winner: result.winner, loser: result.loser })}`);
-  if (!flags.bot) {
-    dex.battles[won ? 'wins' : 'losses'] += 1;
-    store.save(dex);
-  }
-  return 0;
-}
-
 function cmdScan() {
   const s = scanProject(process.cwd());
   console.log(t('scan.project', { name: path.basename(process.cwd()) }));
@@ -366,33 +313,68 @@ function cmdScan() {
   }
 }
 
-function ladderPaths(dir) {
+// --- ladder, battle, friends -------------------------------------------------------------------
+
+/** English creature name -> what to show, for the player's own team. */
+function ownLabeler(dex) {
+  const names = new Map(dex.trophies.map((tr) => [tr.name, render.shownName(tr)]));
+  return (n) => names.get(n) || n;
+}
+
+const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} (${m.power})`).join(', ');
+
+function listWords() {
   return {
-    scores: path.join(dir, 'scores'),
-    state: path.join(dir, 'ladder.json'),
-    challenges: path.join(dir, 'challenges'),
+    ladder: t('battle.secLadder'),
+    friends: t('battle.secFriends'),
+    practice: t('battle.secPractice'),
+    you: t('battle.tagYou'),
+    ranked: t('battle.tagRanked'),
+    kind: (k) => t(`friend.kind.${k}`),
+    pad: i18n.pad,
+    power: (p) => t('battle.rowPower', { p: String(p).padStart(4) }),
   };
 }
 
-function loadLadderState(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return { v: 1, order: [], processed: [] };
-  }
+function ladderNotice(source) {
+  if (!source.note) return;
+  const { code, reason, when } = source.note;
+  if (code === 'cached') console.error(t('battle.cachedLadder', { reason, when }));
+  else if (source.source === 'none') console.error(t('battle.noLadder', { reason }));
 }
 
-const tagWords = () => ({ you: t('ladder.you'), challengeable: t('ladder.challengeable') });
+const ladderLookup = (source) => async (name) => {
+  const p = source.players.get(String(name).toLowerCase());
+  return p ? { name: p.name, team: p.team } : null;
+};
 
 function cmdLadder(args) {
   const { flags, positional } = parseFlags(args);
-  const processing = positional[0] === 'process';
-  const dir = (processing ? positional[1] : positional[0]) || 'leaderboard';
-  const p = ladderPaths(dir);
-  const { players, skipped } = ladder.loadPlayers(p.scores);
-  const state = loadLadderState(p.state);
+  const sub = positional[0];
 
-  if (processing) {
+  if (sub === 'process' || sub === 'accept') {
+    const dir = (sub === 'process' ? positional[1] : positional[1]) || 'leaderboard';
+    if (sub === 'accept') {
+      const bodyFile = flags['body-file'];
+      if (typeof bodyFile !== 'string') {
+        console.error('Usage: bugzoo ladder accept [dir] --body-file <file> --actor <github-login>');
+        return 2;
+      }
+      const r = acceptor.accept({
+        body: fs.readFileSync(bodyFile, 'utf8'),
+        actor: typeof flags.actor === 'string' ? flags.actor : '',
+        dir,
+      });
+      console.log(r.message);
+      return r.ok ? 0 : 1;
+    }
+
+    const p = { scores: path.join(dir, 'scores'), state: path.join(dir, 'ladder.json'), challenges: path.join(dir, 'challenges') };
+    let state = { v: 1, order: [], processed: [] };
+    try {
+      state = JSON.parse(fs.readFileSync(p.state, 'utf8'));
+    } catch { /* first run */ }
+    const { players } = ladder.loadPlayers(p.scores);
     const { state: next, results } = ladder.processChallenges(state, players, ladder.loadChallenges(p.challenges));
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(p.state, JSON.stringify(next, null, 2) + '\n');
@@ -405,87 +387,194 @@ function cmdLadder(args) {
     return 0;
   }
 
-  const order = ladder.sync(state.order, players);
+  return null; // handled asynchronously by showLadder
+}
+
+async function showLadder(args) {
+  const { positional } = parseFlags(args);
+  const source = await remote.loadLadder({ dir: positional[0] });
+  ladderNotice(source);
+  const order = ladder.sync(source.order, source.players);
   if (order.length === 0) {
-    console.log(t('ladder.none', { dir: p.scores }));
+    console.log(t('ladder.none', { dir: positional[0] || remote.repoOf() }));
     return 0;
   }
   const dex = store.load();
-  console.log(ladder.toText(order, players, { me: dex.profile && dex.profile.name, tags: tagWords() }));
-  for (const s of skipped) console.error(`skipped ${s.file}: ${s.reason}`);
+  console.log(ladder.toText(order, source.players, { me: dex.profile && dex.profile.name, tags: { you: t('ladder.you'), challengeable: t('ladder.challengeable') } }));
   return 0;
 }
 
-async function cmdChallenge(args) {
+async function cmdBattle(args) {
   const { flags, positional } = parseFlags(args);
-  const dir = positional[0] || 'leaderboard';
-  const p = ladderPaths(dir);
   const dex = store.load();
-  const name = cleanName((dex.profile && dex.profile.name) || '');
-  if (!name) {
-    console.error(t('share.needName'));
-    return 2;
-  }
-  if (battle.topTeam(dex.trophies).length === 0) {
+  const mine = battle.topTeam(dex.trophies);
+  if (mine.length === 0) {
     console.error(t('battle.noTrophy'));
     return 2;
   }
+  const profileName = cleanName((dex.profile && dex.profile.name) || '');
+  const me = { name: profileName || t('battle.you'), team: mine, score: summarize(dex).score };
+  const labelOf = ownLabeler(dex);
 
-  // Refresh your own entry so the ladder fights with your current team.
-  fs.mkdirSync(p.scores, { recursive: true });
-  const mine = path.join(p.scores, `${name}.json`);
-  fs.writeFileSync(mine, JSON.stringify(sharePayload(dex, name), null, 2) + '\n');
+  let foe = null; // { name, team }
+  let row = null;
+  let list = null;
 
-  const { players } = ladder.loadPlayers(p.scores);
-  const order = ladder.sync(loadLadderState(p.state).order, players);
-  console.log(ladder.toText(order, players, { me: name, tags: tagWords() }));
-  console.log('');
-
-  let target = typeof flags.name === 'string' ? flags.name : null;
-  if (!target) {
-    let pick = typeof flags.rank === 'string' ? flags.rank : null;
-    if (pick === null) pick = await ask(t('ladder.ask'));
-    if (!pick || /^q/i.test(pick)) return 0;
-    const n = Number.parseInt(pick, 10);
-    if (!Number.isInteger(n) || n < 1 || n > order.length) {
-      console.error(t('ladder.badRank', { max: order.length }));
+  if (positional[0]) {
+    // `bugzoo battle <friend code | url | file | player name>`: fight directly, no list.
+    const found = await friends.parseFriend(positional[0], { lookupLadder: remote.lookupPlayer }).catch(() => null);
+    if (!found) {
+      console.error(t('friend.bad'));
       return 2;
     }
-    target = order[n - 1];
+    foe = { name: found.name, team: found.team };
+  } else {
+    const source = await remote.loadLadder({ dir: typeof flags.dir === 'string' ? flags.dir : undefined });
+    ladderNotice(source);
+
+    // Keep live friends current (links, files, ladder names); a code is a fixed snapshot.
+    const lookup = ladderLookup(source);
+    const refreshed = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f, { lookupLadder: lookup })));
+    dex.friends = refreshed.map((r) => r.friend);
+    store.save(dex);
+
+    list = opponents.buildList({ me, source, friends: dex.friends });
+    console.log(opponents.render(list, listWords()));
+    console.log('');
+
+    let pick = typeof flags.pick === 'string' ? flags.pick : null;
+    if (flags.bot) pick = String(list.rows.find((r) => r.section === 'practice').n);
+    if (pick === null) pick = await ask(t('battle.ask'));
+    if (!pick || /^q/i.test(pick)) return 0;
+    row = opponents.pick(list, Number.parseInt(pick, 10));
+    if (!row) {
+      console.error(t('battle.badPick'));
+      return 2;
+    }
+    foe = { name: row.name, team: row.team };
   }
 
-  const chk = ladder.checkChallenge(order, name, target);
-  if (!chk.ok) {
-    console.error(t('ladder.cannot', { reason: t(`ladder.err.${chk.code}`, chk.params) }));
-    return 2;
-  }
-
-  const me = players.get(name.toLowerCase());
-  const foe = players.get(order[chk.di].toLowerCase());
-  const labelOf = ownLabeler(dex);
-  console.log(`\n#${chk.ci + 1} ${me.name}: ${showTeam(me, labelOf)}`);
-  console.log(`#${chk.di + 1} ${foe.name}: ${showTeam(foe, (n) => n)}\n`);
-
-  const result = ladder.fight(players, me.name, foe.name);
+  console.log(`\n${me.name}: ${showTeam(me, labelOf)}`);
+  console.log(`${foe.name}: ${showTeam(foe, (n) => n)}\n`);
+  const result = battle.duel(me, foe);
   for (const ev of result.log) console.log(`  ${render.battleLine(ev, labelOf)}`);
 
-  if (!result.won) {
-    console.log(`\n${t('ladder.lose', { name: foe.name, rank: chk.di + 1 })}`);
-    dex.battles.losses += 1;
+  const won = result.winner === me.name && result.loser !== me.name;
+  console.log(`\n${t(won ? 'battle.win' : 'battle.lose', { winner: result.winner, loser: result.loser })}`);
+
+  const practice = row && row.section === 'practice';
+  if (!practice) {
+    dex.battles[won ? 'wins' : 'losses'] += 1;
     store.save(dex);
+  }
+
+  // Only a win over someone up to 3 ranks above you moves the ladder.
+  if (row && row.section === 'ladder') {
+    const chk = ladder.checkChallenge(list.order, me.name, row.name);
+    if (won && chk.ok) {
+      console.log(`\n${t('battle.promote', { rank: row.rank, name: row.name })}`);
+      if (!profileName) {
+        console.log(t('battle.needName'));
+      } else {
+        const url = acceptor.issueUrl({
+          repo: remote.repoOf(), challenger: profileName, defender: row.name, payload: sharePayload(dex, profileName),
+        });
+        console.log(url);
+        console.log(t('battle.submitNote'));
+        if (interactive() && yes(await ask(t('battle.openAsk')))) {
+          openUrl(url);
+          console.log(t('battle.opened'));
+        }
+      }
+    } else if (won && !chk.ok) {
+      console.log(`\n${t('battle.outOfReach', { reach: ladder.REACH })}`);
+    }
+  } else if (!practice) {
+    console.log(`\n${t('battle.friendly')}`);
+  }
+  return 0;
+}
+
+async function cmdFriend(args) {
+  const { flags, positional } = parseFlags(args);
+  const sub = positional[0] || 'list';
+  const dex = store.load();
+  const name = cleanName((dex.profile && dex.profile.name) || '');
+
+  if (sub === 'list') {
+    if (dex.friends.length === 0) {
+      console.log(t('friend.empty'));
+      return 0;
+    }
+    console.log(t('friend.title'));
+    for (const f of dex.friends) {
+      console.log(`  ${t('friend.row', { name: i18n.pad(f.name, 16), p: friends.teamPower(f.team), kind: t(`friend.kind.${f.kind}`) })}`);
+    }
     return 0;
   }
 
-  dex.battles.wins += 1;
-  store.save(dex);
-  fs.mkdirSync(p.challenges, { recursive: true });
-  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\..*/, 'Z');
-  const file = path.join(p.challenges, `${stamp}-${me.name}-vs-${foe.name}.json`);
-  fs.writeFileSync(file, JSON.stringify({ v: 1, challenger: me.name, defender: foe.name, at: new Date().toISOString() }, null, 2) + '\n');
-  console.log(`\n${t('ladder.win', { name: foe.name, to: chk.di + 1, from: chk.ci + 1 })}`);
-  console.log(t('ladder.wrote', { file }));
-  console.log(t('ladder.commit', { mine }));
-  return 0;
+  if (sub === 'code') {
+    const team = battle.topTeam(dex.trophies);
+    if (team.length === 0) {
+      console.error(t('friend.needTeam'));
+      return 2;
+    }
+    if (!name) {
+      console.error(t('friend.needName'));
+      return 2;
+    }
+    console.log(t('friend.code'));
+    console.log(friends.encodeCode(name, team));
+    return 0;
+  }
+
+  if (sub === 'add') {
+    const input = positional.slice(1).join(' ');
+    let found = null;
+    try {
+      found = await friends.parseFriend(input, { lookupLadder: remote.lookupPlayer });
+    } catch { /* unreachable link etc. */ }
+    if (!found) {
+      console.error(t('friend.bad'));
+      return 2;
+    }
+    if (typeof flags.name === 'string' && cleanName(flags.name)) found.name = cleanName(flags.name);
+    if (name && found.name.toLowerCase() === name.toLowerCase()) {
+      console.error(t('friend.self'));
+      return 2;
+    }
+    const r = friends.upsert(dex.friends, found);
+    dex.friends = r.friends;
+    store.save(dex);
+    console.log(t(r.updated ? 'friend.updated' : 'friend.added', { name: found.name, p: friends.teamPower(found.team) }));
+    return 0;
+  }
+
+  if (sub === 'remove') {
+    const target = positional.slice(1).join(' ');
+    const r = friends.remove(dex.friends, target);
+    if (!r.removed) {
+      console.error(t('friend.notFound', { name: target }));
+      return 2;
+    }
+    dex.friends = r.friends;
+    store.save(dex);
+    console.log(t('friend.removed', { name: target }));
+    return 0;
+  }
+
+  if (sub === 'refresh') {
+    const source = await remote.loadLadder({});
+    const lookup = ladderLookup(source);
+    const results = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f, { lookupLadder: lookup })));
+    dex.friends = results.map((r) => r.friend);
+    store.save(dex);
+    console.log(t('friend.refreshed', { n: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length }));
+    return 0;
+  }
+
+  console.error(t('friend.usage'));
+  return 2;
 }
 
 async function main() {
@@ -507,7 +596,12 @@ async function main() {
       console.log(render.teamList(store.load().trophies));
       break;
     case 'battle':
-      process.exit(cmdBattle(rest));
+    case 'challenge': // the old name; the ladder is now part of `battle`
+      process.exit(await cmdBattle(rest));
+      break;
+    case 'friend':
+    case 'friends':
+      process.exit(await cmdFriend(rest));
       break;
     case 'scan':
       cmdScan();
@@ -521,12 +615,11 @@ async function main() {
     case 'leaderboard':
       process.exit(cmdLeaderboard(rest));
       break;
-    case 'ladder':
-      process.exit(cmdLadder(rest));
+    case 'ladder': {
+      const rc = cmdLadder(rest);
+      process.exit(rc === null ? await showLadder(rest) : rc);
       break;
-    case 'challenge':
-      process.exit(await cmdChallenge(rest));
-      break;
+    }
     case 'hook': {
       const snip = hook.snippet(rest[0]);
       if (!snip) {

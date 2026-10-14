@@ -22,9 +22,10 @@ function load() {
     dex.runs = dex.runs || {};
     dex.trophies = dex.trophies || [];
     dex.battles = dex.battles || { wins: 0, losses: 0 };
+    dex.friends = dex.friends || [];
     return dex;
   } catch {
-    return { creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 } };
+    return { creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [] };
   }
 }
 

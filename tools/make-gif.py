@@ -128,9 +128,9 @@ def render(buffer, title):
     return img
 
 
-def captured(cmd, cwd, env):
+def captured(cmd, cwd, env, stdin=None):
     p = subprocess.run(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                       encoding="utf-8", errors="replace")
+                       input=stdin, encoding="utf-8", errors="replace")
     return p.stdout
 
 
@@ -148,9 +148,27 @@ DB_BAD = "const tables = {};\n\nfunction get(name) {\n  return tables[name];\n}\
 DB_GOOD = "const tables = { users: { rows: [{ name: 'ann' }, { name: 'bob' }] } };\n\nfunction get(name) {\n  return tables[name];\n}\n\nmodule.exports = { get };\n"
 
 TEXT = {
-    "en": {"fix": "# fix lib/db.js: create the users table"},
-    "zh-TW": {"fix": "# 修好 lib/db.js：建立 users 資料表"},
+    "en": {"fix": "# fix lib/db.js: create the users table", "ask": "Fight whom? (number, or q to quit) "},
+    "zh-TW": {"fix": "# 修好 lib/db.js：建立 users 資料表", "ask": "要跟誰對戰？（輸入編號，q 離開）"},
 }
+
+# A small made-up ladder so the demo never depends on the network.
+LADDER = [
+    ("bugslayer", "Heisenbug", "legendary", 160, 3),
+    ("dev-dana", "Nullwisp", "rare", 110, 2),
+    ("rookie", "Crumbmite", "common", 10, 1),
+]
+
+
+def write_ladder(root):
+    import json
+    scores = root / "scores"
+    scores.mkdir(parents=True)
+    for name, mon, rarity, power, caught in LADDER:
+        data = {"v": 2, "name": name, "caught": {rarity: caught}, "repeats": 0, "seen": caught,
+                "team": [{"name": mon, "type": "Error", "rarity": rarity, "power": power}]}
+        (scores / f"{name}.json").write_text(json.dumps(data))
+    (root / "ladder.json").write_text(json.dumps({"v": 1, "order": [l[0] for l in LADDER], "processed": []}))
 
 
 def build(lang, out):
@@ -161,8 +179,10 @@ def build(lang, out):
     (project / "lib" / "api.js").write_text(API)
     (project / "lib" / "db.js").write_text(DB_BAD)
 
+    ladder_dir = work / "ladder"
+    write_ladder(ladder_dir)
     env = {**os.environ, "BUGZOO_HOME": str(work / "home"), "BUGZOO_LANG": lang, "BUGZOO_FORCE": "1",
-           "NODE_OPTIONS": f'--require "{REGISTER}"'}
+           "BUGZOO_LADDER_DIR": str(ladder_dir), "NODE_OPTIONS": f'--require "{REGISTER}"'}
     node = shutil.which("node") or "node"
     subprocess.run([node, str(BIN), "setup", "--lang", lang, "--name", "MilkteaTW1"], env=env,
                    stdout=subprocess.DEVNULL, check=True)
@@ -195,15 +215,27 @@ def build(lang, out):
                     snap(ms)
         snap(120)
 
-    def scene(display, argv, hold=1700, note=None):
+    def scene(display, argv, hold=1700, note=None, answer=None):
         if note:
             buffer.append([(c, DIM, False) for c in note])
             snap(900)
         new_prompt_line()
         snap(300)
         type_cmd(display)
-        out = captured(argv, project, env)
-        reveal(clean(out, project, fake))
+        out = clean(captured(argv, project, env, stdin=f"{answer}\n" if answer else None), project, fake)
+        ask = TEXT[lang]["ask"]
+        if answer and ask in out:
+            # the answer was piped in, so type it where the player would have
+            head, tail = out.split(ask, 1)
+            reveal(head + ask)
+            snap(700)
+            for ch in answer:
+                buffer[-1].append((ch, FG, False))
+                snap(260)
+            snap(450)
+            reveal(tail)
+        else:
+            reveal(out)
         snap(hold)
 
     buffer.append([])
@@ -211,7 +243,7 @@ def build(lang, out):
     (project / "lib" / "db.js").write_text(DB_GOOD)
     scene("node app.js", [node, "app.js"], note=TEXT[lang]["fix"])
     scene("bugzoo team", [node, str(BIN), "team"], hold=1900)
-    scene("bugzoo battle --bot", [node, str(BIN), "battle", "--bot"], hold=3200)
+    scene("bugzoo battle", [node, str(BIN), "battle"], hold=3600, answer="3")
 
     # one shared palette keeps the GIF small and the colours stable
     sample = frames[:: max(1, len(frames) // 12)]

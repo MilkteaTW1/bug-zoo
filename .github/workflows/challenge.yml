@@ -1,0 +1,67 @@
+name: Accept ladder challenge
+
+# A player beats someone on the ladder with `bugzoo battle`; the CLI opens a pre-filled issue.
+# This workflow validates it, replays the fight from the shared teams and updates the ladder.
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: ladder
+  cancel-in-progress: false
+
+jobs:
+  accept:
+    if: startsWith(github.event.issue.title, 'Challenge:')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate and record the challenge
+        id: accept
+        env:
+          # Passed through the environment, never interpolated into the shell script.
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ACTOR: ${{ github.event.issue.user.login }}
+        run: |
+          printf '%s' "$ISSUE_BODY" > "$RUNNER_TEMP/body.txt"
+          if node bin/bugzoo.js ladder accept leaderboard --body-file "$RUNNER_TEMP/body.txt" --actor "$ACTOR" > "$RUNNER_TEMP/result.txt"; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Replay the fight and rebuild the boards
+        if: steps.accept.outputs.ok == 'true'
+        run: |
+          node bin/bugzoo.js ladder process leaderboard --out LADDER.md | tee -a "$RUNNER_TEMP/result.txt"
+          node bin/bugzoo.js leaderboard leaderboard/scores --out LEADERBOARD.md
+
+      - name: Commit the ladder
+        if: steps.accept.outputs.ok == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A leaderboard LADDER.md LEADERBOARD.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Ladder: ${{ github.event.issue.title }}"
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Reply and close
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$NUMBER" --body-file "$RUNNER_TEMP/result.txt" || true
+          gh issue close "$NUMBER" || true

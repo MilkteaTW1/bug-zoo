@@ -18,31 +18,44 @@ function jsonFiles(dir) {
   }
 }
 
-/** Battle-ready players from a scores folder: Map(lowercase name -> { name, score, team }). */
-function loadPlayers(scoresDir) {
+/**
+ * Battle-ready players from already-parsed score files: [{ file, data }].
+ * Returns Map(lowercase name -> { name, score, team }) and what was skipped.
+ */
+function playersFromRaw(list) {
   const players = new Map();
   const skipped = [];
-  for (const f of jsonFiles(scoresDir)) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(path.join(scoresDir, f), 'utf8'));
-      const v = validateEntry(raw);
-      if (!v.ok) {
-        skipped.push({ file: f, reason: v.reason });
-        continue;
-      }
-      const team = validateTeam(raw.team);
-      if (!team) {
-        skipped.push({ file: f, reason: 'no valid team (run `bugzoo share` after catching a bug)' });
-        continue;
-      }
-      const key = lower(v.entry.name);
-      const prev = players.get(key);
-      if (!prev || prev.score < v.entry.score) players.set(key, { name: v.entry.name, score: v.entry.score, team });
-    } catch {
-      skipped.push({ file: f, reason: 'invalid JSON' });
+  for (const { file, data } of list) {
+    const v = validateEntry(data);
+    if (!v.ok) {
+      skipped.push({ file, reason: v.reason });
+      continue;
     }
+    const team = validateTeam(data.team);
+    if (!team) {
+      skipped.push({ file, reason: 'no valid team (run `bugzoo share` after catching a bug)' });
+      continue;
+    }
+    const key = lower(v.entry.name);
+    const prev = players.get(key);
+    if (!prev || prev.score < v.entry.score) players.set(key, { name: v.entry.name, score: v.entry.score, team });
   }
   return { players, skipped };
+}
+
+/** Battle-ready players from a scores folder. */
+function loadPlayers(scoresDir) {
+  const list = [];
+  const bad = [];
+  for (const f of jsonFiles(scoresDir)) {
+    try {
+      list.push({ file: f, data: JSON.parse(fs.readFileSync(path.join(scoresDir, f), 'utf8')) });
+    } catch {
+      bad.push({ file: f, reason: 'invalid JSON' });
+    }
+  }
+  const { players, skipped } = playersFromRaw(list);
+  return { players, skipped: [...bad, ...skipped] };
 }
 
 /** Drop players that left, append newcomers at the bottom (best score first). */
@@ -163,6 +176,6 @@ function toMarkdown(order, players) {
 }
 
 module.exports = {
-  REACH, loadPlayers, sync, indexOf, checkChallenge, promote, fight,
+  REACH, loadPlayers, playersFromRaw, sync, indexOf, checkChallenge, promote, fight,
   loadChallenges, processChallenges, toText, toMarkdown,
 };

@@ -2,22 +2,11 @@
 
 Turn your error messages into collectible monsters.
 
-Run your program through `bugzoo`. When it crashes, the error is caught as a creature and added to a bestiary on your machine. Same error, same monster; rarer errors make rarer creatures.
-
-```
-A wild TypeError appeared!  * NEW *
-    .-"-.
-   / > < \
-   \_^_/
-   Wobblegnaw  [common]  seen x1
-   Cannot read properties of null (reading 'x')
-```
+**English** | [繁體中文](#zh-TW)
 
 ![Bug Zoo demo](docs/demo.en.gif)
 
 *A bug appears, you fix it, it is caught, your team fights. Real output; Node-internal stack frames trimmed.*
-
-**English** | [繁體中文](#zh-TW)
 
 ## Install
 
@@ -29,6 +18,25 @@ bugzoo setup
 Requires Node.js 18+. No dependencies.
 
 The first time you run any `bugzoo` command it asks for your **language** (繁體中文 / English), a **player name** for the leaderboards, and whether to turn on **automatic capture**. (npm install scripts cannot prompt, so the questions happen on first run.) Change them any time with `bugzoo setup`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `bugzoo setup` | Language, player name and automatic capture (`--lang`, `--name`, `--auto on\|off`) |
+| `bugzoo run <command…>` | Run a command; if it fails a bug appears. Not needed once automatic capture is on |
+| `bugzoo dex` | Your collection and the bugs waiting to be caught |
+| `bugzoo team` | Your strongest catches, with the power breakdown |
+| `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight |
+| `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
+| `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
+| `bugzoo ladder` | Show the ladder |
+| `bugzoo rank` | Your score and title |
+| `bugzoo share` | Write a shareable score + team file (counts only, no error text) |
+| `bugzoo leaderboard <dir>` | Build a score leaderboard from shared files |
+| `bugzoo scan` | Scan this project: size and most-depended-on modules |
+| `bugzoo hook <shell>` | Print a wrapper snippet for bash, zsh, fish or PowerShell |
+| `bugzoo export` | Export the bestiary as an SVG for your profile |
 
 ## Automatic capture (no `bugzoo run`)
 
@@ -52,18 +60,6 @@ Whatever you run **by hand** in a terminal is captured, in any project, in any f
 - **Limits**: a language not in the list above needs `bugzoo run <command>`. Runs started by an IDE's Run button (no terminal) are not captured. Wrapped commands have their stderr piped through bugzoo, so a few tools may drop colours on stderr.
 - Windows PowerShell ignores profiles when its execution policy is `Restricted`; `bugzoo setup` tells you if so.
 
-## Usage
-
-```bash
-bugzoo run node app.js      # run anything; failures spawn a bug
-bugzoo run python main.py
-bugzoo dex                  # your collection and bugs waiting to be caught
-bugzoo rank                 # your score and title
-bugzoo export bugzoo.svg    # SVG card grid for your GitHub profile
-```
-
-`bugzoo run` passes stdout/stderr through untouched and returns the original exit code, so it is safe to use in scripts.
-
 ## Catching a bug
 
 A failing run only *spawns* a bug. You catch it by fixing the code and re-running the same command in the same folder:
@@ -77,7 +73,7 @@ A failing run only *spawns* a bug. You catch it by fixing the code and re-runnin
 
 "Same command" ignores flags and numeric arguments, so `node app.js` and `node ./app.js --debug --port 3000` are the same target.
 
-## Power and battles
+## Power
 
 Every bug has a power, snapshotted while it is alive and banked as a trophy when you catch it. Catching the same `TypeError` in two projects gives two trophies with different power.
 
@@ -90,30 +86,53 @@ Every bug has a power, snapshotted while it is alive and banked as a trophy when
 | size | total lines of code in the project (log scale) | +0.5 |
 | rate | failures / max(runs, 5) of that command; a bug you keep hitting grows | +1.0 |
 
-Base: common 10, uncommon 25, rare 60, legendary 150.
+Base: common 10, uncommon 25, rare 60, legendary 150. Your top 3 trophies form your team.
+
+## Battles and the ladder
 
 ```bash
-bugzoo team                  # your strongest catches, with the factor breakdown
-bugzoo battle --bot          # practice against the Legacy Codebase
-bugzoo battle friend.json    # fight a friend's shared team (their `bugzoo share` file)
+bugzoo battle
 ```
 
-Your top 3 trophies form your team and fight one at a time; the survivor keeps its remaining HP. The fight is seeded from both teams, so both players get the same result with no server involved. Shared team power is clamped to what each rarity can reach.
+lists the **ladder**, your **friends** and a **practice** opponent; type a number to fight.
 
-## Catch everything automatically
+```
+Ladder
+ 1. #1   bugslayer          power  160  <counts for ranking>
+ 2. #2   dev-dana           power  110  <counts for ranking>
+ 3. #3   rookie             power   10  <counts for ranking>
+  . #4   you                power   16  <you>
+
+Friends
+ 4.      xiaoming           power   25  <code>
+
+Practice
+ 5.      Legacy Codebase    power  195
+Fight whom? (number, or q to quit)
+```
+
+- Teams fight one at a time; the survivor keeps its remaining HP. The fight is seeded from both teams, so both players get the same result and nobody can re-roll luck.
+- **The ladder is read straight from this GitHub repo** (`leaderboard/`). No clone, no server of ours. If GitHub is unreachable the last saved copy is used.
+- **Beat someone up to 3 ranks above you to take their spot.** The CLI prints a pre-filled GitHub issue link; press *Submit new issue* and a workflow replays the fight from your shared team, then updates the ladder within a minute or two.
+- Fighting friends and the practice opponent is friendly: it never changes the ladder.
+- A player name belongs to the first GitHub account that submits with it, so nobody can submit as someone else.
+
+## Friends
+
+No accounts and no server: a friend is a team you can reach.
 
 ```bash
-eval "$(bugzoo hook bash)"            # bash / zsh: add to ~/.bashrc or ~/.zshrc
-bugzoo hook powershell | Out-String | Invoke-Expression   # PowerShell: add to $PROFILE
+bugzoo friend code                 # your friend code: send it in any chat
+bugzoo friend add BZ1.xxxxxxxx     # add a friend from their code
+bugzoo friend add alice            # add anyone on the ladder; their team stays current
+bugzoo friend add https://…/bob.json   # a link to a shared score file, refreshed each time
+bugzoo friend add ./carol.json     # a local file
+bugzoo friend remove alice
 ```
 
-Common dev commands (`node`, `npm`, `python`, `cargo`, `go`, ...) are then routed through `bugzoo run` when called with arguments; with no arguments (REPLs) the real command runs untouched.
+A code is a snapshot of a team (name and up to 3 monsters). Ladder names, links and files are refreshed when you open `bugzoo battle`. Power in anything you import is clamped to what each rarity can reach.
 
-## Demo
-
-The GIFs above are rendered from real output by `python tools/make-gif.py` (needs Pillow and Windows fonts; writes `docs/demo.en.gif` and `docs/demo.zh-TW.gif`). `node demo/demo.js` plays a similar session live in your terminal.
-
-## Leaderboard (no database)
+## Score leaderboard (no database)
 
 Scores are first catches by rarity (common 10, uncommon 25, rare 60, legendary 200) plus 2 per repeat catch.
 
@@ -121,37 +140,29 @@ Scores are first catches by rarity (common 10, uncommon 25, rare 60, legendary 2
 bugzoo share --name alice --out leaderboard/scores/alice.json
 ```
 
-The file contains only counts - no error messages, paths or commands. Players submit it by pull request; the included GitHub Action runs `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` and commits the table. Scores are recomputed from the counts and are self-reported, so treat the board as friendly, not tamper-proof.
+The file contains only counts and your team: no error messages, paths or commands. A GitHub Action runs `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` and commits the table. Scores are recomputed from the counts and are self-reported, so treat the board as friendly, not tamper-proof.
 
-## Challenge ladder
+Running your own ladder? Fork the repo and set `BUGZOO_LADDER_REPO=owner/repo` (or `BUGZOO_LADDER_DIR` for a local folder).
 
-The leaderboard ranks by score; the **ladder** ranks by who beat whom.
+## Playground
+
+No project? `playground/` has three broken programs; see [playground/GUIDE.md](playground/GUIDE.md).
 
 ```bash
-bugzoo ladder                 # show the ladder; players you can challenge are marked
-bugzoo challenge              # pick a rank interactively and fight
-bugzoo challenge --rank 2     # or pick directly (also: --name bob)
+cd playground
+node ../bin/bugzoo.js run node app.js
 ```
-
-- You can challenge someone up to **3 ranks above** you.
-- Win and you take their rank; everyone in between slides down one.
-- A win writes a tiny `leaderboard/challenges/<time>-you-vs-them.json` (just two names). Commit it with your refreshed score file and open a pull request.
-- CI runs `bugzoo ladder process`, which **replays the fight from the teams in the repo** and never trusts the file's claim, then commits `leaderboard/ladder.json` and `LADDER.md`.
-- Fights are deterministic, so you cannot re-roll luck: a loss only changes when a team changes.
-- Newcomers start at the bottom, ordered by score.
-
-No database: the repo is the state. `ladder.json` holds the order and which challenge files were already applied.
 
 ## How it works
 
 - **Parsing**: finds the last `SomethingError: message` in stderr (works for Node and Python tracebacks), falling back to error codes (`ENOENT`, `SIGSEGV`), then signals.
 - **Identity**: the monster is derived from a hash of the error type plus the message with numbers, quoted names and paths stripped, so `Cannot read 'a'` and `Cannot read 'b'` are the same creature.
 - **Rarity**: common (`TypeError`, `KeyError`...), uncommon (`ENOENT`, `RangeError`...), rare (anything else), legendary (`SIGSEGV`, `ENOSPC`, `StackOverflow`...).
-- **Storage**: `~/.bugzoo/dex.json` (override with `BUGZOO_HOME`). Nothing leaves your machine.
+- **Storage**: `~/.bugzoo/dex.json` (override with `BUGZOO_HOME`). Nothing leaves your machine unless you share or submit it.
+- **Demo GIFs** are rendered from real output by `python tools/make-gif.py` (needs Pillow and Windows fonts). `node demo/demo.js` plays a similar session live.
 
 ## Roadmap
 
-- Verify that a PR's challenger name matches the PR author
 - Evolution when you meet the same monster many times
 - More languages' error formats (Go, Rust, Java)
 
@@ -167,30 +178,20 @@ MIT
 
 把你的錯誤訊息變成可收集的怪物。
 
-程式一壞，錯誤就會被抓成一隻怪物，收進你電腦上的圖鑑。同樣的錯誤是同一隻怪物，越少見的錯誤越稀有。
-
-```
-野生的 TypeError 出現了！  * 新發現 *
-    /\_/\
-   ( x x )
-    > ^ <
-   搖晃蝙蝠  [普通]  遭遇 1 次
-   Cannot read properties of undefined (reading 'rows')
-   錯誤大小：戰鬥力 17
-```
+[English](#bug-zoo) | **繁體中文**
 
 ![Bug Zoo 示範](docs/demo.zh-TW.gif)
 
 *bug 出現、你修好它、捕捉成功、隊伍對戰。內容是真實輸出，僅省略了 Node 內部的堆疊行。*
 
-[English](#bug-zoo) | **繁體中文**
-
-## 安裝與設定
+## 安裝
 
 ```bash
 npm install -g bug-zoo
 bugzoo setup
 ```
+
+需要 Node.js 18 以上，沒有任何相依套件。
 
 第一次執行任何 `bugzoo` 指令時，會詢問三件事：
 
@@ -200,6 +201,25 @@ bugzoo setup
 
 > npm 的安裝腳本沒辦法互動提問，所以問答放在第一次執行，之後隨時可以用 `bugzoo setup` 修改。
 
+## 指令表
+
+| 指令 | 功能 |
+|---|---|
+| `bugzoo setup` | 語言、玩家名稱、自動捕捉（`--lang`、`--name`、`--auto on\|off`） |
+| `bugzoo run <指令…>` | 執行指令，失敗時會出現 bug。開啟自動捕捉後就不用打 |
+| `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
+| `bugzoo team` | 你最強的捕獲，含戰鬥力明細 |
+| `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打 |
+| `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
+| `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
+| `bugzoo ladder` | 查看天梯 |
+| `bugzoo rank` | 你的分數與稱號 |
+| `bugzoo share` | 輸出可分享的分數與隊伍檔（只有數量，不含錯誤內容） |
+| `bugzoo leaderboard <資料夾>` | 用分享檔產生分數排行榜 |
+| `bugzoo scan` | 掃描這個專案：規模與最多檔案依賴的模組 |
+| `bugzoo hook <shell>` | 輸出 bash、zsh、fish、PowerShell 的包裝設定片段 |
+| `bugzoo export` | 把圖鑑匯出成 SVG，放到你的個人頁 |
+
 ## 自動捕捉（不用打 bugzoo run）
 
 開啟後，平常怎麼執行就怎麼執行：
@@ -207,8 +227,6 @@ bugzoo setup
 ```bash
 node app.js
 ```
-
-程式壞了就會出現怪物，修好再跑一次同一條指令就算捕捉成功。
 
 你在終端機**手動執行**的程式，不管哪個專案、哪個資料夾都會被捕捉。這由兩層機制完成：
 
@@ -237,7 +255,7 @@ node app.js
 
 「同一條指令」會忽略旗標與純數字參數，所以 `node app.js` 和 `node ./app.js --debug --port 3000` 視為相同。
 
-## 戰鬥力與對戰
+## 戰鬥力
 
 每隻 bug 都有戰鬥力，在牠還活著時記錄下來，捕捉成功時變成戰利品。同一種 `TypeError` 在兩個專案裡抓到，戰鬥力會不一樣。
 
@@ -250,29 +268,63 @@ node app.js
 | 專案規模 | 專案總行數（取對數） | +0.5 |
 | 錯誤率 | 這條指令的失敗次數 ÷ max(執行次數, 5)，一直踩同一個 bug 會越來越強 | +1.0 |
 
-基礎值：普通 10、罕見 25、稀有 60、傳說 150。
+基礎值：普通 10、罕見 25、稀有 60、傳說 150。前三強戰利品組成你的隊伍。
+
+## 對戰與天梯
 
 ```bash
-bugzoo team                 # 你最強的捕獲與因子明細
-bugzoo battle --bot         # 和 Legacy Codebase 練習
-bugzoo battle friend.json   # 挑戰朋友分享的隊伍
+bugzoo battle
 ```
 
-前三強戰利品組成隊伍，依序單挑，存活者保留剩餘血量。戰鬥用雙方隊伍當亂數種子，所以雙方各自算出的結果一致，不需要伺服器。
+會列出**天梯**、你的**好友**和**練習**對手，輸入編號就開打。
 
-## 排行榜與天梯（不用資料庫）
+```
+天梯
+ 1. #1   bugslayer          戰鬥力  160  <計入排名>
+ 2. #2   dev-dana           戰鬥力  110  <計入排名>
+ 3. #3   rookie             戰鬥力   10  <計入排名>
+  . #4   你                 戰鬥力   16  <你>
+
+好友
+ 4.      小明               戰鬥力   25  <代碼>
+
+練習
+ 5.      Legacy Codebase    戰鬥力  195
+要跟誰對戰？（輸入編號，q 離開）
+```
+
+- 隊伍依序單挑，存活者保留剩餘血量。戰鬥用雙方隊伍當亂數種子，所以雙方算出的結果一致，也不能重複洗運氣。
+- **天梯直接從這個 GitHub repo 讀取**（`leaderboard/`），不用 clone、也沒有我們自己的伺服器。連不上 GitHub 時會用上次儲存的副本。
+- **打贏排名在你上面 3 名以內的人，就奪下他的名次。** CLI 會印出一個預先填好的 GitHub Issue 連結，按下 *Submit new issue*，工作流程會用你分享的隊伍重新播放戰鬥，一兩分鐘內更新天梯。
+- 和好友、練習對手對戰只是切磋，不會影響天梯。
+- 玩家名稱歸第一個用它送出的 GitHub 帳號所有，沒有人能冒用別人的名字。
+
+## 好友
+
+沒有帳號、沒有伺服器：好友就是一支你拿得到的隊伍。
+
+```bash
+bugzoo friend code                 # 你的好友代碼，貼到任何聊天室
+bugzoo friend add BZ1.xxxxxxxx     # 用對方的代碼加好友
+bugzoo friend add alice            # 加天梯上的任何人，隊伍會保持最新
+bugzoo friend add https://…/bob.json   # 分享檔的連結，每次都會更新
+bugzoo friend add ./carol.json     # 本機檔案
+bugzoo friend remove alice
+```
+
+好友代碼是隊伍的快照（名稱加上最多 3 隻怪物）。天梯名稱、連結與檔案會在你開啟 `bugzoo battle` 時更新。匯入的內容，戰鬥力都會被限制在該稀有度能達到的上限內。
+
+## 分數排行榜（不用資料庫）
+
+首次捕捉依稀有度給分（普通 10、罕見 25、稀有 60、傳說 200），重複捕捉每次 +2。
 
 ```bash
 bugzoo share --name alice --out leaderboard/scores/alice.json
-bugzoo ladder               # 看天梯，可挑戰的人會標出來
-bugzoo challenge            # 互動式選名次，直接開打
 ```
 
-- 排行榜依**分數**排名：首次捕捉依稀有度給分（10 / 25 / 60 / 200），重複捕捉每次 +2。
-- 天梯依**勝負**排名：可以挑戰排名在你上面、最多 3 名內的人；贏了就搶走對方的名次。
-- 分享檔只含數量與隊伍，不含錯誤訊息、路徑或指令。
-- 挑戰檔只寫兩個名字，GitHub Action 會用 repo 裡雙方的隊伍**重新播放**戰鬥，不採信檔案自報的結果。
-- 戰鬥是確定性的，不能重複洗運氣；輸了只有在隊伍改變後才可能翻盤。
+分享檔只含數量與隊伍，不含錯誤訊息、路徑或指令。GitHub Action 會執行 `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` 並提交表格。分數由數量重新計算，且為自行回報，所以這是「朋友之間玩」等級的排行榜，不是防篡改的。
+
+想自己架一個天梯？Fork 這個 repo，並設定 `BUGZOO_LADDER_REPO=owner/repo`（或用 `BUGZOO_LADDER_DIR` 指向本機資料夾）。
 
 ## 練習場
 
@@ -282,6 +334,19 @@ bugzoo challenge            # 互動式選名次，直接開打
 cd playground
 node ../bin/bugzoo.js run node app.js
 ```
+
+## 運作原理
+
+- **解析**：找出 stderr 裡最後一個 `SomethingError: message`（Node 與 Python 的堆疊都適用），其次是錯誤代碼（`ENOENT`、`SIGSEGV`），最後是訊號。
+- **身分**：怪物由錯誤類型加上「去掉數字、引號內名稱與路徑的訊息」的雜湊決定，所以 `Cannot read 'a'` 與 `Cannot read 'b'` 是同一隻。
+- **稀有度**：普通（`TypeError`、`KeyError`…）、罕見（`ENOENT`、`RangeError`…）、稀有（其他）、傳說（`SIGSEGV`、`ENOSPC`、`StackOverflow`…）。
+- **儲存位置**：`~/.bugzoo/dex.json`（可用 `BUGZOO_HOME` 覆寫）。除非你主動分享或送出，不會有任何資料離開你的電腦。
+- **示範 GIF** 由 `python tools/make-gif.py` 依真實輸出渲染（需要 Pillow 與 Windows 字型）；`node demo/demo.js` 會在終端機即時播放類似的流程。
+
+## 之後想做的
+
+- 同一隻怪物遇見很多次後會進化
+- 支援更多語言的錯誤格式（Go、Rust、Java）
 
 ## 授權
 

@@ -26,7 +26,7 @@ node ../bin/bugzoo.js run node app.js
 ```bash
 node ../bin/bugzoo.js dex
 node ../bin/bugzoo.js team
-node ../bin/bugzoo.js battle --bot
+node ../bin/bugzoo.js battle
 ```
 
 想少打字：在專案根目錄執行一次 `npm link`，之後直接輸入 `bugzoo` 即可。

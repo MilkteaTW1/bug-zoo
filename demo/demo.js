@@ -9,7 +9,7 @@ const { execFileSync } = require('node:child_process');
 
 const bin = path.join(__dirname, '..', 'bin', 'bugzoo.js');
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'bugzoo-demo-'));
-const env = { ...process.env, BUGZOO_HOME: path.join(dir, '.home') };
+const env = { ...process.env, BUGZOO_HOME: path.join(dir, '.home'), BUGZOO_LADDER_DIR: path.join(dir, 'no-ladder') };
 const sleep = (ms) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
 
 function step(title, file, body, args) {
@@ -30,4 +30,4 @@ step('1. Something breaks - a bug appears', 'app.js', "require('./api')();\n", [
 step('2. A "fix" that makes it worse - it escapes', 'app.js', 'throw new RangeError("off by one");\n', ['run', 'node', 'app.js']);
 step('3. Really fix it - caught!', 'app.js', "console.log('all good');\n", ['run', 'node', 'app.js']);
 step('4. Your strongest catches', null, null, ['team']);
-step('5. Practice battle', null, null, ['battle', '--bot']);
+step('5. Practice battle (the only opponent offline is the practice one)', null, null, ['battle', '--pick', '1']);
