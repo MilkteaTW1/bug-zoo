@@ -138,4 +138,52 @@ function exportSvg(dex) {
     `<text x="14" y="32" fill="#e6edf3" font-size="18" font-weight="bold">${esc(t('svg.title', { caught, seen: entries.length }))}</text>${cards}</svg>\n`;
 }
 
-module.exports = { encounter, outcomeBanner, dexList, exportSvg, teamList, factorLine, battleLine, shownName, label };
+/**
+ * A shareable result card for one battle.
+ *   me, foe  - { name, team: [{ name, type, rarity, power }] }
+ *   winner   - the winning side's name
+ *   hits     - number of blows in the fight
+ *   labelOf  - English monster name -> what to show
+ *   artOf    - monster name -> array of art lines
+ */
+function battleCard({ me, foe, winner, hits, labelOf = (n) => n, artOf = () => [] }) {
+  const W = 680;
+  const ROW = 76;
+  const rows = Math.max(me.team.length, foe.team.length, 1);
+  const H = 150 + rows * ROW + 46;
+  const meWon = winner === me.name;
+  const total = (s) => s.team.reduce((n, m) => n + m.power, 0);
+
+  const side = (s, x, won) => {
+    const stroke = won ? '#3fb950' : '#8b949e';
+    const head = `<text x="${x}" y="116" fill="${won ? '#3fb950' : '#e6edf3'}" font-size="16" font-weight="bold">${esc(s.name)}</text>` +
+      `<text x="${x}" y="136" fill="#8b949e" font-size="12">${esc(t('battle.rowPower', { p: total(s) }))}</text>`;
+    const cards = s.team.map((m, i) => {
+      const y = 150 + i * ROW;
+      const color = RARITY_HEX[m.rarity] || '#8b949e';
+      const art = (artOf(m.name) || []).slice(0, 3)
+        .map((l, j) => `<text x="${x + 12}" y="${y + 24 + j * 14}" fill="${color}" font-size="12" xml:space="preserve">${esc(l)}</text>`).join('');
+      return `<g opacity="${won ? 1 : 0.6}"><rect x="${x}" y="${y}" width="290" height="${ROW - 8}" rx="10" fill="#161b22" stroke="${color}"/>` +
+        art +
+        `<text x="${x + 86}" y="${y + 26}" fill="#e6edf3" font-weight="bold">${esc(labelOf(m.name))}</text>` +
+        `<text x="${x + 86}" y="${y + 46}" fill="#8b949e" font-size="12">${esc(m.type)} · ${esc(rarityText(m.rarity))}</text>` +
+        `<text x="${x + 274}" y="${y + 26}" fill="${color}" font-size="16" font-weight="bold" text-anchor="end">${m.power}</text></g>`;
+    }).join('');
+    return `<g>${head}</g>${cards}<rect x="${x - 6}" y="96" width="302" height="${rows * ROW + 62}" rx="12" fill="none" stroke="${stroke}" stroke-width="${won ? 2 : 1}" opacity="${won ? 1 : 0.5}"/>`;
+  };
+
+  const banner = esc(t('card.win', { winner }));
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" ` +
+    `font-family="ui-monospace,Consolas,'Microsoft JhengHei',monospace" font-size="14">` +
+    `<rect width="100%" height="100%" fill="#0d1117"/>` +
+    `<text x="${W / 2}" y="36" fill="#8b949e" font-size="14" text-anchor="middle">${esc(t('card.title'))}</text>` +
+    `<text x="${W / 2}" y="72" fill="#3fb950" font-size="26" font-weight="bold" text-anchor="middle">${banner}</text>` +
+    `<text x="${W / 2}" y="94" fill="#8b949e" font-size="12" text-anchor="middle">${esc(t('card.rounds', { n: hits }))}</text>` +
+    side(me, 20, meWon) +
+    `<text x="${W / 2}" y="${150 + (rows * ROW) / 2}" fill="#8b949e" font-size="18" font-weight="bold" text-anchor="middle">VS</text>` +
+    side(foe, W - 20 - 290, !meWon) +
+    `<text x="${W / 2}" y="${H - 14}" fill="#6e7681" font-size="12" text-anchor="middle">${esc(t('card.footer'))}</text>` +
+    `</svg>\n`;
+}
+
+module.exports = { encounter, outcomeBanner, dexList, exportSvg, battleCard, teamList, factorLine, battleLine, shownName, label };

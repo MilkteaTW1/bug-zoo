@@ -44,7 +44,7 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 | `bugzoo run <command…>` | Run a command; if it fails a bug appears; fix it and re-run to catch it |
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
 | `bugzoo team` | Your strongest catches, with the power breakdown |
-| `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight |
+| `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
 | `bugzoo ladder` | Show the ladder |
@@ -62,6 +62,7 @@ Everything you earn can be pasted somewhere:
 
 ```bash
 bugzoo export zoo.svg    # a card grid of your bestiary, ready for a profile README
+bugzoo battle --card r.svg   # a result card for the fight you just had
 bugzoo friend code       # your team as one pasteable code
 bugzoo rank              # your score and title
 ```
@@ -69,6 +70,10 @@ bugzoo rank              # your score and title
 ![A bestiary exported with bugzoo export](docs/bestiary.en.svg)
 
 *A sample `bugzoo export`: rarity colours the border, uncaught monsters are faded.*
+
+![A battle result card](docs/battle.en.svg)
+
+*A sample `bugzoo battle --card`. Fights are deterministic, so the same two teams always give the same card.*
 
 ## Catching a bug
 
@@ -248,7 +253,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo run <指令…>` | 執行指令，失敗時出現 bug；修好後重跑就能捕捉 |
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
 | `bugzoo team` | 你最強的捕獲，含戰鬥力明細 |
-| `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打 |
+| `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
 | `bugzoo ladder` | 查看天梯 |
@@ -266,6 +271,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 
 ```bash
 bugzoo export zoo.svg    # 圖鑑的卡片圖，可直接放進個人頁 README
+bugzoo battle --card r.svg   # 剛打完那場的戰鬥結果卡
 bugzoo friend code       # 把你的隊伍變成一段可貼上的代碼
 bugzoo rank              # 你的分數與稱號
 ```
@@ -273,6 +279,10 @@ bugzoo rank              # 你的分數與稱號
 ![用 bugzoo export 匯出的圖鑑](docs/bestiary.zh-TW.svg)
 
 *`bugzoo export` 的範例：稀有度決定邊框顏色，還沒捕捉到的怪物會變淡。*
+
+![戰鬥結果卡](docs/battle.zh-TW.svg)
+
+*`bugzoo battle --card` 的範例。戰鬥是固定的，所以同樣兩支隊伍永遠產生同一張卡。*
 
 ## 捕捉規則
 

@@ -16,6 +16,7 @@ const render = require('../src/render');
 const session = require('../src/session');
 const { decodeOutput } = require('../src/decode');
 const passthrough = require('../src/passthrough');
+const creatureArt = require('../src/creature');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
@@ -35,8 +36,10 @@ Usage:
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
   bugzoo team                 Your strongest catches (power per catch)
-  bugzoo battle               Show the ladder, your friends and a practice
-                              opponent; type a number to fight
+  bugzoo battle [--card f.svg]
+                              Show the ladder, your friends and a practice
+                              opponent; type a number to fight. --card saves a
+                              shareable result card
   bugzoo friend               List friends   (also: code | add <code|url|file|name>
                               | remove <name> | refresh)
   bugzoo ladder [dir]         Show the ladder
@@ -69,7 +72,9 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
                               （開啟自動捕捉後就不用打這個）
   bugzoo dex                  你的圖鑑與等著被捕捉的 bug
   bugzoo team                 你最強的捕獲（每隻的戰鬥力）
-  bugzoo battle               列出天梯、好友與練習對手，輸入編號就開打
+  bugzoo battle [--card f.svg]
+                              列出天梯、好友與練習對手，輸入編號就開打；
+                              --card 會存成可分享的戰鬥結果卡
   bugzoo friend               列出好友（也可用：code | add <代碼|網址|檔案|名稱>
                               | remove <名稱> | refresh）
   bugzoo ladder [資料夾]      查看天梯
@@ -530,6 +535,18 @@ async function cmdBattle(args) {
     }
   } else if (!practice) {
     console.log(`\n${t('battle.friendly')}`);
+  }
+
+  // A shareable card: --card [file], or offered after the fight when a person is at the terminal.
+  let cardFile = typeof flags.card === 'string' ? flags.card : (flags.card ? 'bugzoo-battle.svg' : null);
+  if (!cardFile && interactive() && /^y/i.test(await ask(`\n${t('card.ask')}`))) cardFile = 'bugzoo-battle.svg';
+  if (cardFile) {
+    const mineArt = new Map(dex.trophies.map((tr) => [tr.name, tr.art]));
+    const artOf = (n) => mineArt.get(n) || creatureArt.artFor(`${n}:${(foe.team.find((m) => m.name === n) || {}).type || ''}`);
+    fs.writeFileSync(cardFile, render.battleCard({
+      me, foe, winner: result.winner, hits: result.log.length, labelOf, artOf,
+    }));
+    console.log(`\n${t('card.saved', { file: cardFile })}`);
   }
   return 0;
 }

@@ -58,4 +58,11 @@ function zhName(id) {
   return PREFIX_ZH[n(0) % PREFIX_ZH.length] + SUFFIX_ZH[n(1) % SUFFIX_ZH.length];
 }
 
-module.exports = { makeCreature, rarityOf, zhName, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };
+/** A stable face for any monster we only know by name (an opponent's team, a shared card). */
+function artFor(seed) {
+  const h = hash(String(seed));
+  const n = (i) => parseInt(h.slice(i * 2, i * 2 + 2), 16);
+  return BODIES[n(3) % BODIES.length](EYES[n(2) % EYES.length]);
+}
+
+module.exports = { makeCreature, rarityOf, zhName, artFor, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };

@@ -1,5 +1,11 @@
 # Changelog / 更新紀錄
 
+## 0.2.0
+
+- **Battle result cards.** `bugzoo battle --card result.svg` (or answer yes when asked after a fight) saves an SVG with both teams, power, the winner and the number of blows. Fights are deterministic, so the same two teams always give the same card.
+  戰鬥結果分享卡：`bugzoo battle --card result.svg`（或在對戰後回答 y）會存成 SVG，含雙方隊伍、戰鬥力、勝負與回合數。戰鬥是固定的，同樣兩支隊伍永遠產生同一張卡。
+- Cards and exports are localised (English, 繁體中文). 卡片與匯出圖支援中英文。
+
 ## 0.1.3
 
 - **Fix**: a healthy command with no history no longer prints "Fix the bug and run the same command again" after every run. This affected `bugzoo run` and every wrapped command.
