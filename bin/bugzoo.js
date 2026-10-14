@@ -14,6 +14,7 @@ const leaderboard = require('../src/leaderboard');
 const store = require('../src/store');
 const render = require('../src/render');
 const session = require('../src/session');
+const { decodeOutput } = require('../src/decode');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
@@ -226,20 +227,44 @@ function run(argv) {
     console.error(t('misc.runUsage'));
     return 2;
   }
-  const stdio = ['inherit', 'inherit', 'pipe'];
+  // stdout is piped too: some tools (pytest, build tools) report failures there. Output is passed
+  // straight through; the hints below keep colour and unbuffered output as if it were a terminal.
+  const stdio = ['inherit', 'pipe', 'pipe'];
   const env = { ...process.env, BUGZOO_ACTIVE: '1' }; // keeps the Node preload from counting this run twice
+  if (process.stdout.isTTY) {
+    for (const [k, v] of [['FORCE_COLOR', '1'], ['CLICOLOR_FORCE', '1'], ['PY_COLORS', '1']]) {
+      if (env[k] === undefined) env[k] = v;
+    }
+  }
+  if (env.PYTHONUNBUFFERED === undefined) env.PYTHONUNBUFFERED = '1';
   const child = launch(argv, stdio, env);
-  let captured = '';
+  // Keep raw bytes and decode once at the end, so multi-byte characters split across chunks survive.
+  const errBufs = [];
+  const outBufs = [];
+  let errSize = 0;
+  let outSize = 0;
+  let spawnError = '';
+  child.stdout.on('data', (chunk) => {
+    process.stdout.write(chunk);
+    if (outSize < MAX_CAPTURE) {
+      outBufs.push(chunk);
+      outSize += chunk.length;
+    }
+  });
   child.stderr.on('data', (chunk) => {
     process.stderr.write(chunk);
-    if (captured.length < MAX_CAPTURE) captured += chunk.toString('utf8');
+    if (errSize < MAX_CAPTURE) {
+      errBufs.push(chunk);
+      errSize += chunk.length;
+    }
   });
   child.on('error', (err) => {
-    captured += `${err.code || 'Error'}: ${err.message}\n`;
+    spawnError = `${err.code || 'Error'}: ${err.message}\n`;
   });
   child.on('close', (code, signal) => {
     const exit = code === null ? (signal ? 128 : 1) : code;
-    const text = session.settleRun({ argv, exit, signal, stderr: captured });
+    const stderr = decodeOutput(errBufs) + spawnError;
+    const text = session.settleRun({ argv, exit, signal, stderr, stdout: decodeOutput(outBufs) });
     if (text) process.stderr.write(text);
     process.exit(exit);
   });

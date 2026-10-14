@@ -3,24 +3,83 @@
 const crypto = require('node:crypto');
 
 const SIGNAL_NAMES = { 11: 'SIGSEGV', 6: 'SIGABRT', 9: 'SIGKILL', 15: 'SIGTERM', 139: 'SIGSEGV', 134: 'SIGABRT' };
+const MAX_ERRORS = 5; // a compiler can print dozens; five creatures per run is plenty
 
-/** Extract { type, message } from captured stderr text and the exit code. */
-function parseError(stderr, exitCode) {
-  const text = String(stderr || '');
+const ANSI = /\x1b\[[0-9;?]*[A-Za-z]/g;
+const stripAnsi = (s) => String(s || '').replace(ANSI, '');
+const clip = (s) => String(s || '').trim().slice(0, 160);
+const lastSegment = (name) => String(name).split(/[.$]/).filter(Boolean).pop();
 
-  // Last "SomethingError: message" line wins (Python tracebacks end with it).
-  const re = /^\s*(?:Uncaught\s+)?((?:[\w.]+\.)?[A-Z]\w*(?:Error|Exception))\s*:\s*(.*)$/gm;
-  let m;
-  let last = null;
-  while ((m = re.exec(text)) !== null) last = m;
-  if (last) {
-    return { type: last[1].split('.').pop(), message: last[2].trim().slice(0, 160) };
+const EXC = '((?:[\\w$]+\\.)*[A-Z][\\w$]*(?:Error|Exception))';
+
+/**
+ * Known error formats. Each rule: a multiline regex plus how to read a type and a message.
+ * Covers Node, Python, pytest, Java, .NET, Go, Rust, TypeScript, gcc/clang and Gradle.
+ */
+const RULES = [
+  { // TypeError: x | java.lang.NullPointerException: x | Exception in thread "main" ... | Unhandled exception. System.X: y
+    re: new RegExp(`^\\s*(?:Uncaught\\s+|Caused by:\\s+|Exception in thread "[^"]*"\\s+|Unhandled [Ee]xception[.:]\\s+)?${EXC}[ \\t]*(?::[ \\t]*(.*))?$`, 'gm'),
+    type: (m) => lastSegment(m[1]),
+    msg: (m) => m[2],
+  },
+  { // pytest: "E   KeyError: 'x'"
+    re: new RegExp(`^E\\s+${EXC}[ \\t]*(?::[ \\t]*(.*))?$`, 'gm'),
+    type: (m) => lastSegment(m[1]),
+    msg: (m) => m[2],
+  },
+  { // pytest: "E   assert 1 + 1 == 3"
+    re: /^E\s+(assert\b.*)$/gm,
+    type: () => 'AssertionError',
+    msg: (m) => m[1],
+  },
+  { re: /^error\[(E\d{4})\]:\s*(.*)$/gm, type: (m) => m[1], msg: (m) => m[2] }, // rustc
+  { re: /^thread '[^']*' panicked at (.*)$/gm, type: () => 'Panic', msg: (m) => m[1] }, // Rust
+  { re: /^panic:\s*(.*)$/gm, type: () => 'Panic', msg: (m) => m[1] }, // Go
+  { re: /^(?:[\w.\\/-]+\.go):\d+:\d+:\s*(.*)$/gm, type: () => 'GoBuildError', msg: (m) => m[1] },
+  { re: /\berror (CS\d{4}):\s*(.*)$/gm, type: (m) => m[1], msg: (m) => m[2] }, // C#
+  { re: /\berror (TS\d{4}):\s*(.*)$/gm, type: (m) => m[1], msg: (m) => m[2] }, // TypeScript
+  { re: /^[^\s:][^:\n]*:\d+(?::\d+)?:\s*(?:fatal )?error:\s*(.*)$/gm, type: () => 'CompileError', msg: (m) => m[1] }, // gcc/clang
+  { // Gradle: the reason is the line after "* What went wrong:"
+    re: /^FAILURE: Build failed with an exception\.?$/gm,
+    type: () => 'BuildFailure',
+    msg: (m, text) => {
+      const rest = text.slice(m.index);
+      const w = /\* What went wrong:\s*\r?\n(.*)/.exec(rest);
+      return w ? w[1] : 'Build failed';
+    },
+  },
+];
+
+/** Every recognised error in `text`, in the order it appears, de-duplicated. */
+function scan(text) {
+  const found = [];
+  for (const rule of RULES) {
+    rule.re.lastIndex = 0;
+    let m;
+    while ((m = rule.re.exec(text)) !== null) {
+      if (m[0] === '') {
+        rule.re.lastIndex += 1;
+        continue;
+      }
+      const type = rule.type(m);
+      if (type) found.push({ at: m.index, type, message: clip(rule.msg(m, text)) });
+    }
   }
+  found.sort((a, b) => a.at - b.at);
+  const seen = new Map();
+  for (const f of found) {
+    const key = `${f.type}:${normalize(f.message)}`;
+    if (!seen.has(key)) seen.set(key, { type: f.type, message: f.message });
+  }
+  return [...seen.values()];
+}
 
+/** Best guess when no known format matched: error codes, panics, signals, then a mystery. */
+function fallback(text, exitCode) {
   const code = text.match(/\b(E[A-Z]{3,}|SIG[A-Z]+)\b/);
   if (code) {
     const line = text.split(/\r?\n/).find((l) => l.includes(code[1])) || firstLine(text);
-    return { type: code[1], message: line.trim().replace(/^Error:\s*/, '').slice(0, 160) };
+    return { type: code[1], message: clip(line.replace(/^\s*(npm )?(error|ERR!):?\s*/i, '').replace(/^Error:\s*/, '')) };
   }
 
   if (/segmentation fault/i.test(text)) return { type: 'SIGSEGV', message: 'Segmentation fault' };
@@ -32,18 +91,25 @@ function parseError(stderr, exitCode) {
   return { type: 'MysteryError', message: firstLine(text) || `exited with code ${exitCode}` };
 }
 
-/** Every distinct error found in stderr (a run can surface more than one bug). */
-function parseErrors(stderr, exitCode) {
-  const text = String(stderr || '');
-  const re = /^\s*(?:Uncaught\s+)?((?:[\w.]+\.)?[A-Z]\w*(?:Error|Exception))\s*:\s*(.*)$/gm;
-  const seen = new Map();
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const found = { type: m[1].split('.').pop(), message: m[2].trim().slice(0, 160) };
-    seen.set(`${found.type}:${normalize(found.message)}`, found);
+/** Extract one { type, message } (the last recognised error) from captured output and the exit code. */
+function parseError(stderr, exitCode) {
+  const text = stripAnsi(stderr);
+  const found = scan(text);
+  return found.length > 0 ? found[found.length - 1] : fallback(text, exitCode);
+}
+
+/**
+ * Every distinct error of a run. stderr is read first; stdout is the backup for tools that
+ * report failures there (pytest, many build tools).
+ */
+function parseErrors(stderr, exitCode, stdout = '') {
+  const err = stripAnsi(stderr);
+  const out = stripAnsi(stdout);
+  for (const text of [err, out]) {
+    const found = scan(text);
+    if (found.length > 0) return found.slice(0, MAX_ERRORS);
   }
-  if (seen.size > 0) return [...seen.values()];
-  return [parseError(text, exitCode)];
+  return [fallback(err.trim() ? err : out, exitCode)];
 }
 
 function firstLine(text) {
@@ -64,4 +130,4 @@ function hash(str) {
   return crypto.createHash('sha1').update(str).digest('hex');
 }
 
-module.exports = { parseError, parseErrors, normalize, hash };
+module.exports = { parseError, parseErrors, scan, stripAnsi, normalize, hash };

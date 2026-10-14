@@ -18,17 +18,17 @@ function commandKey(argv, cwd = process.cwd()) {
  * Record the outcome of one run and return the text to show the player ('' if nothing to show).
  * Shared by `bugzoo run` (wraps a child process) and the Node preload (runs inside the program).
  */
-function settleRun({ argv, exit, signal = null, stderr = '', cwd = process.cwd() }) {
+function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = process.cwd() }) {
   const dex = store.load();
   i18n.setLang((dex.profile && dex.profile.lang) || i18n.detectLang());
 
   let creatures = [];
   let ctx = null;
   if (exit !== 0) {
-    creatures = parseErrors(stderr || signal || '', signal || exit)
+    creatures = parseErrors(stderr || signal || '', signal || exit, stdout)
       .map((e) => ({ ...makeCreature(e.type, e.message), sample: e.message }));
     try {
-      ctx = { ...analyze(cwd, stderr), project: path.basename(cwd) };
+      ctx = { ...analyze(cwd, `${stderr}\n${stdout}`), project: path.basename(cwd) };
     } catch {
       ctx = null; // scanning is best-effort; never break the player's program
     }
