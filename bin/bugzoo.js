@@ -15,6 +15,7 @@ const store = require('../src/store');
 const render = require('../src/render');
 const session = require('../src/session');
 const { decodeOutput } = require('../src/decode');
+const passthrough = require('../src/passthrough');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
@@ -227,6 +228,18 @@ function run(argv) {
     console.error(t('misc.runUsage'));
     return 2;
   }
+  // Prompting commands (npm publish, npx, ...) and BUGZOO_DISABLE=1 run completely untouched:
+  // capturing would make stdout a pipe and many tools stop asking questions when it is not a TTY.
+  if (process.env.BUGZOO_DISABLE || passthrough.needsTerminal(argv)) {
+    const raw = launch(argv, ['inherit', 'inherit', 'inherit'], process.env);
+    raw.on('error', (err) => {
+      process.stderr.write(`${err.message}\n`);
+      process.exit(127);
+    });
+    raw.on('close', (code, signal) => process.exit(code === null ? (signal ? 128 : 1) : code));
+    return null;
+  }
+
   // stdout is piped too: some tools (pytest, build tools) report failures there. Output is passed
   // straight through; the hints below keep colour and unbuffered output as if it were a terminal.
   const stdio = ['inherit', 'pipe', 'pipe'];
