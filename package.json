@@ -14,5 +14,8 @@
   },
   "keywords": ["cli", "errors", "bestiary", "pokedex", "developer-tools", "fun"],
   "author": "MilkteaTW1",
+  "repository": { "type": "git", "url": "git+https://github.com/MilkteaTW1/bug-zoo.git" },
+  "homepage": "https://github.com/MilkteaTW1/bug-zoo#readme",
+  "bugs": { "url": "https://github.com/MilkteaTW1/bug-zoo/issues" },
   "license": "MIT"
 }

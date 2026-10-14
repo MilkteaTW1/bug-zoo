@@ -11,11 +11,11 @@ Turn your error messages into collectible monsters.
 ## Install
 
 ```bash
-npm install -g bug-zoo
+npm install -g github:MilkteaTW1/bug-zoo
 bugzoo setup
 ```
 
-Requires Node.js 18+. No dependencies.
+Requires Node.js 18+. No dependencies. Installs straight from GitHub; it is not on the npm registry yet.
 
 The first time you run any `bugzoo` command it asks for your **language** (繁體中文 / English), a **player name** for the leaderboards, and whether to turn on **automatic capture**. (npm install scripts cannot prompt, so the questions happen on first run.) Change them any time with `bugzoo setup`.
 
@@ -187,11 +187,11 @@ MIT
 ## 安裝
 
 ```bash
-npm install -g bug-zoo
+npm install -g github:MilkteaTW1/bug-zoo
 bugzoo setup
 ```
 
-需要 Node.js 18 以上，沒有任何相依套件。
+需要 Node.js 18 以上，沒有任何相依套件。直接從 GitHub 安裝；目前還沒有發佈到 npm 套件庫。
 
 第一次執行任何 `bugzoo` 指令時，會詢問三件事：
 
