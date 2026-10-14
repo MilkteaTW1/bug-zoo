@@ -132,6 +132,15 @@ Restart Claude Code, then work as usual:
 - Limits: Claude Code only, and only its Bash tool. A command that also changes files (`printf ... > f.js && node f.js`) is a different command from `node f.js`, so it will not match a later clean run. Checked on Windows with Claude Code desktop; the hook format follows Claude Code's documentation.
 - Bug Zoo only edits the hooks it added, refuses to touch a settings file that is not plain JSON, and `--ai off` removes exactly those entries.
 
+**Other assistants** (checked against their documentation on 2026-10-14, not tried live):
+
+| Assistant | Post-command hook | Why it is not supported yet |
+|---|---|---|
+| Cursor | `afterShellExecution` | The event carries the command and its output but **no exit code**, and there is no documented way to show a message only to the person, so a monster would have nowhere to appear. |
+| Gemini CLI | `AfterTool` (shell tool) | It has a `systemMessage` shown to the user, but the shell tool's `tool_response` fields (exit code, `llmContent`, `returnDisplay`) are not documented well enough to detect a failure reliably. |
+
+If you use one of these, [open an issue](https://github.com/MilkteaTW1/bug-zoo/issues) with a sample hook payload and it can be added.
+
 ## Power and fair play
 
 Every bug has a power, snapshotted while it is alive and banked as a trophy when you catch it. Catching the same `TypeError` in two projects gives two trophies with different power.
@@ -373,6 +382,15 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 - 和手動執行是同一個身分：助手與你各自執行的 `node app.js` 是同一個目標，可以在一邊失敗、在另一邊捕捉。`cd proj && node app.js 2>&1 | tail` 會當成 `node app.js`。
 - 限制：只支援 Claude Code 的 Bash 工具。同時會改檔案的指令（`printf ... > f.js && node f.js`）和單獨的 `node f.js` 是不同的指令，所以不會和之後的乾淨執行配對。已在 Windows 的 Claude Code 桌面版驗證；hook 格式依 Claude Code 官方文件。
 - Bug Zoo 只會動它自己加的 hook；設定檔不是純 JSON 時絕不覆寫；`--ai off` 只會移除它自己加的項目。
+
+**其他 AI 助手**（依官方文件於 2026-10-14 查證，沒有實際操作過）：
+
+| 助手 | 指令後的 hook | 為什麼還沒支援 |
+|---|---|---|
+| Cursor | `afterShellExecution` | 事件有指令與輸出，但**沒有結束碼**，也沒有文件記載的「只給使用者看」的訊息管道，怪物沒有地方可以出現。 |
+| Gemini CLI | `AfterTool`（shell 工具） | 有顯示給使用者的 `systemMessage`，但 shell 工具的 `tool_response` 欄位（結束碼、`llmContent`、`returnDisplay`）文件寫得不夠清楚，無法可靠判斷失敗。 |
+
+如果你用的是其中一個，歡迎[開 issue](https://github.com/MilkteaTW1/bug-zoo/issues) 並附上 hook 收到的範例資料，就能補上。
 
 ## 戰鬥力與公平性
 
