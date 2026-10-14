@@ -64,6 +64,16 @@ test('TypeScript, gcc and Gradle', () => {
   assert.deepEqual(first(g), { type: 'BuildFailure', message: 'Script compilation error' });
 });
 
+test('npm: the error code and its reason, not the first "npm notice" line', () => {
+  const t = 'npm notice\nnpm notice package: bug-zoo@0.1.0\nnpm notice Publishing to https://registry.npmjs.org/ with tag latest\n' +
+    'npm error code E403\nnpm error 403 403 Forbidden - PUT https://registry.npmjs.org/bug-zoo - Two-factor authentication is required\n' +
+    'npm error A complete log of this run can be found in: C:\\x\\debug.log\n';
+  const e = first(t);
+  assert.equal(e.type, 'E403');
+  assert.match(e.message, /^403 Forbidden - PUT/);
+  assert.equal(first('npm ERR! code ELIFECYCLE\nnpm ERR! errno 1\n').type, 'ELIFECYCLE');
+});
+
 test('colour codes do not hide errors', () => {
   assert.equal(first('\x1b[31mTypeError: boom\x1b[0m\n').type, 'TypeError');
   assert.equal(first('', 1, '\x1b[1m\x1b[31mE       ValueError: nope\x1b[0m\n').type, 'ValueError');

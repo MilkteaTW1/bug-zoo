@@ -39,6 +39,15 @@ const RULES = [
   { re: /\berror (CS\d{4}):\s*(.*)$/gm, type: (m) => m[1], msg: (m) => m[2] }, // C#
   { re: /\berror (TS\d{4}):\s*(.*)$/gm, type: (m) => m[1], msg: (m) => m[2] }, // TypeScript
   { re: /^[^\s:][^:\n]*:\d+(?::\d+)?:\s*(?:fatal )?error:\s*(.*)$/gm, type: () => 'CompileError', msg: (m) => m[1] }, // gcc/clang
+  { // npm: "npm error code E403" then "npm error 403 403 Forbidden - ..." (older npm: "npm ERR!")
+    re: /^npm (?:error|ERR!) code (\w+)\s*$/gm,
+    type: (m) => m[1],
+    msg: (m, text) => {
+      const rest = text.slice(m.index + m[0].length);
+      const reason = /^npm (?:error|ERR!) (?!code\b)(?:\d+ )?(\S.*)$/m.exec(rest);
+      return reason ? reason[1] : `npm failed with ${m[1]}`;
+    },
+  },
   { // Gradle: the reason is the line after "* What went wrong:"
     re: /^FAILURE: Build failed with an exception\.?$/gm,
     type: () => 'BuildFailure',
