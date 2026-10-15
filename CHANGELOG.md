@@ -1,5 +1,10 @@
 # Changelog / 更新紀錄
 
+## Unreleased
+
+- **Join the ladder even if you lose.** A player who is not on the ladder yet is offered the submission after any ladder fight; they join at the bottom, and only a win within reach moves them up.
+  還不在天梯上的玩家，打任何一場天梯戰鬥後都能送出並加入（從最底下開始）；只有打贏範圍內的人才會晉升。
+
 ## 0.3.1
 
 - README: lists which other AI assistants (Cursor, Gemini CLI) are not supported yet, and why. No behaviour changes.

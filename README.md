@@ -197,6 +197,7 @@ Fight whom? (number, or q to quit)
 
 - Teams fight one at a time; the survivor keeps its remaining HP. The fight is seeded from both teams, so both players get the same result and nobody can re-roll luck.
 - **The ladder is read straight from this GitHub repo** (`leaderboard/`). No clone, no server of ours. If GitHub is unreachable the last saved copy is used.
+- **New here? Your first ladder fight puts you on the ladder, win or lose.** You start at the bottom, then climb.
 - **Beat someone up to 3 ranks above you to take their spot.** The CLI prints a pre-filled GitHub issue link; press *Submit new issue* and a workflow replays the fight from your shared team, then updates the ladder within a minute or two.
 - Fighting friends and the practice opponent is friendly: it never changes the ladder.
 - A player name belongs to the first GitHub account that submits with it, so nobody can submit as someone else.
@@ -448,6 +449,7 @@ bugzoo battle
 
 - 隊伍依序單挑，存活者保留剩餘血量。戰鬥用雙方隊伍當亂數種子，所以雙方算出的結果一致，也不能重複洗運氣。
 - **天梯直接從這個 GitHub repo 讀取**（`leaderboard/`），不用 clone、也沒有我們自己的伺服器。連不上 GitHub 時會用上次儲存的副本。
+- **新玩家第一次打天梯，不論輸贏都會加入天梯。** 從最底下開始往上爬。
 - **打贏排名在你上面 3 名以內的人，就奪下他的名次。** CLI 會印出一個預先填好的 GitHub Issue 連結，按下 *Submit new issue*，工作流程會用你分享的隊伍重新播放戰鬥，一兩分鐘內更新天梯。
 - 和好友、練習對手對戰只是切磋，不會影響天梯。
 - 玩家名稱歸第一個用它送出的 GitHub 帳號所有，沒有人能冒用別人的名字。

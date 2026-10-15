@@ -287,3 +287,19 @@ test('`friend code` needs a name and team, and the code can be added back', () =
   assert.ok(code);
   assert.equal(friends.decodeCode(code).name, 'tester');
 });
+
+test('a challenger who is not on the ladder joins at the bottom even when they lose', () => {
+  const dir = tmp('bz-join-');
+  fs.mkdirSync(path.join(dir, 'scores'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'scores', 'strong.json'), JSON.stringify(score('strong', 600)));
+  fs.writeFileSync(path.join(dir, 'ladder.json'), JSON.stringify({ v: 1, order: ['strong'], processed: [] }));
+
+  const r = acceptor.accept({ body: submission('newbie', 'strong', 10), actor: 'newbie-gh', dir });
+  assert.equal(r.ok, true, r.message);
+
+  const { players } = ladder.loadPlayers(path.join(dir, 'scores'));
+  const state = JSON.parse(fs.readFileSync(path.join(dir, 'ladder.json'), 'utf8'));
+  const out = ladder.processChallenges(state, players, ladder.loadChallenges(path.join(dir, 'challenges')));
+  assert.equal(out.results[0].outcome, 'lost');
+  assert.deepEqual(out.state.order, ['strong', 'newbie']);
+});

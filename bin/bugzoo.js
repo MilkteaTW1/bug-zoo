@@ -479,6 +479,7 @@ async function cmdBattle(args) {
   let foe = null; // { name, team }
   let row = null;
   let list = null;
+  let joining = false; // not on the ladder yet: any ladder fight submits and joins at the bottom
 
   if (positional[0]) {
     // `bugzoo battle <friend code | url | file | player name>`: fight directly, no list.
@@ -499,6 +500,7 @@ async function cmdBattle(args) {
     store.save(dex);
 
     list = opponents.buildList({ me, source, friends: dex.friends });
+    joining = !source.players.has(me.name.toLowerCase());
     console.log(opponents.render(list, listWords()));
     console.log('');
 
@@ -533,8 +535,8 @@ async function cmdBattle(args) {
   // Only a win over someone up to 3 ranks above you moves the ladder.
   if (row && row.section === 'ladder') {
     const chk = ladder.checkChallenge(list.order, me.name, row.name);
-    if (won && chk.ok) {
-      console.log(`\n${t('battle.promote', { rank: row.rank, name: row.name })}`);
+    if ((won && chk.ok) || joining) {
+      console.log(`\n${won && chk.ok ? t('battle.promote', { rank: row.rank, name: row.name }) : t('battle.join')}`);
       if (!profileName) {
         console.log(t('battle.needName'));
       } else {
