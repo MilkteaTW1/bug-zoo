@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" width="1200" height="880" font-family="'Segoe UI','Microsoft JhengHei','Noto Sans TC','PingFang TC',sans-serif">
+<rect width="1200" height="880" fill="#0f172a"/>
+<text x="600" y="92" text-anchor="middle" font-size="64" font-weight="700" fill="#f8fafc">🐛 Bug Zoo</text>
+<text x="600" y="140" text-anchor="middle" font-size="26" fill="#94a3b8">把你的錯誤訊息變成可以收集的怪物。</text>
+<rect x="30" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#5eead4" stroke-width="2"/>
+<circle cx="66" cy="233" r="20" fill="#5eead4"/>
+<text x="66" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">1</text>
+<text x="100" y="228" font-size="22" font-weight="600" fill="#f8fafc">程式出錯</text>
+<text x="100" y="257" font-size="16" fill="#94a3b8">怪物出現</text>
+<text x="305" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="325" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+<circle cx="361" cy="233" r="20" fill="#fbbf24"/>
+<text x="361" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">2</text>
+<text x="395" y="228" font-size="22" font-weight="600" fill="#f8fafc">修好 bug</text>
+<text x="395" y="257" font-size="16" fill="#94a3b8">再跑同一條指令</text>
+<text x="600" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="620" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+<circle cx="656" cy="233" r="20" fill="#a78bfa"/>
+<text x="656" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">3</text>
+<text x="690" y="228" font-size="22" font-weight="600" fill="#f8fafc">捕捉成功！</text>
+<text x="690" y="257" font-size="16" fill="#94a3b8">加入你的圖鑑</text>
+<text x="895" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="915" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#f87171" stroke-width="2"/>
+<circle cx="951" cy="233" r="20" fill="#f87171"/>
+<text x="951" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">4</text>
+<text x="985" y="228" font-size="22" font-weight="600" fill="#f8fafc">對戰</text>
+<text x="985" y="257" font-size="16" fill="#94a3b8">攀登天梯</text>
+<rect x="30" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="30" y="330" width="270" height="6" rx="3" fill="#5eead4"/>
+<text x="54" y="398" font-size="40">🔧</text>
+<text x="54" y="445" font-size="22" font-weight="700" fill="#f8fafc">修好才算捕捉</text>
+<text x="54" y="478" font-size="16" fill="#cbd5e1">重跑成功，才證明</text>
+<text x="54" y="502" font-size="16" fill="#cbd5e1">你真的修好了。</text>
+<rect x="320" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="320" y="330" width="270" height="6" rx="3" fill="#fbbf24"/>
+<text x="344" y="398" font-size="40">⚡</text>
+<text x="344" y="445" font-size="22" font-weight="700" fill="#f8fafc">自動捕捉</text>
+<text x="344" y="478" font-size="16" fill="#cbd5e1">Node、Python、Go、Rust、</text>
+<text x="344" y="502" font-size="16" fill="#cbd5e1">Java、npm、gcc、.NET…</text>
+<rect x="610" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="610" y="330" width="270" height="6" rx="3" fill="#a78bfa"/>
+<text x="634" y="398" font-size="40">🤖</text>
+<text x="634" y="445" font-size="22" font-weight="700" fill="#f8fafc">AI 助手也算</text>
+<text x="634" y="478" font-size="16" fill="#cbd5e1">Claude Code 跑的指令失敗，</text>
+<text x="634" y="502" font-size="16" fill="#cbd5e1">同樣會出現怪物。</text>
+<rect x="900" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="900" y="330" width="270" height="6" rx="3" fill="#f87171"/>
+<text x="924" y="398" font-size="40">💪</text>
+<text x="924" y="445" font-size="22" font-weight="700" fill="#f8fafc">戰鬥力來自真實專案</text>
+<text x="924" y="478" font-size="16" fill="#cbd5e1">堆疊深度、影響範圍、</text>
+<text x="924" y="502" font-size="16" fill="#cbd5e1">專案規模、錯誤頻率。</text>
+<rect x="30" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="30" y="560" width="270" height="6" rx="3" fill="#60a5fa"/>
+<text x="54" y="628" font-size="40">⚔️</text>
+<text x="54" y="675" font-size="22" font-weight="700" fill="#f8fafc">天梯與好友</text>
+<text x="54" y="708" font-size="16" fill="#cbd5e1">挑戰對手與朋友，</text>
+<text x="54" y="732" font-size="16" fill="#cbd5e1">不需要伺服器與資料庫。</text>
+<rect x="320" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="320" y="560" width="270" height="6" rx="3" fill="#f472b6"/>
+<text x="344" y="628" font-size="40">✨</text>
+<text x="344" y="675" font-size="22" font-weight="700" fill="#f8fafc">進化與成就</text>
+<text x="344" y="708" font-size="16" fill="#cbd5e1">同一隻捕捉多次會進化，</text>
+<text x="344" y="732" font-size="16" fill="#cbd5e1">13 個成就等你收集。</text>
+<rect x="610" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="610" y="560" width="270" height="6" rx="3" fill="#34d399"/>
+<text x="634" y="628" font-size="40">🃏</text>
+<text x="634" y="675" font-size="22" font-weight="700" fill="#f8fafc">可分享的卡片</text>
+<text x="634" y="708" font-size="16" fill="#cbd5e1">圖鑑與戰鬥結果</text>
+<text x="634" y="732" font-size="16" fill="#cbd5e1">都能匯出成 SVG。</text>
+<rect x="900" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="900" y="560" width="270" height="6" rx="3" fill="#fb923c"/>
+<text x="924" y="628" font-size="40">🌐</text>
+<text x="924" y="675" font-size="22" font-weight="700" fill="#f8fafc">零依賴</text>
+<text x="924" y="708" font-size="16" fill="#cbd5e1">一行 npm 安裝，</text>
+<text x="924" y="732" font-size="16" fill="#cbd5e1">支援繁體中文與英文。</text>
+<rect x="320" y="796" width="560" height="52" rx="26" fill="#0b1220" stroke="#334155"/>
+<text x="600" y="830" text-anchor="middle" font-size="22" font-family="Consolas,'Courier New',monospace" fill="#5eead4">npm install -g bug-zoo</text>
+<text x="600" y="872" text-anchor="middle" font-size="16" fill="#64748b">github.com/MilkteaTW1/bug-zoo</text>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" width="1200" height="880" font-family="'Segoe UI','Microsoft JhengHei','Noto Sans TC','PingFang TC',sans-serif">
+<rect width="1200" height="880" fill="#0f172a"/>
+<text x="600" y="92" text-anchor="middle" font-size="64" font-weight="700" fill="#f8fafc">🐛 Bug Zoo</text>
+<text x="600" y="140" text-anchor="middle" font-size="26" fill="#94a3b8">Turn your error messages into collectible monsters.</text>
+<rect x="30" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#5eead4" stroke-width="2"/>
+<circle cx="66" cy="233" r="20" fill="#5eead4"/>
+<text x="66" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">1</text>
+<text x="100" y="228" font-size="22" font-weight="600" fill="#f8fafc">Your code fails</text>
+<text x="100" y="257" font-size="16" fill="#94a3b8">A monster spawns</text>
+<text x="305" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="325" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#fbbf24" stroke-width="2"/>
+<circle cx="361" cy="233" r="20" fill="#fbbf24"/>
+<text x="361" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">2</text>
+<text x="395" y="228" font-size="22" font-weight="600" fill="#f8fafc">You fix the bug</text>
+<text x="395" y="257" font-size="16" fill="#94a3b8">Run it again</text>
+<text x="600" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="620" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#a78bfa" stroke-width="2"/>
+<circle cx="656" cy="233" r="20" fill="#a78bfa"/>
+<text x="656" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">3</text>
+<text x="690" y="228" font-size="22" font-weight="600" fill="#f8fafc">Caught!</text>
+<text x="690" y="257" font-size="16" fill="#94a3b8">It joins your bestiary</text>
+<text x="895" y="241" text-anchor="middle" font-size="28" fill="#475569">›</text>
+<rect x="915" y="185" width="255" height="96" rx="14" fill="#1e293b" stroke="#f87171" stroke-width="2"/>
+<circle cx="951" cy="233" r="20" fill="#f87171"/>
+<text x="951" y="241" text-anchor="middle" font-size="22" font-weight="700" fill="#0f172a">4</text>
+<text x="985" y="228" font-size="22" font-weight="600" fill="#f8fafc">Battle</text>
+<text x="985" y="257" font-size="16" fill="#94a3b8">Climb the ladder</text>
+<rect x="30" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="30" y="330" width="270" height="6" rx="3" fill="#5eead4"/>
+<text x="54" y="398" font-size="40">🔧</text>
+<text x="54" y="445" font-size="22" font-weight="700" fill="#f8fafc">Catch by fixing</text>
+<text x="54" y="478" font-size="16" fill="#cbd5e1">A monster is caught only when</text>
+<text x="54" y="502" font-size="16" fill="#cbd5e1">a clean re-run proves the fix.</text>
+<rect x="320" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="320" y="330" width="270" height="6" rx="3" fill="#fbbf24"/>
+<text x="344" y="398" font-size="40">⚡</text>
+<text x="344" y="445" font-size="22" font-weight="700" fill="#f8fafc">Automatic capture</text>
+<text x="344" y="478" font-size="16" fill="#cbd5e1">Node, Python, Go, Rust, Java,</text>
+<text x="344" y="502" font-size="16" fill="#cbd5e1">npm, gcc, .NET and more.</text>
+<rect x="610" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="610" y="330" width="270" height="6" rx="3" fill="#a78bfa"/>
+<text x="634" y="398" font-size="40">🤖</text>
+<text x="634" y="445" font-size="22" font-weight="700" fill="#f8fafc">AI assistants count</text>
+<text x="634" y="478" font-size="16" fill="#cbd5e1">Claude Code runs a failing</text>
+<text x="634" y="502" font-size="16" fill="#cbd5e1">command? A monster shows up.</text>
+<rect x="900" y="330" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="900" y="330" width="270" height="6" rx="3" fill="#f87171"/>
+<text x="924" y="398" font-size="40">💪</text>
+<text x="924" y="445" font-size="22" font-weight="700" fill="#f8fafc">Power from real code</text>
+<text x="924" y="478" font-size="16" fill="#cbd5e1">Stack depth, blast radius,</text>
+<text x="924" y="502" font-size="16" fill="#cbd5e1">project size, error rate.</text>
+<rect x="30" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="30" y="560" width="270" height="6" rx="3" fill="#60a5fa"/>
+<text x="54" y="628" font-size="40">⚔️</text>
+<text x="54" y="675" font-size="22" font-weight="700" fill="#f8fafc">Ladder and friends</text>
+<text x="54" y="708" font-size="16" fill="#cbd5e1">Fight rivals and friends.</text>
+<text x="54" y="732" font-size="16" fill="#cbd5e1">No server, no database.</text>
+<rect x="320" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="320" y="560" width="270" height="6" rx="3" fill="#f472b6"/>
+<text x="344" y="628" font-size="40">✨</text>
+<text x="344" y="675" font-size="22" font-weight="700" fill="#f8fafc">Evolve and achieve</text>
+<text x="344" y="708" font-size="16" fill="#cbd5e1">Catch again to evolve.</text>
+<text x="344" y="732" font-size="16" fill="#cbd5e1">13 achievements to earn.</text>
+<rect x="610" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="610" y="560" width="270" height="6" rx="3" fill="#34d399"/>
+<text x="634" y="628" font-size="40">🃏</text>
+<text x="634" y="675" font-size="22" font-weight="700" fill="#f8fafc">Shareable cards</text>
+<text x="634" y="708" font-size="16" fill="#cbd5e1">Export your bestiary and</text>
+<text x="634" y="732" font-size="16" fill="#cbd5e1">battle results as SVG.</text>
+<rect x="900" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
+<rect x="900" y="560" width="270" height="6" rx="3" fill="#fb923c"/>
+<text x="924" y="628" font-size="40">🌐</text>
+<text x="924" y="675" font-size="22" font-weight="700" fill="#f8fafc">Zero dependencies</text>
+<text x="924" y="708" font-size="16" fill="#cbd5e1">One npm install. English</text>
+<text x="924" y="732" font-size="16" fill="#cbd5e1">and Traditional Chinese.</text>
+<rect x="320" y="796" width="560" height="52" rx="26" fill="#0b1220" stroke="#334155"/>
+<text x="600" y="830" text-anchor="middle" font-size="22" font-family="Consolas,'Courier New',monospace" fill="#5eead4">npm install -g bug-zoo</text>
+<text x="600" y="872" text-anchor="middle" font-size="16" fill="#64748b">github.com/MilkteaTW1/bug-zoo</text>
+</svg>
