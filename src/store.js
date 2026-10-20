@@ -121,7 +121,9 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   if (result.pending.length > 0) {
     const info = {};
     for (const id of result.pending) info[id] = fresh[id] || prevInfo[id];
-    dex.pending[key] = { ids: result.pending, since: prev ? prev.since : stamp, info };
+    // cwd lets editors tell which project a waiting bug belongs to.
+    const cwd = (ctx && ctx.cwd) || (prev && prev.cwd);
+    dex.pending[key] = { ids: result.pending, since: prev ? prev.since : stamp, info, ...(cwd ? { cwd } : {}) };
   } else {
     delete dex.pending[key];
   }

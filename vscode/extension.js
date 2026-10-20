@@ -17,7 +17,8 @@ const config = () => vscode.workspace.getConfiguration('bugzoo');
 
 function safeState() {
   try {
-    return buildState();
+    const folders = (vscode.workspace.workspaceFolders || []).map((f) => f.uri.fsPath);
+    return buildState(folders);
   } catch {
     return null; // a half-written dex.json must never break the editor
   }
@@ -174,6 +175,7 @@ function activate(context) {
       vscode.window.showInformationMessage(`Bug Zoo terminal capture ${on ? 'on' : 'off'}.`);
     }),
   );
+  context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(scheduleRefresh));
   lastState = safeState();
   refreshLadder();
   ladderTimer = setInterval(refreshLadder, LADDER_REFRESH_MS);

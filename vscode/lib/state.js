@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('node:path');
 const { store, power, remote } = require('./engine');
 
 /**
@@ -7,12 +8,24 @@ const { store, power, remote } = require('./engine');
  *   wild   - bugs still waiting to be caught (a failing command's pending list)
  *   caught - everything caught at least once, with its evolution stage
  */
-function buildState() {
+const norm = (p) => path.resolve(p).replace(/[\/]+$/, '').toLowerCase();
+const isInside = (cwd, folder) => {
+  const c = norm(cwd);
+  const f = norm(folder);
+  return c === f || c.startsWith(f + path.sep);
+};
+
+/**
+ * folders - open project folders: only bugs waiting in those projects count as wild (the rest stay saved
+ * but hidden). Leave undefined to show everything.
+ */
+function buildState(folders) {
   const dex = store.load();
   const pendingInfo = {};
   const since = {};
   const wildIds = new Set();
   for (const p of Object.values(dex.pending)) {
+    if (folders && !(p.cwd && folders.some((f) => isInside(p.cwd, f)))) continue;
     for (const id of p.ids) {
       wildIds.add(id);
       if (!since[id] || p.since < since[id]) since[id] = p.since;

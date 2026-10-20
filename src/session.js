@@ -28,9 +28,10 @@ function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = 
     creatures = parseErrors(stderr || signal || '', signal || exit, stdout)
       .map((e) => ({ ...makeCreature(e.type, e.message), sample: e.message }));
     try {
-      ctx = { ...analyze(cwd, `${stderr}\n${stdout}`), project: path.basename(cwd) };
+      ctx = { ...analyze(cwd, `${stderr}\n${stdout}`), project: path.basename(cwd), cwd };
     } catch {
-      ctx = null; // scanning is best-effort; never break the player's program
+      // scanning is best-effort; never break the player's program
+      ctx = { frames: 0, blast: 0, loc: 0, project: path.basename(cwd), cwd };
     }
   }
 

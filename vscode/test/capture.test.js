@@ -55,3 +55,12 @@ test('ANSI colour codes in terminal output do not hide the error', () => {
   recordCommand({ commandLine: 'node other.js', exitCode: 1, cwd: home, output: coloured });
   assert.ok(buildState().wild.some((c) => c.type === 'TypeError'));
 });
+
+test('only bugs from open project folders show as wild', () => {
+  const other = fs.mkdtempSync(path.join(os.tmpdir(), 'bugzoo-other-'));
+  recordCommand({ commandLine: 'node elsewhere.js', exitCode: 1, cwd: other, output: CRASH.replace('first', 'second') });
+  assert.ok(buildState().wild.length >= 1);
+  assert.strictEqual(buildState([path.join(other, 'nope')]).wild.length, 0);
+  assert.ok(buildState([other]).wild.length >= 1);
+  assert.ok(buildState([path.dirname(other)]).wild.length >= 1, 'a bug in a sub-folder belongs to the parent folder');
+});
