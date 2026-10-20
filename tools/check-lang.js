@@ -13,9 +13,10 @@ for (const code of i18n.LANGS) {
   const unknown = Object.keys(m).filter((k) => !(k in en));
   const same = Object.keys(en).filter((k) => k in m && m[k] === en[k]);
   const helpSame = i18n.LOCALES[code].help === i18n.LOCALES.en.help;
+  const namesSame = JSON.stringify(i18n.LOCALES[code].names) === JSON.stringify(i18n.LOCALES.en.names);
   problems += missing.length + unknown.length;
   console.log(`${code} (${i18n.LANG_LABEL[code]}): ${Object.keys(m).length}/${Object.keys(en).length} keys, ` +
-    `${same.length} still English${helpSame ? ', help still English' : ''}` +
+    `${same.length} still English${helpSame ? ', help still English' : ''}${namesSame ? ', monster names still English' : ''}` +
     `${missing.length ? `, missing: ${missing.join(', ')}` : ''}${unknown.length ? `, unknown: ${unknown.join(', ')}` : ''}`);
 }
 process.exit(problems ? 1 : 0);

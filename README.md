@@ -273,7 +273,7 @@ Each language is one file in [`src/locales/`](src/locales). To add yours:
 
 ```bash
 npm run lang -- ja 日本語     # creates src/locales/ja.js from the English text
-# translate "help" and "messages" in that file
+# translate "help", "messages" and "names" (monster names) in that file
 npm run lang:check            # shows what is still English
 npm test
 ```
@@ -571,7 +571,7 @@ bugzoo share --name alice --out leaderboard/scores/alice.json
 
 ```bash
 npm run lang -- ja 日本語     # 以英文內容建立 src/locales/ja.js
-# 翻譯該檔案裡的 "help" 與 "messages"
+# 翻譯該檔案裡的 "help"、"messages" 與 "names"（怪物名稱）
 npm run lang:check            # 檢查還有哪些是英文
 npm test
 ```

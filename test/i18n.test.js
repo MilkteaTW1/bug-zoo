@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const i18n = require('../src/i18n');
-const { zhName, makeCreature } = require('../src/creature');
+const { zhName, localName, makeCreature } = require('../src/creature');
 const auto = require('../src/autostart');
 
 const REGISTER = auto.REGISTER_ARG; // same quoting-safe form that `bugzoo setup` writes
@@ -191,4 +191,34 @@ test('`bugzoo lang` lists the languages, switches by code or number, and touches
   const dex = JSON.parse(fs.readFileSync(path.join(home, 'dex.json'), 'utf8'));
   assert.equal(dex.profile.lang, 'en');
   assert.equal(dex.profile.name, undefined);
+});
+
+test('every language file has monster name lists, and localName follows them', () => {
+  for (const code of i18n.LANGS) {
+    const names = i18n.LOCALES[code].names;
+    assert.ok(names && names.prefix.length > 0 && names.suffix.length > 0, `${code} has no names`);
+    for (const w of [...names.prefix, ...names.suffix]) assert.ok(typeof w === 'string' && w.length > 0, `${code}: empty name part`);
+  }
+  const c = makeCreature('TypeError', 'x is undefined');
+  assert.equal(localName(c.id, 'en'), null, 'English keeps the saved name');
+  assert.equal(localName(c.id, 'xx'), null);
+  const tw = localName(c.id, 'zh-TW');
+  const cn = localName(c.id, 'zh-CN');
+  assert.ok(tw && cn);
+  assert.equal(tw, zhName(c.id));
+  assert.match(cn, /^[一-鿿]+$/);
+  assert.notEqual(cn, c.name, 'Simplified Chinese players get Chinese monster names');
+});
+
+test('a Simplified Chinese player sees simplified monster names in the CLI', () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bz-names-'));
+  const c = makeCreature('TypeError', 'x is undefined');
+  fs.writeFileSync(path.join(home, 'dex.json'), JSON.stringify({
+    creatures: { [c.id]: { ...c, captures: 1, count: 1, escapes: 0 } }, pending: {}, runs: {}, battles: { wins: 0, losses: 0 },
+    friends: [], profile: { name: 'tester', lang: 'zh-CN' }, trophies: [],
+  }));
+  const bin = path.resolve(__dirname, '..', 'bin', 'bugzoo.js');
+  const out = spawnSync(process.execPath, [bin, 'dex'], { encoding: 'utf8', env: { ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: '' } }).stdout;
+  assert.ok(out.includes(localName(c.id, 'zh-CN')), out);
+  assert.ok(!out.includes(localName(c.id, 'zh-TW')) || localName(c.id, 'zh-TW') === localName(c.id, 'zh-CN'));
 });

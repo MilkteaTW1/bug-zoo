@@ -7,6 +7,11 @@ module.exports = {
   // Locale prefixes that select this language (the longest match wins), e.g. LANG=zh_TW.UTF-8 -> 'zh-tw'.
   order: 3, // position in the language picker (omit to go after the built-in ones)
   detect: ['en'],
+  // Monster names are prefix + suffix, picked from the error's hash. The two lists may have any length.
+  names: {
+    prefix: ['Grim', 'Fluff', 'Snark', 'Wobble', 'Gloom', 'Zap', 'Murk', 'Pip', 'Crumb', 'Hex', 'Glitch', 'Nib'],
+    suffix: ['ling', 'bat', 'gnaw', 'moth', 'toad', 'wisp', 'beetle', 'imp', 'crawler', 'snail', 'sprite', 'mite'],
+  },
   help: `bugzoo - turn your errors into collectible monsters
 
 Usage:
@@ -309,5 +314,6 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.langTitle': 'Bug Zoo language',
     'vs.langPlaceholder': 'Choose the language for Bug Zoo',
     'vs.langSet': 'Bug Zoo language: {lang}.',
+    'vs.creature': '{name} the {type}',
   },
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 const { normalize, hash } = require('./parse');
+const i18n = require('./i18n');
 
 const COMMON = ['TypeError', 'ReferenceError', 'SyntaxError', 'KeyError', 'ValueError', 'NameError',
   'IndexError', 'AttributeError', 'ImportError', 'ModuleNotFoundError', 'IndentationError'];
@@ -12,8 +13,8 @@ const RARITY_ORDER = ['common', 'uncommon', 'rare', 'legendary'];
 const RARITY_COLOR = { common: '\x1b[37m', uncommon: '\x1b[32m', rare: '\x1b[36m', legendary: '\x1b[35m' };
 const RARITY_HEX = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
 
-const PREFIX = ['Grim', 'Fluff', 'Snark', 'Wobble', 'Gloom', 'Zap', 'Murk', 'Pip', 'Crumb', 'Hex', 'Glitch', 'Nib'];
-const SUFFIX = ['ling', 'bat', 'gnaw', 'moth', 'toad', 'wisp', 'beetle', 'imp', 'crawler', 'snail', 'sprite', 'mite'];
+// English names live in src/locales/en.js (`names`), every other language has its own list there.
+const EN_NAMES = i18n.LOCALES.en.names;
 const EYES = ['o o', '^ ^', '> <', '@ @', '. .', '* *', 'x x', '0 0'];
 const BODIES = [
   (e) => [` /\\_/\\`, `( ${e} )`, ` > ^ <`],
@@ -34,7 +35,7 @@ function makeCreature(type, message) {
   const variant = hash(normalize(message)).slice(0, 8);
   const h = hash(`${type}:${variant}`);
   const n = (i) => parseInt(h.slice(i * 2, i * 2 + 2), 16);
-  const name = PREFIX[n(0) % PREFIX.length] + SUFFIX[n(1) % SUFFIX.length];
+  const name = EN_NAMES.prefix[n(0) % EN_NAMES.prefix.length] + EN_NAMES.suffix[n(1) % EN_NAMES.suffix.length];
   const eyes = EYES[n(2) % EYES.length];
   const body = BODIES[n(3) % BODIES.length](eyes);
   return {
@@ -48,15 +49,23 @@ function makeCreature(type, message) {
   };
 }
 
-const PREFIX_ZH = ['陰森', '毛茸', '毒舌', '搖晃', '憂鬱', '電擊', '陰暗', '小不點', '碎屑', '詛咒', '故障', '小筆'];
-const SUFFIX_ZH = ['小怪', '蝙蝠', '啃咬蟲', '飛蛾', '蟾蜍', '鬼火', '甲蟲', '小鬼', '爬蟲', '蝸牛', '精靈', '蟎'];
-
-/** Chinese display name for a creature id; same hash and indices as the English name. */
-function zhName(id) {
+/**
+ * A creature's name in a language: same hash and indices as the English name, but picked from that
+ * language's `names` lists (src/locales/<code>.js). Returns null for English (the saved name is used)
+ * and for a language without lists.
+ */
+function localName(id, lang) {
+  if (lang === 'en') return null;
+  const loc = i18n.LOCALES[lang];
+  const names = loc && loc.names;
+  if (!names || !names.prefix.length || !names.suffix.length) return null;
   const h = hash(id);
   const n = (i) => parseInt(h.slice(i * 2, i * 2 + 2), 16);
-  return PREFIX_ZH[n(0) % PREFIX_ZH.length] + SUFFIX_ZH[n(1) % SUFFIX_ZH.length];
+  return names.prefix[n(0) % names.prefix.length] + names.suffix[n(1) % names.suffix.length];
 }
+
+/** Traditional Chinese name (kept for older callers). */
+const zhName = (id) => localName(id, 'zh-TW');
 
 /** A stable face for any monster we only know by name (an opponent's team, a shared card). */
 function artFor(seed) {
@@ -65,4 +74,4 @@ function artFor(seed) {
   return BODIES[n(3) % BODIES.length](EYES[n(2) % EYES.length]);
 }
 
-module.exports = { makeCreature, rarityOf, zhName, artFor, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };
+module.exports = { makeCreature, rarityOf, localName, zhName, artFor, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };

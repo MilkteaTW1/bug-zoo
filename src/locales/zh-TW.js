@@ -7,6 +7,11 @@ module.exports = {
   // Locale prefixes that select this language (the longest match wins), e.g. LANG=zh_TW.UTF-8 -> 'zh-tw'.
   order: 1, // position in the language picker (omit to go after the built-in ones)
   detect: ['zh-tw', 'zh-hk', 'zh-mo', 'zh-hant'],
+  // Monster names are prefix + suffix, picked from the error's hash. The two lists may have any length.
+  names: {
+    prefix: ['陰森', '毛茸', '毒舌', '搖晃', '憂鬱', '電擊', '陰暗', '小不點', '碎屑', '詛咒', '故障', '小筆'],
+    suffix: ['小怪', '蝙蝠', '啃咬蟲', '飛蛾', '蟾蜍', '鬼火', '甲蟲', '小鬼', '爬蟲', '蝸牛', '精靈', '蟎'],
+  },
   help: `bugzoo - 把你的錯誤變成可收集的怪物
 
 用法：
@@ -306,5 +311,6 @@ module.exports = {
     'vs.langTitle': 'Bug Zoo 語言',
     'vs.langPlaceholder': '選擇 Bug Zoo 使用的語言',
     'vs.langSet': 'Bug Zoo 語言：{lang}。',
+    'vs.creature': '{name}（{type}）',
   },
 };

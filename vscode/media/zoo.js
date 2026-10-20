@@ -83,7 +83,7 @@
   }
 
   function tip(c, wild) {
-    const parts = [c.name + ' the ' + c.type, c.rarity];
+    const parts = [tr('creature').replace('{name}', c.name).replace('{type}', c.type), tr('rarity.' + c.rarity) || c.rarity];
     if (wild && c.since) parts.push(tr('since') + ' ' + fullDate(c.since));
     if (c.power) parts.push(tr('power') + ' ' + c.power);
     if (wild && c.sample) parts.push(c.sample);

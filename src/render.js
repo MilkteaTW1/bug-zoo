@@ -1,6 +1,6 @@
 'use strict';
 
-const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, zhName } = require('./creature');
+const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, localName } = require('./creature');
 const { t, getLang, pad } = require('./i18n');
 const { EVOLUTION, stageOf, evolutionMult } = require('./power');
 const { boostTrophies } = require('./battle');
@@ -13,9 +13,9 @@ const GREEN = '\x1b[32m';
 const RED = '\x1b[31m';
 const YELLOW = '\x1b[33m';
 
-/** Name to show for one of the player's own creatures (Chinese names are derived from the id). */
+/** Name to show for one of the player's own creatures: the language's own name list, else the English name. */
 function shownName(e) {
-  return getLang() === 'zh-TW' && e.id ? zhName(e.id) : e.name;
+  return (e.id && localName(e.id, getLang())) || e.name;
 }
 
 const rarityText = (r) => t(`rarity.${r}`);

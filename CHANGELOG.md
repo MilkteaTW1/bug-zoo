@@ -1,5 +1,10 @@
 # Changelog / 更新紀錄
 
+## 0.3.5
+
+- **Monster names in every language.** Each language file now has a `names` block (prefix + suffix lists), so Simplified Chinese players see Chinese monster names (they used to see English ones; only Traditional Chinese had them). A new language translates its own `names` too. The VS Code zoo tooltip is translated as well (it said "the" and showed the rarity in English).
+  每個語言檔都有 `names`（前綴＋後綴清單）：簡體中文玩家現在看到中文怪物名稱（原本只有繁體有，簡體顯示英文）。新語言也可以翻譯自己的 `names`。VS Code 動物園的提示文字也一併翻譯。
+
 ## 0.3.4
 
 - **`bugzoo lang`** lists the languages; `bugzoo lang zh-CN` (or a number) switches in one line and changes nothing else.

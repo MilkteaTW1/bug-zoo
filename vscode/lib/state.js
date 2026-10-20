@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('node:path');
-const { store, power, remote, i18n } = require('./engine');
+const { store, power, remote, i18n, creature } = require('./engine');
 
 /**
  * Turn the dex file into what the zoo view draws.
@@ -52,7 +52,7 @@ function buildState(folders) {
   for (const t of dex.trophies) if (!best[t.id] || t.power > best[t.id]) best[t.id] = t.power;
   const caughtPower = (c) => (best[c.id] ? Math.round(best[c.id] * power.evolutionMult(power.stageOf(c.captures || 0))) : undefined);
   const pack = (c) => ({
-    id: c.id, name: c.name, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
+    id: c.id, name: creature.localName(c.id, i18n.getLang()) || c.name, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
     count: c.count, captures: c.captures, stage: power.stageOf(c.captures || 0),
     power: wildIds.has(c.id) ? (pendingInfo[c.id] ? pendingInfo[c.id].power : undefined) : caughtPower(c),
     since: since[c.id] || null,
@@ -67,7 +67,11 @@ function buildState(folders) {
     seen: all.length,
     caughtCount: all.filter((c) => (c.captures || 0) > 0).length,
     lang: i18n.getLang(),
-    text: i18n.bundle('vs.'), // every on-screen text of the zoo and ladder views, in the player's language
+    // Every on-screen text of the zoo and ladder views, in the player's language (rarity words keep their `rarity.` prefix).
+    text: {
+      ...i18n.bundle('vs.'),
+      ...Object.fromEntries(Object.entries(i18n.bundle('rarity.')).map(([k, v]) => [`rarity.${k}`, v])),
+    },
   };
 }
 
