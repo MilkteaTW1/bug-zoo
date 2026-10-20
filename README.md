@@ -41,6 +41,8 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 
 Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode/) turns failing terminal commands into monsters in the side bar, with the ladder, friends and animated fights built in. It shares the same data file as the CLI.
 
+**Install:** search for **Bug Zoo** in the VS Code Extensions view, or [get it from the Marketplace](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode).
+
 [![Watch the 36-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
 
 *Click to watch the 36-second promo video.*
@@ -312,6 +314,8 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 ## VS Code 擴充套件
 
 想看 bug 在編輯器裡跑來跑去？[VS Code 擴充套件](vscode/)會把終端機裡失敗的指令變成側邊欄的怪物，內建天梯、好友和動畫對戰，和 CLI 共用同一份資料檔。
+
+**安裝:**在 VS Code 擴充套件面板搜尋 **Bug Zoo**,或[到 Marketplace 安裝](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode)。
 
 [![觀看 36 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
 

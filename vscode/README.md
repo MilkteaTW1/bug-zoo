@@ -1,5 +1,7 @@
 # Bug Zoo for VS Code
 
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/MilkteaTW1.bug-zoo-vscode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode)
+
 Your failing terminal commands become little monsters that wander around the side bar. Fix the bug, run the same command again, and the monster is caught and moves into your pen.
 
 It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo), so monsters, rarity, power, evolution and achievements are identical, and both share `~/.bugzoo/dex.json`.
