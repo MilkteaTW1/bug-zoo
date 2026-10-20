@@ -53,18 +53,18 @@
         {
           "type": "webview",
           "id": "bugzoo.zoo",
-          "name": "Zoo"
+          "name": "%view.zoo%"
         }
       ]
     },
     "commands": [
       {
         "command": "bugzoo.openZoo",
-        "title": "Bug Zoo: Open the zoo in an editor tab"
+        "title": "%command.openZoo%"
       },
       {
         "command": "bugzoo.toggleCapture",
-        "title": "Bug Zoo: Toggle terminal capture"
+        "title": "%command.toggleCapture%"
       }
     ],
     "configuration": {
@@ -73,12 +73,12 @@
         "bugzoo.captureTerminal": {
           "type": "boolean",
           "default": true,
-          "description": "Turn failing commands in the integrated terminal into monsters (needs terminal shell integration). Turn this off if you already use `bugzoo setup --auto on`, or runs would count twice."
+          "description": "%config.captureTerminal%"
         },
         "bugzoo.notifications": {
           "type": "boolean",
           "default": true,
-          "description": "Show a notification when a monster appears or is caught."
+          "description": "%config.notifications%"
         }
       }
     }

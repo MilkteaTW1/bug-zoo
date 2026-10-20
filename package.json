@@ -7,7 +7,9 @@
   },
   "files": ["bin", "src", "LICENSE", "README.md"],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "lang": "node tools/new-lang.js",
+    "lang:check": "node tools/check-lang.js"
   },
   "engines": {
     "node": ">=18"

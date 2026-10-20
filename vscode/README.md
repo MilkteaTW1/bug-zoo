@@ -70,6 +70,10 @@ npm run package     # vendors ../src and builds a .vsix
 
 Press F5 in VS Code with this folder open to try it in an Extension Development Host.
 
+### Languages
+
+The zoo, the ladder panel and the notifications use the same language files as the CLI: `src/locales/<code>.js` in this repo (keys starting with `vs.`). Add a language once with `npm run lang -- <code> <name>` at the repo root and it works in both. The command names in the manifest come from `package.nls.<locale>.json` (add one, e.g. `package.nls.ja.json`, copying `package.nls.json`). The language is the one set by `bugzoo setup`, otherwise VS Code's display language.
+
 ## 繁體中文
 
 把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建天梯、好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。

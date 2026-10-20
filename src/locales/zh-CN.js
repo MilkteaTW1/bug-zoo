@@ -1,0 +1,300 @@
+'use strict';
+
+// Language file. To add a language, run `npm run lang -- <code> <label>` and translate `messages` and `help`.
+module.exports = {
+  code: 'zh-CN',
+  label: '简体中文',
+  // Locale prefixes that select this language (the longest match wins), e.g. LANG=zh_TW.UTF-8 -> 'zh-tw'.
+  order: 2, // position in the language picker (omit to go after the built-in ones)
+  detect: ['zh'],
+  help: `bugzoo - 把你的错误变成可收集的怪物
+
+用法：
+  bugzoo setup [--lang zh-TW|zh-CN|en] [--name 名字] [--auto on|off] [--ai on|off]
+                              语言、玩家名、自动捕获，以及 AI 助手
+                              （Claude Code）执行的命令也会出怪物
+  bugzoo run <命令...>        执行命令，失败时会出现 bug
+                              （开启自动捕获后就不用打这个）
+  bugzoo dex                  你的图鉴与等着被捕获的 bug
+  bugzoo team                 你最强的捕获与它们的进化状况
+  bugzoo achievements         你的成就
+  bugzoo battle [--card f.svg]
+                              列出天梯、好友与练习对手，输入编号就开打；
+                              --card 会存成可分享的战斗结果卡
+  bugzoo friend               列出好友（也可用：code | add <代码|网址|文件|名字>
+                              | remove <名字> | refresh）
+  bugzoo ladder [文件夹]      查看天梯
+  bugzoo scan                 扫描这个项目：规模与被最多文件依赖的模块
+  bugzoo rank                 查看你的分数与称号
+  bugzoo share [--name 名字] [--out 文件]
+                              输出可分享的分数与队伍文件（不含错误内容）
+  bugzoo leaderboard <文件夹|文件...> [--out file.md]
+                              用分享文件生成分数排行榜
+  bugzoo hook <bash|zsh|fish|powershell>
+                              输出会把常见开发命令包起来的配置片段
+  bugzoo export [文件]        把图鉴导出成 SVG（默认 bugzoo.svg）
+  bugzoo help                 显示帮助
+
+捕获规则（在同一个文件夹重跑同一条命令；比对时会忽略旗标与纯数字参数）：
+  干净通过         捕获成功
+  同一个 bug       还在
+  部分 bug 消失    消失的那些捕获成功
+  出现新的 bug     逃走了，新的 bug 变成你的目标
+
+在天梯上打赢排名在你上面 3 名以内的人，就能夺下他的名次。
+`,
+  messages: {
+    'fmt.creature': '{name}（{type}）',
+    'fmt.power': '{label}（战力 {power}）',
+    'rarity.common': '普通',
+    'rarity.uncommon': '罕见',
+    'rarity.rare': '稀有',
+    'rarity.legendary': '传说',
+
+    'enc.appeared': '野生的 {type} 出现了！',
+    'enc.new': '* 新发现 *',
+    'enc.seen': '遇到 {n} 次',
+    'enc.power': '错误大小：战力 {power}',
+
+    'out.caughtTag': '[捕获成功]',
+    'out.escapedTag': '[逃走了]',
+    'out.captured': '干净通过！你捕获了 {names}。',
+    'out.partial': '你捕获了 {names}。',
+    'out.partial2': '还在逃：{names}。继续修，再跑一次。',
+    'out.still': '它还在：{names}。修好后再跑一次。',
+    'out.failed': '{names} 逃走了：你的修改引发了新的错误。',
+    'out.failed2': '新的目标：{names}。修好后再跑一次来捕获。',
+    'out.wild': '修好这个 bug，再执行同一条命令就能捕获它。',
+
+    'dex.empty': '图鉴还是空的。执行 `bugzoo run <命令>`，让程序坏一次吧。',
+    'dex.title': 'Bug Zoo｜已捕获 {caught} / 遇到 {seen}',
+    'dex.caught': '已捕获 x{n}',
+    'dex.wild': '野生',
+    'dex.pending': '还有 {n} 只 bug 等着你捕获。',
+
+    'team.empty': '还没有战利品。先捕获一只 bug：修好后重跑同一条命令。',
+    'team.title': '你最强的捕获（前三名会上场战斗）',
+    'team.power': '战力',
+    'factor.depth': '堆栈深度',
+    'factor.blast': '影响范围',
+    'factor.size': '项目规模',
+    'factor.rate': '错误率',
+
+    'battle.hit': '{att} 攻击 {def}，造成 {dmg} 点伤害',
+    'battle.crit': '（暴击！）',
+    'battle.faint': '，{def} 倒下了！',
+    'battle.left': '（剩余 {hp} 血）',
+    'battle.you': '你',
+    'battle.win': '你赢了！{winner} 击败了 {loser}。',
+    'battle.lose': '你输了。{winner} 击败了 {loser}。',
+    'battle.noTrophy': '你还没有战利品。先捕获一只 bug：修好后重跑同一条命令。',
+
+    'share.needName': '请先设置公开的玩家名：bugzoo share --name <名字>',
+    'share.wrote': '已写入 {file}（{name}，分数 {score}，队伍 {n} 只）。',
+
+    'rank.title': '称号：{title}',
+    'rank.score': '分数：{score}',
+    'rank.caught': '已捕获：普通 {c}、罕见 {u}、稀有 {r}、传说 {l}（重复捕获 +{rep}，遇到过 {seen} 种）',
+    'rank.battles': '战绩：{w} 胜 {l} 负',
+
+    'scan.project': '项目：{name}',
+    'scan.files': '文件：{files}   行数：{loc}',
+    'scan.top': '被最多文件依赖的模块（这里出 bug 威力更大）：',
+    'scan.row': '{name} 被 {n} 个文件引用',
+
+    'ladder.none': '{dir} 里没有可对战的玩家。玩家需要先分享队伍（bugzoo share）。',
+    'ladder.you': '你',
+    'ladder.challengeable': '可挑战',
+    'ladder.ask': '要挑战第几名？（输入数字，q 离开）',
+    'ladder.badRank': '请输入 1 到 {max} 之间的名次。',
+    'ladder.cannot': '无法挑战：{reason}。',
+    'ladder.err.notOnLadder': '{name} 不在天梯上（需要先分享队伍）',
+    'ladder.err.self': '不能挑战自己',
+    'ladder.err.below': '{name} 的排名在你之下',
+    'ladder.err.reach': '只能挑战排名在你上面 {reach} 名以内的人',
+    'ladder.lose': '你输了。{name} 守住了第 {rank} 名。战斗结果是固定的，除非队伍改变才会不同，去捕获更强的 bug 再来吧。',
+    'ladder.win': '你赢了！你从 {name} 手中夺下第 {to} 名（原本第 {from} 名）。',
+    'ladder.wrote': '已写入 {file}。',
+    'ladder.commit': '把它和 {mine} 一起 commit 并开 Pull Request，合并后天梯就会让你晋级。',
+    'ladder.processed': '天梯已更新：{players} 位玩家，处理了 {n} 条挑战。',
+
+    'setup.name': '玩家名（会显示在排行榜上，直接按 Enter 可跳过）：',
+    'setup.done': '设置完成！语言：{lang}，名字：{name}。之后可用 `bugzoo setup` 修改。',
+    'setup.noName': '（未设置）',
+    'setup.nameHint': '还没有玩家名。分享前请先用 `bugzoo setup --name <名字>` 设置。',
+
+    'setup.auto': '要连“你手动执行的任何项目”都自动捕获 bug 吗？这是可选功能，不开也能用 `bugzoo run <命令>` 玩。\n  开启会修改你的用户环境变量与终端配置文件，之后随时可用 `bugzoo setup --auto off` 还原。[y/N]：',
+    'setup.autoOn': '自动捕获已开启。请重新打开终端，之后你在里面手动执行的程序都会被捕获。',
+    'setup.step.node': '  - Node 程序：任何项目，只要是从终端启动的（NODE_OPTIONS）',
+    'setup.step.cmd': '  - 命令提示符：python、go、cargo、java、npm…（AutoRun）',
+    'setup.step.ps': '  - PowerShell：python、go、cargo、java、npm…（{file}）',
+    'setup.step.sh': '  - 已更新 shell 配置文件：{file}',
+    'setup.warn.policy': 'PowerShell 的执行策略是 {policy}，所以 PowerShell 会忽略配置文件。若要允许你自己的配置文件，请执行一次：Set-ExecutionPolicy -Scope CurrentUser RemoteSigned',
+    'setup.autoOff': '自动捕获已关闭。',
+    'setup.autoFail': '无法更改自动捕获设置：{error}',
+    'setup.status': '语言：{lang}｜名字：{name}｜自动捕获：{auto}',
+    'evo.tag': '[进化]',
+    'evo.line': '{name} 进化了！现在是“{stage}”，战力 ×{mult}。',
+    'evo.stage0': '普通',
+    'evo.stage1': '第二形态',
+    'evo.stage2': '觉醒形态',
+    'evo.next': '再捕获 {n} 次就会进化',
+    'evo.max': '最终形态',
+    'ach.tag': '[成就解锁]',
+    'ach.title': '成就：{n}/{total}',
+    'ach.on': '于 {date} 解锁',
+    'ach.off': '未解锁',
+    'ach.first-catch.name': '初次捕获',
+    'ach.first-catch.desc': '捕获你的第一只 bug。',
+    'ach.collector.name': '收藏家',
+    'ach.collector.desc': '捕获 10 种不同的 bug。',
+    'ach.many-types.name': '见多识广',
+    'ach.many-types.desc': '捕获 5 种不同的错误类型。',
+    'ach.rare-find.name': '稀有发现',
+    'ach.rare-find.desc': '捕获一只稀有 bug。',
+    'ach.legend.name': '传说猎人',
+    'ach.legend.desc': '捕获一只传说级 bug。',
+    'ach.persistent.name': '老朋友',
+    'ach.persistent.desc': '同一只 bug 捕获 3 次，看它进化。',
+    'ach.ascended.name': '觉醒',
+    'ach.ascended.desc': '同一只 bug 捕获 10 次。',
+    'ach.big-game.name': '大猎物',
+    'ach.big-game.desc': '捕获战力 100 以上的 bug。',
+    'ach.streak-3.name': '连续三天',
+    'ach.streak-3.desc': '连续 3 天都有捕获。',
+    'ach.streak-7.name': '一整周',
+    'ach.streak-7.desc': '连续 7 天都有捕获。',
+    'ach.first-win.name': '首战告捷',
+    'ach.first-win.desc': '赢下第一场对战。',
+    'ach.friendly.name': '不孤单',
+    'ach.friendly.desc': '添加一位好友。',
+    'ach.slippery.name': '让它跑了',
+    'ach.slippery.desc': '让一只 bug 逃走。',
+    'card.title': 'Bug Zoo 对战',
+    'card.win': '{winner} 获胜！',
+    'card.rounds': '{n} 回合',
+    'card.footer': 'npm install -g bug-zoo',
+    'card.ask': '要把这场对战存成可分享的卡片吗？[y/N]：',
+    'card.saved': '已存成 {file}。战斗是固定的，同一场永远是同一张卡。',
+    'title.Bystander': '路人',
+    'title.Bug Spotter': '虫子侦察员',
+    'title.Bug Catcher': '捕虫员',
+    'title.Exterminator': '除虫专家',
+    'title.Zookeeper': '动物园长',
+    'title.Bug Whisperer': '虫语者',
+    'rank.points': '计分：普通 {c}、罕见 {u}、稀有 {r}、传说 {l}；每次重复捕获 +2',
+    'setup.aiOn': 'AI 协作：已把 hook 加进 {file}。AI 助手执行的命令失败或修好时，你会看到怪物。请重启 Claude Code 让它生效。',
+    'setup.aiOff': 'AI 协作：已从 {file} 移除 hook。',
+    'setup.aiFail': '无法更改 AI hook：{error}',
+    'setup.aiStatus': 'AI 协作（Claude Code）：{state}',
+    'common.on': '开启',
+    'common.off': '关闭',
+
+    'battle.secLadder': '天梯',
+    'battle.secFriends': '好友',
+    'battle.secPractice': '练习',
+    'battle.rowPower': '战力 {p}',
+    'battle.tagYou': '你',
+    'battle.tagRanked': '计入排名',
+    'battle.ask': '要跟谁对战？（输入编号，q 离开）',
+    'battle.badPick': '请输入列表里的编号。',
+    'battle.cachedLadder': '无法连上天梯（{reason}），使用 {when} 保存的副本。',
+    'battle.noLadder': '无法连上天梯（{reason}）。好友与练习对手仍可使用。',
+    'battle.friendly': '切磋：这场不会影响天梯。',
+    'battle.outOfReach': '切磋：只有打赢排名在你上面 {reach} 名以内的人才能晋级。',
+    'battle.promote': '你击败了第 {rank} 名 {name}！提交即可夺下他的名次：',
+    'battle.join': '你还不在天梯上。提交这场战斗即可加入天梯（不论输赢，从最底下开始）：',
+    'battle.needName': '要提交天梯结果，请先设置玩家名（bugzoo setup --name <名字>）。',
+    'battle.openAsk': '要现在用浏览器打开吗？[Y/n]：',
+    'battle.opened': '已打开。请按“Submit new issue”，天梯会在一两分钟内更新。',
+    'battle.submitNote': '天梯会用你分享的队伍重新播放这场战斗，所以结果无法造假。',
+
+    'friend.usage': '用法：bugzoo friend [list] | code | add <代码|网址|文件|名字> | remove <名字> | refresh',
+    'friend.empty': '还没有好友。请朋友执行 `bugzoo friend code` 把代码给你，然后：bugzoo friend add <代码>',
+    'friend.title': '好友',
+    'friend.row': '{name}  战力 {p}  （{kind}）',
+    'friend.code': '你的好友代码。发给朋友，他们执行 `bugzoo friend add <代码>` 就能加你：',
+    'friend.needTeam': '请先捕获一只 bug：好友代码会带着你的队伍。',
+    'friend.needName': '请先设置玩家名：bugzoo setup --name <名字>',
+    'friend.added': '已添加 {name}（队伍战力 {p}）。',
+    'friend.updated': '已更新 {name}（队伍战力 {p}）。',
+    'friend.removed': '已移除 {name}。',
+    'friend.notFound': '没有叫 {name} 的好友。',
+    'friend.bad': '无法从这个内容读出一个好友。请使用好友代码（BZ1.…）、JSON 网址或文件，或天梯上的玩家名。',
+    'friend.self': '那是你自己。',
+    'friend.refreshed': '已更新 {n} 位好友，{failed} 位连不上。',
+    'friend.kind.code': '代码',
+    'friend.kind.url': '链接',
+    'friend.kind.file': '文件',
+    'friend.kind.ladder': '天梯',
+
+    'hook.usage': '用法：bugzoo hook <bash|zsh|fish|powershell>',
+    'misc.unknown': '未知的命令：{cmd}',
+    'misc.runUsage': '用法：bugzoo run <命令...>',
+    'misc.leaderUsage': '用法：bugzoo leaderboard <文件夹|文件...> [--out file.md]',
+    'misc.wrote': '已写入 {file}',
+    'misc.leaderWrote': '已写入 {file}（有效 {valid} 条，跳过 {skipped} 条）',
+    'svg.title': 'Bug Zoo · 已捕获 {caught} / 遇到 {seen}',
+
+    // VS Code extension (vscode/): the zoo view, the ladder panel and the notifications.
+    'vs.caught': '已捕获',
+    'vs.seen': '已遇见',
+    'vs.pen': '已捕获',
+    'vs.empty': '动物园还是空的。<br>在终端里跑一个会出错的命令，<br>怪物就会出现。',
+    'vs.wild': '野生',
+    'vs.power': '战力',
+    'vs.evo': '形态',
+    'vs.since': '出现于',
+    'vs.ladder': '榜单',
+    'vs.offline': '离线数据',
+    'vs.noladder': '榜单暂时无法加载',
+    'vs.friends': '好友',
+    'vs.fight': '对战',
+    'vs.you': '你',
+    'vs.challenge': '可以挑战这位玩家',
+    'vs.practice': '练习',
+    'vs.addFriend': '+ 加好友',
+    'vs.copyCode': '复制我的代码',
+    'vs.remove': '移除',
+    'vs.noTeam': '先抓一只 bug：你的队伍由最强的几只组成。',
+    'vs.win': '你赢了！',
+    'vs.lose': '你输了',
+    'vs.close': '关闭',
+    'vs.submit': '提交到榜单',
+    'vs.replay': '重播',
+    'vs.skip': '跳过',
+    'vs.promote': '你打败了 {name}！到 GitHub 提交这场胜利就能夺下他的名次。',
+    'vs.join': '到 GitHub 提交你的队伍就能加入榜单。',
+    'vs.outOfReach': '赢得漂亮，但榜单只在挑战你上方 {reach} 名以内的玩家时才会变动。',
+    'vs.friendly': '友谊赛：不会影响榜单。',
+    'vs.lost': '多修几个 bug、养强队伍再来挑战吧。',
+    'vs.practiceNote': '练习对战：不计入战绩。',
+    'vs.hits': '攻击',
+    'vs.crit': '暴击！',
+    'vs.gone': '这位对手已不在名单上。',
+    'vs.kind.code': '代码',
+    'vs.kind.url': '链接',
+    'vs.kind.file': '文件',
+    'vs.kind.ladder': '榜单',
+    'vs.vs': 'VS',
+    'vs.achievement': '成就',
+    'vs.nameTitle': 'Bug Zoo 玩家名',
+    'vs.namePrompt': '你在榜单上的名字（会显示给其他玩家）',
+    'vs.namePick': '请输入名字',
+    'vs.addTitle': '加好友',
+    'vs.addPrompt': '粘贴好友代码（BZ1...）、链接、文件路径，或榜单上的玩家名',
+    'vs.friendAdded': '已添加 {name}。',
+    'vs.friendUpdated': '已更新 {name}。',
+    'vs.friendSelf': '那是你自己！',
+    'vs.friendBad': '无法读取这位好友。',
+    'vs.needCatch': '先抓一只 bug：你的好友代码由最强的几只捕获组成。',
+    'vs.codeCopied': '已复制好友代码。发给朋友，他们粘贴到“加好友”就能对战。',
+    'vs.statusCaught': '$(check) Bug Zoo：捕获 {creature}！',
+    'vs.notifyCaught': '捕获 {creature}！它加入了你的动物园。',
+    'vs.statusSpawned': '$(bug) Bug Zoo：野生的 {creature} 出现了',
+    'vs.notifySpawned': '野生的 {creature} 出现了！修好 bug 后重跑命令就能捕获它。',
+    'vs.openZoo': '打开动物园',
+    'vs.captureOn': 'Bug Zoo 终端捕获已开启。',
+    'vs.captureOff': 'Bug Zoo 终端捕获已关闭。',
+  },
+};

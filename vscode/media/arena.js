@@ -8,41 +8,7 @@
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TONE = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
-  const TEXT = {
-    en: {
-      ladder: 'Ladder', friends: 'Friends', offline: 'offline copy', noladder: 'Ladder unavailable',
-      fight: 'Fight', you: 'you', challenge: 'You can challenge this player', practice: 'Practice',
-      addFriend: '+ Add friend', copyCode: 'Copy my code', remove: 'Remove',
-      noTeam: 'Catch a bug first: your team is made from your strongest catches.',
-      win: 'You win!', lose: 'You lose', close: 'Close', submit: 'Submit to the ladder', replay: 'Replay', skip: 'Skip',
-      promote: 'You beat {name}! Submit this win on GitHub to take their spot.',
-      join: 'Submit your team on GitHub to join the ladder.',
-      outOfReach: 'Nice win, but the ladder only moves for players up to {reach} ranks above you.',
-      friendly: 'A friendly fight: it does not change the ladder.',
-      lost: 'Fix a few more bugs, grow your team and try again.',
-      practiceNote: 'Practice fight: it does not count.',
-      hits: 'hits', crit: 'critical!', power: 'power', gone: 'That opponent is no longer on the list.',
-      kind: { code: 'code', url: 'link', file: 'file', ladder: 'ladder' },
-      vs: 'vs', achievement: 'Achievement',
-    },
-    'zh-TW': {
-      ladder: '榜單', friends: '好友', offline: '離線資料', noladder: '榜單暫時無法載入',
-      fight: '對戰', you: '你', challenge: '可以挑戰這位玩家', practice: '練習',
-      addFriend: '+ 加好友', copyCode: '複製我的代碼', remove: '移除',
-      noTeam: '先抓一隻 bug:你的隊伍由最強的幾隻組成。',
-      win: '你贏了!', lose: '你輸了', close: '關閉', submit: '提交到榜單', replay: '重播', skip: '跳過',
-      promote: '你打敗了 {name}!到 GitHub 提交這場勝利就能取代他的名次。',
-      join: '到 GitHub 提交你的隊伍就能加入榜單。',
-      outOfReach: '贏得漂亮,但榜單只在挑戰你上方 {reach} 名以內的玩家時才會變動。',
-      friendly: '友誼賽:不會影響榜單。',
-      lost: '多修幾個 bug、養強隊伍再來挑戰吧。',
-      practiceNote: '練習對戰:不計入戰績。',
-      hits: '攻擊', crit: '爆擊!', power: '戰力', gone: '這位對手已不在名單上。',
-      kind: { code: '代碼', url: '連結', file: '檔案', ladder: '榜單' },
-      vs: 'VS', achievement: '成就',
-    },
-  };
-  const tr = (k) => (TEXT[bz.lang()] || TEXT.en)[k];
+  const tr = (k) => bz.tr(k); // texts: src/locales/<code>.js (keys vs.*)
   const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (_m, k) => (vars[k] === undefined ? '' : vars[k]));
 
   let data = null;
@@ -56,7 +22,7 @@
     const rk = r.section === 'ladder' ? r.rank : (r.section === 'practice' ? '·' : '♥');
     const tags = [];
     if (r.isMe) tags.push(tr('you'));
-    if (r.kind) tags.push(tr('kind')[r.kind] || r.kind);
+    if (r.kind) tags.push(tr('kind.' + r.kind) || r.kind);
     const title = r.team.map((m) => m.name).join(', ') + (r.reach ? ' · ' + tr('challenge') : '');
     const star = r.reach ? '<span class="reach" title="' + esc(tr('challenge')) + '">★</span>' : '';
     const fightBtn = canFight && !r.isMe

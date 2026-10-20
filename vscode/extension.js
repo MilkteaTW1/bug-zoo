@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const vscode = require('vscode');
-const { buildState, diffStates } = require('./lib/state');
+const { buildState, diffStates, say, creatureName } = require('./lib/state');
 const fight = require('./lib/fight');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
 const { store } = require('./lib/engine');
@@ -47,9 +47,9 @@ const post = (view, msg) => view.webview.postMessage(msg);
 
 async function askName() {
   const name = await vscode.window.showInputBox({
-    title: 'Bug Zoo player name',
-    prompt: 'Your name on the ladder (shown to other players)',
-    validateInput: (v) => (v.trim() ? null : 'Pick a name'),
+    title: say('nameTitle'),
+    prompt: say('namePrompt'),
+    validateInput: (v) => (v.trim() ? null : say('namePick')),
   });
   return name && fight.saveName(name) ? name : null;
 }
@@ -69,13 +69,13 @@ async function onWebviewMessage(view, msg) {
     if (url) await vscode.env.openExternal(vscode.Uri.parse(url));
   } else if (msg.type === 'addFriend') {
     const input = await vscode.window.showInputBox({
-      title: 'Add a friend',
-      prompt: 'Paste a friend code (BZ1...), a link, a file path, or a player name from the ladder',
+      title: say('addTitle'),
+      prompt: say('addPrompt'),
     });
     if (!input) return;
     const r = await fight.addFriend(input);
-    if (r.ok) vscode.window.showInformationMessage(`${r.updated ? 'Updated' : 'Added'} ${r.name}.`);
-    else vscode.window.showWarningMessage(r.reason === 'self' ? 'That is you!' : 'Could not read that friend.');
+    if (r.ok) vscode.window.showInformationMessage(say(r.updated ? 'friendUpdated' : 'friendAdded', { name: r.name }));
+    else vscode.window.showWarningMessage(say(r.reason === 'self' ? 'friendSelf' : 'friendBad'));
     refreshLadder();
   } else if (msg.type === 'removeFriend') {
     fight.removeFriend(msg.name);
@@ -84,11 +84,11 @@ async function onWebviewMessage(view, msg) {
     if (fight.needsName() && !(await askName())) return;
     const code = fight.myCode();
     if (!code) {
-      vscode.window.showInformationMessage('Catch a bug first: your friend code is made from your strongest catches.');
+      vscode.window.showInformationMessage(say('needCatch'));
       return;
     }
     await vscode.env.clipboard.writeText(code);
-    vscode.window.showInformationMessage('Friend code copied. Send it to a friend; they paste it into Add friend.');
+    vscode.window.showInformationMessage(say('codeCopied'));
   } else if (msg.type === 'refreshArena') {
     refreshLadder();
   }
@@ -104,14 +104,14 @@ function scheduleRefresh() {
 
 function announce(events) {
   for (const c of events.caught) {
-    vscode.window.setStatusBarMessage(`$(check) Bug Zoo: caught ${c.name} the ${c.type}!`, 6000);
-    vscode.window.showInformationMessage(`Caught ${c.name} the ${c.type}! It joined your zoo.`);
+    vscode.window.setStatusBarMessage(say('statusCaught', { creature: creatureName(c) }), 6000);
+    vscode.window.showInformationMessage(say('notifyCaught', { creature: creatureName(c) }));
   }
   for (const c of events.spawned) {
-    vscode.window.setStatusBarMessage(`$(bug) Bug Zoo: a wild ${c.name} the ${c.type} appeared`, 6000);
+    vscode.window.setStatusBarMessage(say('statusSpawned', { creature: creatureName(c) }), 6000);
     vscode.window.showWarningMessage(
-      `A wild ${c.name} the ${c.type} appeared! Fix the bug and re-run the command to catch it.`,
-      'Open the zoo',
+      say('notifySpawned', { creature: creatureName(c) }),
+      say('openZoo'),
     ).then((pick) => {
       if (pick) vscode.commands.executeCommand('bugzoo.zoo.focus');
     });
@@ -201,6 +201,8 @@ function captureTerminal(context) {
 }
 
 function activate(context) {
+  // A player who never chose a language gets the editor's display language (the CLI still wins when it is set).
+  if (!process.env.BUGZOO_LANG) process.env.BUGZOO_LANG = vscode.env.language;
   const provider = {
     resolveWebviewView(view) {
       attach(view, context.extensionUri);
@@ -219,7 +221,7 @@ function activate(context) {
     vscode.commands.registerCommand('bugzoo.toggleCapture', async () => {
       const on = !config().get('captureTerminal');
       await config().update('captureTerminal', on, vscode.ConfigurationTarget.Global);
-      vscode.window.showInformationMessage(`Bug Zoo terminal capture ${on ? 'on' : 'off'}.`);
+      vscode.window.showInformationMessage(say(on ? 'captureOn' : 'captureOff'));
     }),
   );
   context.subscriptions.push(vscode.workspace.onDidChangeWorkspaceFolders(scheduleRefresh));

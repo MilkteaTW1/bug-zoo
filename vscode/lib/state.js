@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('node:path');
-const { store, power, remote } = require('./engine');
+const { store, power, remote, i18n } = require('./engine');
 
 /**
  * Turn the dex file into what the zoo view draws.
@@ -15,12 +15,27 @@ const isInside = (cwd, folder) => {
   return c === f || c.startsWith(f + path.sep);
 };
 
+/** The player's language: their saved choice, else the editor's display language (see activate()). */
+function setLang(dex) {
+  i18n.setLang((dex.profile && dex.profile.lang) || i18n.detectLang());
+}
+
+/** A message for the editor's own notifications and prompts (the views get theirs through the state). */
+function say(key, vars) {
+  setLang(store.load());
+  return i18n.t(`vs.${key}`, vars);
+}
+
+/** "Wibblebat the TypeError" in the current language. */
+const creatureName = (c) => i18n.t('fmt.creature', { name: c.name, type: c.type });
+
 /**
  * folders - open project folders: only bugs waiting in those projects count as wild (the rest stay saved
  * but hidden). Leave undefined to show everything.
  */
 function buildState(folders) {
   const dex = store.load();
+  setLang(dex);
   const pendingInfo = {};
   const since = {};
   const wildIds = new Set();
@@ -51,7 +66,8 @@ function buildState(folders) {
     wild, caught,
     seen: all.length,
     caughtCount: all.filter((c) => (c.captures || 0) > 0).length,
-    lang: (dex.profile && dex.profile.lang) || null,
+    lang: i18n.getLang(),
+    text: i18n.bundle('vs.'), // every on-screen text of the zoo and ladder views, in the player's language
   };
 }
 
@@ -84,4 +100,4 @@ async function loadLadderRows() {
   return { rows, me, source: l.source, offline: l.source === 'cache' || l.source === 'none' };
 }
 
-module.exports = { buildState, diffStates, loadLadderRows };
+module.exports = { buildState, diffStates, loadLadderRows, say, creatureName };

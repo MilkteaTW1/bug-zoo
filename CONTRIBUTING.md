@@ -19,7 +19,7 @@ Then open a pull request. Mention `Closes #<issue>` if it fixes one. For the lan
 
 - Keep it dependency-free.
 - Add or extend a test in `test/` for what you change. CI runs `npm test` on Linux, macOS and Windows.
-- Adding a language: follow the `zh-TW` block in `src/i18n.js`, add it to the `bugzoo setup` language choice, and extend `test/i18n.test.js` so every key exists. Translate meaning, not characters.
+- Adding a language: run `npm run lang -- <code> <name>` (e.g. `npm run lang -- ja 日本語`). It creates `src/locales/<code>.js` from the English text; translate `help` and `messages`, keep the `{placeholders}`, and check progress with `npm run lang:check`. It also covers the VS Code extension (the `vs.*` keys). Optionally add `vscode/package.nls.<locale>.json` for the extension's command names. Translate meaning, not characters.
 - Please do not edit `leaderboard/`, `LADDER.md` or `LEADERBOARD.md` in a pull request: a bot maintains them.
 
 ## The ladder is separate

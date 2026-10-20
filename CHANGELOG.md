@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Languages are one file each** in `src/locales/`. `npm run lang -- <code> <name>` creates a new one and `npm run lang:check` shows what is still untranslated; the `bugzoo setup` picker, `--help` and locale detection pick it up automatically.
+  The VS Code extension now uses the same files (`vs.*` keys) for the zoo view, ladder panel and notifications, so zh-CN and every future language work there too; command names come from `vscode/package.nls.*.json`.
+  每個語言一個檔案（`src/locales/`）。`npm run lang -- <代碼> <名稱>` 建立新語言，`npm run lang:check` 檢查尚未翻譯的部分；語言選單、`--help` 與系統語系偵測會自動套用。VS Code 擴充套件的畫面與通知也改用同一份檔案（`vs.*`），簡體與之後新增的語言都會生效；指令名稱來自 `vscode/package.nls.*.json`。
+
 - **Simplified Chinese (zh-CN)**, thanks to @cjy851096 (#5). Hong Kong and Macau locales (zh-HK, zh-MO) stay Traditional.
   新增简体中文，感谢 @cjy851096（#5）。zh-HK、zh-MO 仍使用繁體。
 

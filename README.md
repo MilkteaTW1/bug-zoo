@@ -264,6 +264,19 @@ Running your own ladder? Fork the repo and set `BUGZOO_LADDER_REPO=owner/repo` (
 - Evolution when you meet the same monster many times
 - More languages' error formats
 
+## Add your language
+
+Each language is one file in [`src/locales/`](src/locales). To add yours:
+
+```bash
+npm run lang -- ja 日本語     # creates src/locales/ja.js from the English text
+# translate "help" and "messages" in that file
+npm run lang:check            # shows what is still English
+npm test
+```
+
+Nothing else needs editing: the language shows up in `bugzoo setup`, is picked from the system locale automatically, and also translates the [VS Code extension](vscode/) (its texts are the `vs.*` keys in the same file). Optionally add `vscode/package.nls.<locale>.json` for the extension's command names. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## License
 
 MIT
@@ -537,6 +550,19 @@ bugzoo share --name alice --out leaderboard/scores/alice.json
 
 - 同一隻怪物遇見很多次後會進化
 - 支援更多語言的錯誤格式
+
+## 新增你的語言
+
+每個語言就是 [`src/locales/`](src/locales) 裡的一個檔案。新增方式：
+
+```bash
+npm run lang -- ja 日本語     # 以英文內容建立 src/locales/ja.js
+# 翻譯該檔案裡的 "help" 與 "messages"
+npm run lang:check            # 檢查還有哪些是英文
+npm test
+```
+
+不用改其他檔案：新語言會自動出現在 `bugzoo setup`、依系統語系自動選用，也會同時翻譯 [VS Code 擴充套件](vscode/)（它的文字就是同一個檔案裡的 `vs.*`）。可另外新增 `vscode/package.nls.<locale>.json` 翻譯擴充套件的指令名稱。詳見 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 授權
 

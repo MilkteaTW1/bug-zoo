@@ -8,12 +8,9 @@
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TONE = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
-  const TEXT = {
-    en: { caught: 'caught', seen: 'seen', pen: 'caught', empty: 'The zoo is empty.<br>Run a command that fails in the terminal<br>and a monster will show up.', wild: 'wild', power: 'power', evo: 'form', since: 'since', ladder: 'Ladder', offline: 'offline copy', noladder: 'Ladder unavailable' },
-    'zh-TW': { caught: '已捕獲', seen: '已遇見', pen: '已捕獲', empty: '動物園還是空的。<br>在終端機跑一個會出錯的指令,<br>怪物就會出現。', wild: '野生', power: '戰力', evo: '型態', since: '出現於', ladder: '榜單', offline: '離線資料', noladder: '榜單暫時無法載入' },
-  };
-  let lang = 'en';
-  const tr = (k) => (TEXT[lang] || TEXT.en)[k];
+  // All texts come from the player's language file (src/locales/<code>.js, keys vs.*) through the state.
+  let text = {};
+  const tr = (k) => text[k] || '';
 
   const mons = new Map();
   let last = performance.now();
@@ -157,8 +154,7 @@
   }
 
   function render(state, events) {
-    if (state.lang && TEXT[state.lang]) lang = state.lang;
-    else if (/^zh/i.test(navigator.language)) lang = 'zh-TW';
+    text = state.text || text;
     bar.innerHTML = '<span>' + tr('caught') + ' ' + state.caughtCount + ' / ' + tr('seen') + ' ' + state.seen + '</span><span>' +
       (state.wild.length ? tr('wild') + ' ' + state.wild.length : '') + '</span>';
     pen.dataset.label = tr('pen');
@@ -217,7 +213,7 @@
   // arena.js (the ladder, friends and fights) shares the page through this handle.
   window.bugzoo = {
     vscode,
-    lang: () => lang,
+    tr,
     esc,
     relayout(ladderHeight) {
       zoo.style.setProperty('--ladder-h', ladderHeight + 'px');

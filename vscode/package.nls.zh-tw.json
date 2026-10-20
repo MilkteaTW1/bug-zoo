@@ -1,0 +1,7 @@
+{
+  "view.zoo": "動物園",
+  "command.openZoo": "Bug Zoo：在編輯器分頁開啟動物園",
+  "command.toggleCapture": "Bug Zoo：切換終端機捕捉",
+  "config.captureTerminal": "把整合終端機裡失敗的指令變成怪物（需要終端機 shell integration）。如果你已經用 `bugzoo setup --auto on`，請關閉這個選項，否則同一次執行會被算兩次。",
+  "config.notifications": "怪物出現或被捕獲時顯示通知。"
+}

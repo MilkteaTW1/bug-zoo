@@ -12,51 +12,63 @@ const auto = require('../src/autostart');
 
 const REGISTER = auto.REGISTER_ARG; // same quoting-safe form that `bugzoo setup` writes
 
-test('every language has exactly the same keys as English', () => {
-  // Reads the same tables through t(): a missing key would echo the key itself.
-  const src = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'i18n.js'), 'utf8');
-  const body = src.slice(src.indexOf('const M = {'), src.indexOf('\nlet current'));
-  const blocks = [...body.matchAll(/^  (?:'([^']+)'|([a-zA-Z]+)): \{/gm)]
-    .map((m, i, all) => ({
-      lang: m[1] || m[2],
-      text: body.slice(m.index, i + 1 < all.length ? all[i + 1].index : body.length),
-    }));
-  const keysOf = (text) => new Set([...text.matchAll(/^\s{4}'([^']+)':/gm)].map((m) => m[1]));
-
-  // Every registered language must have a table, and English is the reference.
-  assert.deepEqual(blocks.map((b) => b.lang).sort(), [...i18n.LANGS].sort());
-  const reference = keysOf(blocks.find((b) => b.lang === 'en').text);
+test('every language file has exactly the same keys as English', () => {
+  const reference = new Set(Object.keys(i18n.LOCALES.en.messages));
   assert.ok(reference.size > 40);
+  assert.ok(i18n.LANGS.includes('en') && i18n.LANGS.length >= 3);
+  for (const code of i18n.LANGS) {
+    if (code === 'en') continue;
+    const keys = new Set(Object.keys(i18n.LOCALES[code].messages));
+    assert.deepEqual([...reference].filter((k) => !keys.has(k)), [], `${code} is missing keys`);
+    assert.deepEqual([...keys].filter((k) => !reference.has(k)), [], `${code} has keys English lacks`);
+  }
+});
 
-  for (const { lang, text } of blocks) {
-    if (lang === 'en') continue;
-    const keys = keysOf(text);
-    assert.deepEqual([...reference].filter((k) => !keys.has(k)), [], `${lang} is missing keys`);
-    assert.deepEqual([...keys].filter((k) => !reference.has(k)), [], `${lang} has keys English lacks`);
+test('every language file is complete: code, label, detect prefixes and help text', () => {
+  for (const code of i18n.LANGS) {
+    const loc = i18n.LOCALES[code];
+    assert.equal(loc.code, code, `${code}.js declares another code`);
+    assert.ok(loc.label && loc.detect.length > 0 && loc.help.includes('bugzoo'), `${code} is incomplete`);
+    assert.equal(i18n.parseLang(code), code, `${code} cannot be chosen by its own code`);
+    assert.equal(i18n.LANG_LABEL[code], loc.label);
   }
 });
 
 test('translations keep every {placeholder} of the English original', () => {
-  const src = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'i18n.js'), 'utf8');
-  const body = src.slice(src.indexOf('const M = {'), src.indexOf('\nlet current'));
-  const blocks = [...body.matchAll(/^  (?:'([^']+)'|([a-zA-Z]+)): \{/gm)]
-    .map((m, i, all) => ({
-      lang: m[1] || m[2],
-      text: body.slice(m.index, i + 1 < all.length ? all[i + 1].index : body.length),
-    }));
-  const entriesOf = (text) => new Map([...text.matchAll(/^\s{4}'([^']+)': '((?:[^'\\]|\\.)*)'/gm)]
-    .map((m) => [m[1], m[2]]));
   const holes = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
-
-  const en = entriesOf(blocks.find((b) => b.lang === 'en').text);
-  for (const { lang, text } of blocks) {
-    if (lang === 'en') continue;
-    const table = entriesOf(text);
-    for (const [key, value] of table) {
-      if (!en.has(key)) continue;
-      assert.deepEqual(holes(value), holes(en.get(key)), `${lang}/${key} changed its placeholders`);
+  const en = i18n.LOCALES.en.messages;
+  for (const code of i18n.LANGS) {
+    for (const [key, value] of Object.entries(i18n.LOCALES[code].messages)) {
+      if (key in en) assert.deepEqual(holes(value), holes(en[key]), `${code}/${key} changed its placeholders`);
     }
   }
+});
+
+test('the language picker lists every language and accepts numbers, codes and locales', () => {
+  const prompt = i18n.langPrompt();
+  i18n.LANGS.forEach((code, i) => assert.ok(prompt.includes(`[${i + 1}] ${i18n.LANG_LABEL[code]}`)));
+  assert.equal(i18n.parseLang('1'), i18n.LANGS[0]);
+  assert.equal(i18n.parseLang('zh_CN.UTF-8'), 'zh-CN');
+  assert.equal(i18n.parseLang('zh-HK'), 'zh-TW');
+  assert.equal(i18n.parseLang('EN'), 'en');
+  assert.equal(i18n.parseLang('99'), null);
+  assert.equal(i18n.parseLang('xx'), null);
+});
+
+test('npm run lang creates a ready-to-translate file with the English keys, then refuses to overwrite it', () => {
+  const root = path.resolve(__dirname, '..');
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'bz-lang-'));
+  const make = () => spawnSync(process.execPath, [path.join(root, 'tools', 'new-lang.js'), 'zz-ZZ', 'Zedish'],
+    { encoding: 'utf8', env: { ...process.env, BUGZOO_LOCALES_OUT: out } });
+  assert.equal(make().status, 0);
+  const loc = require(path.join(out, 'zz-ZZ.js'));
+  assert.equal(loc.code, 'zz-ZZ');
+  assert.equal(loc.label, 'Zedish');
+  assert.deepEqual(loc.detect, ['zz-zz', 'zz']);
+  assert.equal(loc.order, undefined);
+  assert.deepEqual(Object.keys(loc.messages), Object.keys(i18n.LOCALES.en.messages));
+  assert.notEqual(make().status, 0, 'a second run must not overwrite the file');
+  assert.equal(fs.existsSync(path.join(root, 'src', 'locales', 'zz-ZZ.js')), false, 'the test must not touch src/locales');
 });
 
 test('t() interpolates and falls back to English then the key', () => {
