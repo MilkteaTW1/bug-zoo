@@ -1,6 +1,6 @@
 # Changelog / 更新紀錄
 
-## Unreleased
+## 0.3.3
 
 - **Languages are one file each** in `src/locales/`. `npm run lang -- <code> <name>` creates a new one and `npm run lang:check` shows what is still untranslated; the `bugzoo setup` picker, `--help` and locale detection pick it up automatically.
   The VS Code extension now uses the same files (`vs.*` keys) for the zoo view, ladder panel and notifications, so zh-CN and every future language work there too; command names come from `vscode/package.nls.*.json`.
