@@ -27,6 +27,8 @@ bugzoo setup
 
 Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / 简体中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
 
+Change the language any time with one line: `bugzoo lang zh-CN` (`bugzoo lang` lists them). In VS Code use the globe button in the Bug Zoo view header.
+
 ## Play in 30 seconds
 
 ```bash
@@ -313,7 +315,9 @@ npm install -g bug-zoo
 bugzoo setup
 ```
 
-需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／English）和排行榜用的玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
+需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／简体中文／English）和排行榜用的玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
+
+之後想換語言，一行就好：`bugzoo lang zh-CN`（`bugzoo lang` 會列出所有語言）。在 VS Code 裡則按 Bug Zoo 面板標題列的地球按鈕。
 
 ## 30 秒玩一次
 

@@ -76,6 +76,8 @@ The zoo, the ladder panel and the notifications use the same language files as t
 
 ## 繁體中文
 
+語言可以隨時切換：按 Bug Zoo 面板標題列的地球按鈕（或指令「Bug Zoo：切換語言」），擴充套件與 CLI 會一起換成同一個語言；清單會自動列出專案裡現有的所有語言。
+
 把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建天梯、好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。
 
 [![觀看 36 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
