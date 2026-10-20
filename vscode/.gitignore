@@ -1,0 +1,3 @@
+bugzoo-src/
+*.vsix
+node_modules/

@@ -1,0 +1,46 @@
+{
+  "name": "bug-zoo-vscode",
+  "displayName": "Bug Zoo",
+  "description": "Your failing terminal commands become little monsters that roam around VS Code. Fix the bug to catch them.",
+  "version": "0.1.0",
+  "publisher": "MilkteaTW1",
+  "license": "MIT",
+  "engines": { "vscode": "^1.93.0" },
+  "categories": ["Other", "Visualization"],
+  "keywords": ["bug-zoo", "errors", "game", "fun", "terminal"],
+  "repository": { "type": "git", "url": "git+https://github.com/MilkteaTW1/bug-zoo.git", "directory": "vscode" },
+  "main": "./extension.js",
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [{ "id": "bugzoo", "title": "Bug Zoo", "icon": "media/icon.svg" }]
+    },
+    "views": {
+      "bugzoo": [{ "type": "webview", "id": "bugzoo.zoo", "name": "Zoo" }]
+    },
+    "commands": [
+      { "command": "bugzoo.openZoo", "title": "Bug Zoo: Open the zoo in an editor tab" },
+      { "command": "bugzoo.toggleCapture", "title": "Bug Zoo: Toggle terminal capture" }
+    ],
+    "configuration": {
+      "title": "Bug Zoo",
+      "properties": {
+        "bugzoo.captureTerminal": {
+          "type": "boolean",
+          "default": true,
+          "description": "Turn failing commands in the integrated terminal into monsters (needs terminal shell integration). Turn this off if you already use `bugzoo setup --auto on`, or runs would count twice."
+        },
+        "bugzoo.notifications": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show a notification when a monster appears or is caught."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vendor": "node scripts/vendor.js",
+    "test": "node --test test/*.test.js",
+    "package": "node scripts/vendor.js && npx --yes @vscode/vsce package"
+  }
+}
