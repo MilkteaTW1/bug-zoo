@@ -17,6 +17,7 @@ const WIDTH = 1120;
 const HEIGHT = 660;
 const outDir = path.resolve(process.argv[2] || path.join(__dirname, '..', 'docs'));
 const work = path.join(require('node:os').tmpdir(), `bugzoo-rec-${Date.now()}`);
+const ZH = process.env.BZ_LANG === 'zh';
 const media = path.join(__dirname, '..', 'media');
 
 function sidebarHtml() {
@@ -51,7 +52,7 @@ function serve(dir) {
 async function record(browser, base, name) {
   const page = await browser.newPage();
   await page.setViewport({ width: WIDTH, height: HEIGHT, deviceScaleFactor: 1 });
-  await page.goto(`${base}/mock.html?${name}`);
+  await page.goto(`${base}/mock.html?${name}${ZH ? '&zh' : ''}`);
   await page.waitForFunction('window.__ready === true');
 
   const frames = [];
@@ -109,8 +110,8 @@ function encode(listFile, gif, mp4) {
   try {
     for (const name of ['catch', 'fight', 'friends']) {
       const r = await record(browser, base, name);
-      const gif = path.join(outDir, `${name}.gif`);
-      const mp4 = process.env.MP4_DIR ? path.join(process.env.MP4_DIR, `${name}.mp4`) : null;
+      const gif = path.join(outDir, `${name}${ZH ? '.zh' : ''}.gif`);
+      const mp4 = process.env.MP4_DIR ? path.join(process.env.MP4_DIR, `${name}${ZH ? '.zh' : ''}.mp4`) : null;
       encode(r.listFile, gif, mp4);
       console.log(`${name}: ${r.count} frames -> ${gif} (${(fs.statSync(gif).size / 1048576).toFixed(1)} MB)`);
     }

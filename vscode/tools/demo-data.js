@@ -43,7 +43,7 @@ function writeLadder() {
 
 function seedPlayer() {
   const dex = store.load();
-  dex.profile = { name: 'devfan', lang: 'en' };
+  dex.profile = { name: 'devfan', lang: process.env.BZ_LANG === 'zh' ? 'zh-TW' : 'en' };
   const seeds = [
     ['KeyError', "'user_id'", 4, { frames: 6, blast: 6, loc: 9000, failRate: 0.6 }],
     ['ENOENT', "no such file 'config.json'", 11, { frames: 4, blast: 5, loc: 9000, failRate: 0.5 }],

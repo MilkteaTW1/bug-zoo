@@ -67,6 +67,26 @@
 <script>
 (async function () {
   const D = await (await fetch('data.json')).json();
+  const ZH = /[?&]zh/.test(location.search);
+  const S = ZH ? {
+    run: '在終端機跑一個會當機的指令…', wild: '野生 bug 出現了!', fix: '修好 bug…', caught: '捕獲成功!怪物進入你的圍欄',
+    ladder: '榜單在面板最底部', star: '星號 = 打得到的對手,按「Fight」!', win: '贏了就把戰績提交到榜單',
+    friends: '好友分頁:用代碼、連結或榜單名稱加好友', fightFriend: '隨時都能跟好友對戰', share: '用代碼分享你的隊伍',
+    submit: '正在開啟預填好的 GitHub issue…<small>在那邊按「Submit new issue」就能把勝利送上榜單。</small>',
+    addQ: '加好友:貼上好友代碼 (BZ1…)、連結、檔案路徑,或榜單上的玩家名稱', added: '已加入 ByteBaker。',
+    copied: '好友代碼已複製。<small>傳給朋友,他貼到「加好友」就行。</small>',
+    wildToast: (n, t) => '野生的 <b>' + n + '</b>(' + t + ')出現了!修好 bug 後重跑指令就能捕獲。',
+    caughtToast: (n, t) => '捕獲 <b>' + n + '</b>(' + t + ')!已加入你的動物園。',
+  } : {
+    run: 'Run something that crashes…', wild: 'A wild bug appears!', fix: 'Fix the bug…', caught: 'Caught! It moves into your pen',
+    ladder: 'The ladder lives at the bottom of the panel', star: 'Star = within reach. Press Fight!', win: 'Win it, then submit your result to the ladder',
+    friends: 'Friends tab: add rivals by code, link or ladder name', fightFriend: 'Fight your friend any time', share: 'Share your own team with a code',
+    submit: 'Opening a pre-filled GitHub issue…<small>Press “Submit new issue” there to send your win to the ladder.</small>',
+    addQ: 'Add a friend: paste a friend code (BZ1…), a link, a file path, or a player name from the ladder', added: 'Added ByteBaker.',
+    copied: 'Friend code copied.<small>Send it to a friend; they paste it into “Add friend”.</small>',
+    wildToast: (n, t) => 'A wild <b>' + n + '</b> the ' + t + ' appeared! Fix the bug and re-run the command to catch it.',
+    caughtToast: (n, t) => 'Caught <b>' + n + '</b> the ' + t + '! It joined your zoo.',
+  };
   const $ = (id) => document.getElementById(id);
   const zoo = $('zoo');
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -138,13 +158,13 @@
       const b = m.section === 'ladder' ? D.battleLadder : (m.section === 'friend' ? D.battleFriend : D.battlePractice);
       send({ type: 'battle', battle: b });
     } else if (m.type === 'submit') {
-      toast('Opening a pre-filled GitHub issue…<small>Press “Submit new issue” there to send your win to the ladder.</small>');
+      toast(S.submit);
     } else if (m.type === 'addFriend') {
-      await quickInput('Add a friend: paste a friend code (BZ1…), a link, a file path, or a player name from the ladder', 'ByteBaker');
+      await quickInput(S.addQ, 'ByteBaker');
       arena = D.arenaB; send({ type: 'ladder', ladder: arena });
-      toast('Added ByteBaker.');
+      toast(S.added);
     } else if (m.type === 'copyCode') {
-      toast('Friend code copied.<small>Send it to a friend; they paste it into “Add friend”.</small>');
+      toast(S.copied);
     }
   });
 
@@ -155,28 +175,28 @@
       await waitReady();
       paintCode(BROKEN); term = ''; paintTerm();
       send({ type: 'state', state: D.states.S0, events: null }); send({ type: 'ladder', ladder: D.arenaA });
-      caption('Run something that crashes…'); await sleep(1800);
+      caption(S.run); await sleep(1800);
       await typeCmd('node app.js');
       D.crash.split('\n').forEach((l) => termOut(l, /Error|\^/.test(l) ? 'err' : ''));
       send({ type: 'state', state: D.states.S1, events: D.events.spawn });
       const w = D.states.S1.wild[0];
-      toast('A wild <b>' + w.name + '</b> the ' + w.type + ' appeared! Fix the bug and re-run the command to catch it.');
-      caption('A wild bug appears!', 3600); await sleep(4800);
-      caption('Fix the bug…'); paintCode(FIXED, 2); await sleep(2600);
+      toast(S.wildToast(w.name, w.type));
+      caption(S.wild, 3600); await sleep(4800);
+      caption(S.fix); paintCode(FIXED, 2); await sleep(2600);
       await typeCmd('node app.js'); termOut('Hello, world', 'good');
       send({ type: 'state', state: D.states.S2, events: D.events.caught });
-      toast('Caught <b>' + w.name + '</b> the ' + w.type + '! It joined your zoo.');
-      caption('Caught! It moves into your pen', 3600); await sleep(5200);
+      toast(S.caughtToast(w.name, w.type));
+      caption(S.caught, 3600); await sleep(5200);
     },
     async fight() {
       await waitReady();
       paintCode(FIXED, 2); term = ''; paintTerm();
       send({ type: 'state', state: D.states.S2, events: null }); send({ type: 'ladder', ladder: D.arenaA });
-      caption('The ladder lives at the bottom of the panel', 3000); await sleep(3200);
-      caption('Star = within reach. Press Fight!', 3000);
+      caption(S.ladder, 3000); await sleep(3200);
+      caption(S.star, 3000);
       await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes(D.target)).querySelector('.fight'));
       await sleep(7600);
-      caption('Win it, then submit your result to the ladder', 3000);
+      caption(S.win, 3000);
       await clickEl('#submit'); await sleep(3600);
       await clickEl('#close'); await sleep(1200);
     },
@@ -185,15 +205,15 @@
       paintCode(FIXED, 2); term = ''; paintTerm();
       send({ type: 'state', state: D.states.S2, events: null }); send({ type: 'ladder', ladder: D.arenaA });
       await sleep(1500);
-      caption('Friends tab: add rivals by code, link or ladder name', 3200);
+      caption(S.friends, 3200);
       await clickEl('.tab[data-tab="friends"]'); await sleep(1200);
       await clickEl('#add'); await sleep(2400);
-      caption('Fight your friend any time', 2600);
+      caption(S.fightFriend, 2600);
       await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes('ByteBaker')).querySelector('.fight'));
       await sleep(1500);
       await clickEl('#skip'); await sleep(1600);
       await clickEl('#close'); await sleep(900);
-      caption('Share your own team with a code', 2600);
+      caption(S.share, 2600);
       await clickEl('#copy'); await sleep(3200);
     },
   };

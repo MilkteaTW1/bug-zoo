@@ -8,6 +8,10 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 
 *The GIFs use demo data and a made-up ladder; the zoo, fights and replays are the real extension.*
 
+[![Watch the 36-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
+
+*Click to watch the 36-second promo video. 中文版影片:[點這裡](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)*
+
 **A crash spawns a monster. Fix it, and it is caught.**
 
 ![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
@@ -65,3 +69,15 @@ npm run package     # vendors ../src and builds a .vsix
 ```
 
 Press F5 in VS Code with this folder open to try it in an Extension Development Host.
+
+## 繁體中文
+
+把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建天梯、好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。
+
+[![觀看 36 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
+
+![指令失敗出現野生怪物,修好後捕獲](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.zh.gif)
+
+![挑戰天梯玩家並提交勝利](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
+
+![加好友、對戰、複製好友代碼](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.zh.gif)

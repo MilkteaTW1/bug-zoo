@@ -41,7 +41,21 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 
 Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode/) turns failing terminal commands into monsters in the side bar, with the ladder, friends and animated fights built in. It shares the same data file as the CLI.
 
-![A failing command spawns a wild monster; the fix catches it](vscode/docs/catch.gif)
+[![Watch the 36-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
+
+*Click to watch the 36-second promo video.*
+
+**A crash spawns a monster. Fix it, and it is caught.**
+
+![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
+
+**Climb the ladder with a turn-by-turn battle replay.**
+
+![Fighting a ladder player and submitting the win](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
+
+**Add friends, fight them any time, share your team with a code.**
+
+![Adding a friend, fighting them and copying your friend code](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.gif)
 
 ## Commands
 
@@ -294,6 +308,26 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 ```
 
 任何指令都行（`bugzoo run python main.py`、`bugzoo run npm test`…）。沒有專案可以試？`playground/` 裡有三支故意壞掉的程式，說明見 [playground/GUIDE.md](playground/GUIDE.md)。
+
+## VS Code 擴充套件
+
+想看 bug 在編輯器裡跑來跑去？[VS Code 擴充套件](vscode/)會把終端機裡失敗的指令變成側邊欄的怪物，內建天梯、好友和動畫對戰，和 CLI 共用同一份資料檔。
+
+[![觀看 36 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
+
+*點圖觀看 36 秒宣傳影片。*
+
+**當機就生出怪物，修好它就能捕獲。**
+
+![指令失敗出現野生怪物，修好後捕獲](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.zh.gif)
+
+**爬天梯，還有逐回合的戰鬥重播。**
+
+![挑戰天梯玩家並提交勝利](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
+
+**加好友、隨時開戰、用代碼分享你的隊伍。**
+
+![加好友、對戰、複製好友代碼](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.zh.gif)
 
 ## 指令表
 
