@@ -32,7 +32,7 @@ const HELP = {
   en: `bugzoo - turn your errors into collectible monsters
 
 Usage:
-  bugzoo setup [--lang zh-TW|en] [--name N] [--auto on|off] [--ai on|off]
+  bugzoo setup [--lang zh-TW|zh-CN|en] [--name N] [--auto on|off] [--ai on|off]
                               Language, player name, automatic capture, and
                               monsters for commands your AI assistant runs
                               (Claude Code)
@@ -71,7 +71,7 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
   'zh-TW': `bugzoo - 把你的錯誤變成可收集的怪物
 
 用法：
-  bugzoo setup [--lang zh-TW|en] [--name 名稱] [--auto on|off] [--ai on|off]
+  bugzoo setup [--lang zh-TW|zh-CN|en] [--name 名稱] [--auto on|off] [--ai on|off]
                               語言、玩家名稱、自動捕捉，以及 AI 助手
                               （Claude Code）執行的指令也會出怪物
   bugzoo run <指令...>        執行指令，失敗時會出現 bug
@@ -103,6 +103,42 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
   出現新的 bug     逃走了，新的 bug 變成你的目標
 
 在天梯上打贏排名在你上面 3 名以內的人，就能奪下他的名次。
+`,
+  'zh-CN': `bugzoo - 把你的错误变成可收集的怪物
+
+用法：
+  bugzoo setup [--lang zh-TW|zh-CN|en] [--name 名字] [--auto on|off] [--ai on|off]
+                              语言、玩家名、自动捕获，以及 AI 助手
+                              （Claude Code）执行的命令也会出怪物
+  bugzoo run <命令...>        执行命令，失败时会出现 bug
+                              （开启自动捕获后就不用打这个）
+  bugzoo dex                  你的图鉴与等着被捕获的 bug
+  bugzoo team                 你最强的捕获与它们的进化状况
+  bugzoo achievements         你的成就
+  bugzoo battle [--card f.svg]
+                              列出天梯、好友与练习对手，输入编号就开打；
+                              --card 会存成可分享的战斗结果卡
+  bugzoo friend               列出好友（也可用：code | add <代码|网址|文件|名字>
+                              | remove <名字> | refresh）
+  bugzoo ladder [文件夹]      查看天梯
+  bugzoo scan                 扫描这个项目：规模与被最多文件依赖的模块
+  bugzoo rank                 查看你的分数与称号
+  bugzoo share [--name 名字] [--out 文件]
+                              输出可分享的分数与队伍文件（不含错误内容）
+  bugzoo leaderboard <文件夹|文件...> [--out file.md]
+                              用分享文件生成分数排行榜
+  bugzoo hook <bash|zsh|fish|powershell>
+                              输出会把常见开发命令包起来的配置片段
+  bugzoo export [文件]        把图鉴导出成 SVG（默认 bugzoo.svg）
+  bugzoo help                 显示帮助
+
+捕获规则（在同一个文件夹重跑同一条命令；比对时会忽略旗标与纯数字参数）：
+  干净通过         捕获成功
+  同一个 bug       还在
+  部分 bug 消失    消失的那些捕获成功
+  出现新的 bug     逃走了，新的 bug 变成你的目标
+
+在天梯上打赢排名在你上面 3 名以内的人，就能夺下他的名次。
 `,
 };
 
@@ -137,7 +173,17 @@ function ask(question) {
   });
 }
 
-const normalizeLang = (v) => (/^zh/i.test(v) ? 'zh-TW' : /^en/i.test(v) ? 'en' : null);
+const normalizeLang = (v) => {
+  const s = String(v || '').trim().toLowerCase().replace(/_/g, '-');
+  if (!s) return null;
+  // The picker offers the languages in LANGS order as 1..n.
+  if (/^\d+$/.test(s)) return i18n.LANGS[Number(s) - 1] || null;
+  if (i18n.LANGS.includes(s)) return s;
+  if (/^zh-(?:tw|hant)\b/.test(s)) return 'zh-TW';
+  if (/^zh\b/.test(s)) return 'zh-CN';
+  if (/^en\b/.test(s)) return 'en';
+  return null;
+};
 const yes = (a) => !/^n/i.test(a);
 
 function openUrl(url) {
@@ -162,7 +208,7 @@ async function runSetup({ flags = {}, ask: prompt }) {
   if (prompt) {
     if (!lang) {
       const a = await ask(t('setup.lang'));
-      lang = a === '2' || /^en/i.test(a) ? 'en' : 'zh-TW';
+      lang = normalizeLang(a) || i18n.LANGS[0];
       i18n.setLang(lang);
     }
     if (name === null) name = cleanName(await ask(t('setup.name')));
