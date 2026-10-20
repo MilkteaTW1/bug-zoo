@@ -40,6 +40,7 @@ test('a failing command spawns a wild monster, a clean re-run catches it', () =>
   const done = buildState();
   assert.strictEqual(done.wild.length, 0);
   assert.strictEqual(done.caught.length, 1);
+  assert.ok(done.caught[0].power > 0, 'a caught monster carries its battle power');
   assert.strictEqual(diffStates(wild, done).caught.length, 1);
 });
 

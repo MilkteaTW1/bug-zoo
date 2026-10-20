@@ -78,6 +78,7 @@
   function label(c, wild) {
     let s = '<b>' + esc(c.name) + '</b>';
     if (!wild && c.stage) s += ' ' + '★'.repeat(c.stage);
+    if (!wild && c.power) s += '<div class="meta">⚔ ' + tr('power') + ' ' + c.power + '</div>';
     if (wild) {
       s += '<div class="meta">' + esc(c.type) + (c.since ? ' · ' + shortDate(c.since) : '') + '</div>';
       if (c.power) s += '<div class="meta">⚔ ' + tr('power') + ' ' + c.power + '</div>';
@@ -88,7 +89,7 @@
   function tip(c, wild) {
     const parts = [c.name + ' the ' + c.type, c.rarity];
     if (wild && c.since) parts.push(tr('since') + ' ' + fullDate(c.since));
-    if (wild && c.power) parts.push(tr('power') + ' ' + c.power);
+    if (c.power) parts.push(tr('power') + ' ' + c.power);
     if (wild && c.sample) parts.push(c.sample);
     if (!wild) parts.push(tr('caught') + ' x' + c.captures, tr('evo') + ' ' + (c.stage + 1));
     return parts.join(' · ');

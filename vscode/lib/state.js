@@ -19,10 +19,14 @@ function buildState() {
       if (p.info && p.info[id]) pendingInfo[id] = p.info[id];
     }
   }
+  // A caught monster fights at its best trophy's power, scaled by its evolution form (as in battles).
+  const best = {};
+  for (const t of dex.trophies) if (!best[t.id] || t.power > best[t.id]) best[t.id] = t.power;
+  const caughtPower = (c) => (best[c.id] ? Math.round(best[c.id] * power.evolutionMult(power.stageOf(c.captures || 0))) : undefined);
   const pack = (c) => ({
     id: c.id, name: c.name, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
     count: c.count, captures: c.captures, stage: power.stageOf(c.captures || 0),
-    power: pendingInfo[c.id] ? pendingInfo[c.id].power : undefined,
+    power: wildIds.has(c.id) ? (pendingInfo[c.id] ? pendingInfo[c.id].power : undefined) : caughtPower(c),
     since: since[c.id] || null,
     lastSeen: c.lastSeen || null,
     sample: c.sample ? String(c.sample).slice(0, 160) : '',
