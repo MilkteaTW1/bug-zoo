@@ -19,7 +19,7 @@ Then open a pull request. Mention `Closes #<issue>` if it fixes one. For the lan
 
 - Keep it dependency-free.
 - Add or extend a test in `test/` for what you change. CI runs `npm test` on Linux, macOS and Windows.
-- Adding a language: run `npm run lang -- <code> <name>` (e.g. `npm run lang -- ja 日本語`). It creates `src/locales/<code>.js` from the English text; translate `help` and `messages`, keep the `{placeholders}`, and check progress with `npm run lang:check`. It also covers the VS Code extension (the `vs.*` keys). Optionally add `vscode/package.nls.<locale>.json` for the extension's command names. Translate meaning, not characters.
+- Adding a language: run `npm run lang -- <code> <name>` (e.g. `npm run lang -- ja 日本語`). It creates `src/locales/<code>.js` from the English text; translate `help` and `messages`, keep the `{placeholders}`, and check progress with `npm run lang:check`. It also covers the VS Code extension (the `vs.*` keys). Optionally add `vscode/package.nls.<locale>.json` for the extension's command names. Translate meaning, not characters. The maintainer releases the CLI (npm) and the VS Code extension (Marketplace) regularly; a merged language reaches players, in both, with the next release.
 - Please do not edit `leaderboard/`, `LADDER.md` or `LEADERBOARD.md` in a pull request: a bot maintains them.
 
 ## The ladder is separate
