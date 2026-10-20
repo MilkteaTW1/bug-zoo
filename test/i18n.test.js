@@ -168,3 +168,27 @@ test('preload stays silent for healthy programs and respects BUGZOO_ACTIVE', () 
   const inside = spawnSync(process.execPath, ['bad.js'], { cwd: dir, env: { ...base, BUGZOO_ACTIVE: '1' }, encoding: 'utf8' });
   assert.ok(!/wild/.test(inside.stderr));
 });
+
+test('`bugzoo lang` lists the languages, switches by code or number, and touches nothing else', () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bz-lang-cli-'));
+  const bin = path.resolve(__dirname, '..', 'bin', 'bugzoo.js');
+  const run = (...args) => spawnSync(process.execPath, [bin, 'lang', ...args], {
+    encoding: 'utf8', env: { ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: '' },
+  });
+  const listed = run();
+  assert.equal(listed.status, 0);
+  for (const code of i18n.LANGS) assert.ok(listed.stdout.includes(code) && listed.stdout.includes(i18n.LANG_LABEL[code]));
+
+  assert.equal(run('zh-CN').status, 0);
+  assert.match(run().stdout, /\* 2\s+zh-CN/);
+  assert.equal(run('1').status, 0);
+  assert.match(run().stdout, /\* 1\s+zh-TW/);
+  assert.equal(run('EN').stdout.trim(), 'Language set to English.');
+
+  const bad = run('xx');
+  assert.equal(bad.status, 2);
+  assert.match(bad.stderr, /xx/);
+  const dex = JSON.parse(fs.readFileSync(path.join(home, 'dex.json'), 'utf8'));
+  assert.equal(dex.profile.lang, 'en');
+  assert.equal(dex.profile.name, undefined);
+});

@@ -2,7 +2,7 @@
   "name": "bug-zoo-vscode",
   "displayName": "Bug Zoo",
   "description": "Your failing terminal commands become little monsters that roam your sidebar. Fix the bug to catch them, then fight other players on a public ladder.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "MilkteaTW1",
   "icon": "icon.png",
   "license": "MIT",
@@ -65,8 +65,22 @@
       {
         "command": "bugzoo.toggleCapture",
         "title": "%command.toggleCapture%"
+      },
+      {
+        "command": "bugzoo.setLanguage",
+        "title": "%command.setLanguage%",
+        "icon": "$(globe)"
       }
     ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "bugzoo.setLanguage",
+          "when": "view == bugzoo.zoo",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
       "title": "Bug Zoo",
       "properties": {

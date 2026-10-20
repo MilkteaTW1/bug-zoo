@@ -10,10 +10,11 @@ module.exports = {
   help: `bugzoo - turn your errors into collectible monsters
 
 Usage:
-  bugzoo setup [--lang zh-TW|zh-CN|en] [--name N] [--auto on|off] [--ai on|off]
+  bugzoo setup [--lang <code>] [--name N] [--auto on|off] [--ai on|off]
                               Language, player name, automatic capture, and
                               monsters for commands your AI assistant runs
                               (Claude Code)
+  bugzoo lang [code]          Show the languages or switch: bugzoo lang zh-CN
   bugzoo run <command...>     Run a command. If it fails, a bug appears.
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
@@ -239,6 +240,12 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'misc.leaderWrote': 'Wrote {file} ({valid} valid, {skipped} skipped)',
     'svg.title': 'Bug Zoo · {caught} caught / {seen} seen',
 
+    // bugzoo lang
+    'lang.title': 'Languages (current marked with *):',
+    'lang.ask': 'Pick a number, or press Enter to keep it: ',
+    'lang.set': 'Language set to {lang}.',
+    'lang.bad': 'Unknown language "{value}". Available: {list}',
+
     // VS Code extension (vscode/): the zoo view, the ladder panel and the notifications.
     'vs.caught': 'caught',
     'vs.seen': 'seen',
@@ -299,5 +306,8 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.openZoo': 'Open the zoo',
     'vs.captureOn': 'Bug Zoo terminal capture on.',
     'vs.captureOff': 'Bug Zoo terminal capture off.',
+    'vs.langTitle': 'Bug Zoo language',
+    'vs.langPlaceholder': 'Choose the language for Bug Zoo',
+    'vs.langSet': 'Bug Zoo language: {lang}.',
   },
 };

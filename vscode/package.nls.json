@@ -3,5 +3,6 @@
   "command.openZoo": "Bug Zoo: Open the zoo in an editor tab",
   "command.toggleCapture": "Bug Zoo: Toggle terminal capture",
   "config.captureTerminal": "Turn failing commands in the integrated terminal into monsters (needs terminal shell integration). Turn this off if you already use `bugzoo setup --auto on`, or runs would count twice.",
-  "config.notifications": "Show a notification when a monster appears or is caught."
+  "config.notifications": "Show a notification when a monster appears or is caught.",
+  "command.setLanguage": "Bug Zoo: Change language"
 }

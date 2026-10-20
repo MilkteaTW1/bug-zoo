@@ -5,7 +5,7 @@ const vscode = require('vscode');
 const { buildState, diffStates, say, creatureName } = require('./lib/state');
 const fight = require('./lib/fight');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
-const { store } = require('./lib/engine');
+const { store, i18n } = require('./lib/engine');
 
 const views = new Set(); // every live webview (sidebar + editor tabs)
 let lastState = null;
@@ -217,6 +217,20 @@ function activate(context) {
         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
       });
       attach(panel, context.extensionUri);
+    }),
+    vscode.commands.registerCommand('bugzoo.setLanguage', async () => {
+      const dex = store.load();
+      const current = (dex.profile && dex.profile.lang) || i18n.getLang();
+      const pick = await vscode.window.showQuickPick(
+        i18n.LANGS.map((code) => ({ label: i18n.LANG_LABEL[code], description: code === current ? `${code} ✓` : code, code })),
+        { title: say('langTitle'), placeHolder: say('langPlaceholder') },
+      );
+      if (!pick) return;
+      dex.profile = dex.profile || {};
+      dex.profile.lang = pick.code; // the same choice `bugzoo lang` and `bugzoo setup` save
+      store.save(dex);
+      pushState(false);
+      vscode.window.showInformationMessage(say('langSet', { lang: pick.label }));
     }),
     vscode.commands.registerCommand('bugzoo.toggleCapture', async () => {
       const on = !config().get('captureTerminal');

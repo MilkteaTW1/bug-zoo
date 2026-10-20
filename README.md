@@ -72,6 +72,7 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
 | `bugzoo ladder` | Show the ladder |
 | `bugzoo rank` | Your score and title |
+| `bugzoo lang [code]` | Show the languages, or switch in one line: `bugzoo lang zh-CN` (changes nothing else) |
 | `bugzoo setup` | Language, player name, optional automatic capture and the AI-assistant hook (`--lang`, `--name`, `--auto on\|off`, `--ai on\|off`) |
 | `bugzoo share` | Write a shareable score + team file (counts only, no error text) |
 | `bugzoo leaderboard <dir>` | Build a score leaderboard from shared files |
@@ -359,6 +360,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
 | `bugzoo ladder` | 查看天梯 |
 | `bugzoo rank` | 你的分數與稱號 |
+| `bugzoo lang [代碼]` | 查看語言清單，或一行切換：`bugzoo lang zh-CN`（不會動到其他設定） |
 | `bugzoo setup` | 語言、玩家名稱、選用的自動捕捉與 AI 助手 hook（`--lang`、`--name`、`--auto on\|off`、`--ai on\|off`） |
 | `bugzoo share` | 輸出可分享的分數與隊伍檔（只有數量，不含錯誤內容） |
 | `bugzoo leaderboard <資料夾>` | 用分享檔產生分數排行榜 |

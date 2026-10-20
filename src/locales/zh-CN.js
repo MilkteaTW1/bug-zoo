@@ -10,9 +10,10 @@ module.exports = {
   help: `bugzoo - 把你的错误变成可收集的怪物
 
 用法：
-  bugzoo setup [--lang zh-TW|zh-CN|en] [--name 名字] [--auto on|off] [--ai on|off]
+  bugzoo setup [--lang <code>] [--name 名字] [--auto on|off] [--ai on|off]
                               语言、玩家名、自动捕获，以及 AI 助手
                               （Claude Code）执行的命令也会出怪物
+  bugzoo lang [代码]          查看语言列表或切换语言：bugzoo lang zh-CN
   bugzoo run <命令...>        执行命令，失败时会出现 bug
                               （开启自动捕获后就不用打这个）
   bugzoo dex                  你的图鉴与等着被捕获的 bug
@@ -236,6 +237,12 @@ module.exports = {
     'misc.leaderWrote': '已写入 {file}（有效 {valid} 条，跳过 {skipped} 条）',
     'svg.title': 'Bug Zoo · 已捕获 {caught} / 遇到 {seen}',
 
+    // bugzoo lang
+    'lang.title': '语言（当前使用的标有 *）：',
+    'lang.ask': '输入编号，直接按 Enter 保持不变：',
+    'lang.set': '语言已切换为 {lang}。',
+    'lang.bad': '找不到语言“{value}”。可用的语言：{list}',
+
     // VS Code extension (vscode/): the zoo view, the ladder panel and the notifications.
     'vs.caught': '已捕获',
     'vs.seen': '已遇见',
@@ -296,5 +303,8 @@ module.exports = {
     'vs.openZoo': '打开动物园',
     'vs.captureOn': 'Bug Zoo 终端捕获已开启。',
     'vs.captureOff': 'Bug Zoo 终端捕获已关闭。',
+    'vs.langTitle': 'Bug Zoo 语言',
+    'vs.langPlaceholder': '选择 Bug Zoo 使用的语言',
+    'vs.langSet': 'Bug Zoo 语言：{lang}。',
   },
 };

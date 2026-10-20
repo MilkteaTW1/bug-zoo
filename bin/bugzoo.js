@@ -129,6 +129,32 @@ async function cmdSetup(args) {
   return runSetup({ flags, ask: !given && interactive() });
 }
 
+/** `bugzoo lang` lists the languages; `bugzoo lang <code|number>` switches. Nothing else is touched. */
+async function cmdLang(args) {
+  const { positional } = parseFlags(args);
+  const dex = store.load();
+  dex.profile = dex.profile || {};
+  const current = dex.profile.lang || i18n.getLang();
+  let pick = positional[0];
+  if (pick === undefined) {
+    console.log(t('lang.title'));
+    i18n.LANGS.forEach((code, i) => console.log(`  ${code === current ? '*' : ' '} ${i + 1}  ${i18n.pad(code, 8)}${i18n.LANG_LABEL[code]}`));
+    if (!interactive()) return 0;
+    pick = (await ask(t('lang.ask'))).trim();
+    if (!pick) return 0;
+  }
+  const lang = i18n.parseLang(pick);
+  if (!lang) {
+    console.error(t('lang.bad', { value: pick, list: i18n.LANGS.join(', ') }));
+    return 2;
+  }
+  dex.profile.lang = lang;
+  store.save(dex);
+  i18n.setLang(lang);
+  console.log(t('lang.set', { lang: i18n.LANG_LABEL[lang] }));
+  return 0;
+}
+
 /** First run: pick the language from the environment, then ask the player (when a terminal is attached). */
 async function ensureSetup(cmd) {
   const dex = store.load();
@@ -137,7 +163,7 @@ async function ensureSetup(cmd) {
     return;
   }
   i18n.setLang(i18n.detectLang());
-  const skip = new Set(['setup', 'hook', 'ai-hook', 'help', '--help', '-h', undefined, 'ladder']);
+  const skip = new Set(['setup', 'lang', 'hook', 'ai-hook', 'help', '--help', '-h', undefined, 'ladder']);
   if (!skip.has(cmd) && interactive()) await runSetup({ flags: {}, ask: true });
 }
 
@@ -588,6 +614,9 @@ async function main() {
     }
     case 'setup':
       process.exit(await cmdSetup(rest));
+      break;
+    case 'lang':
+      process.exit(await cmdLang(rest));
       break;
     case 'dex':
       console.log(render.dexList(store.load()));

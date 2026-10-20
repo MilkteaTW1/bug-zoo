@@ -72,7 +72,7 @@ Press F5 in VS Code with this folder open to try it in an Extension Development 
 
 ### Languages
 
-The zoo, the ladder panel and the notifications use the same language files as the CLI: `src/locales/<code>.js` in this repo (keys starting with `vs.`). Add a language once with `npm run lang -- <code> <name>` at the repo root and it works in both. The command names in the manifest come from `package.nls.<locale>.json` (add one, e.g. `package.nls.ja.json`, copying `package.nls.json`). The language is the one set by `bugzoo setup`, otherwise VS Code's display language.
+The zoo, the ladder panel and the notifications use the same language files as the CLI: `src/locales/<code>.js` in this repo (keys starting with `vs.`). Add a language once with `npm run lang -- <code> <name>` at the repo root and it works in both. The command names in the manifest come from `package.nls.<locale>.json` (add one, e.g. `package.nls.ja.json`, copying `package.nls.json`). The language is the one saved by `bugzoo lang` or `bugzoo setup`, otherwise VS Code's display language. The globe button in the Bug Zoo view header (or the command **Bug Zoo: Change language**) switches it for the extension and the CLI at once.
 
 ## 繁體中文
 

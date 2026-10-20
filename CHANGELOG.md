@@ -1,5 +1,12 @@
 # Changelog / 更新紀錄
 
+## 0.3.4
+
+- **`bugzoo lang`** lists the languages; `bugzoo lang zh-CN` (or a number) switches in one line and changes nothing else.
+  `bugzoo lang` 列出語言；`bugzoo lang zh-CN`（或編號）一行切換，不會動到其他設定。
+- **VS Code:** a globe button in the Bug Zoo view header (command *Bug Zoo: Change language*) switches the language for the extension and the CLI.
+  VS Code：Bug Zoo 面板標題列新增地球按鈕（指令「Bug Zoo：切換語言」），同時切換擴充套件與 CLI 的語言。
+
 ## 0.3.3
 
 - **Languages are one file each** in `src/locales/`. `npm run lang -- <code> <name>` creates a new one and `npm run lang:check` shows what is still untranslated; the `bugzoo setup` picker, `--help` and locale detection pick it up automatically.
