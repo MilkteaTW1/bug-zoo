@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Bug Zoo demo</title>
+<style>
+  :root { --bg:#1e1e1e; --side:#252526; --bar:#333333; --line:#3c3c3c; --fg:#cccccc; --accent:#007acc; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+  body { font: 13px "Segoe UI", system-ui, sans-serif; color: var(--fg); }
+  .win { position: absolute; inset: 0; display: grid; grid-template-columns: 48px 330px 1fr; grid-template-rows: 1fr 22px; background: var(--bg); }
+  .act { background: var(--bar); display: flex; flex-direction: column; align-items: center; padding-top: 8px; gap: 4px; }
+  .act i { width: 48px; height: 44px; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 20px; opacity: .55; }
+  .act i.on { opacity: 1; box-shadow: inset 2px 0 0 #fff; }
+  .side { background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; }
+  .side .title { padding: 8px 14px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+  .side iframe { flex: 1; border: 0; width: 100%; }
+  .main { display: grid; grid-template-rows: 35px 1fr 210px; min-width: 0; }
+  .tabs { background: var(--side); display: flex; }
+  .tabs b { font-weight: 400; padding: 9px 16px; background: var(--bg); border-top: 1px solid var(--accent); }
+  .code { padding: 10px 0; font: 14px/22px Consolas, "Cascadia Mono", monospace; overflow: hidden; }
+  .code div { display: flex; white-space: pre; }
+  .code .n { width: 50px; text-align: right; padding-right: 18px; color: #858585; }
+  .code .t { color: #d4d4d4; }
+  .kw { color: #569cd6; } .st { color: #ce9178; } .cm { color: #6a9955; } .fn { color: #dcdcaa; } .ok { background: rgba(70,150,70,.28); }
+  .term { border-top: 1px solid var(--line); background: var(--bg); padding: 6px 16px; font: 13px/19px Consolas, "Cascadia Mono", monospace; overflow: hidden; }
+  .term .h { font: 11px "Segoe UI", sans-serif; letter-spacing: .06em; text-transform: uppercase; opacity: .7; margin-bottom: 4px; }
+  .term pre { margin: 0; font: inherit; white-space: pre-wrap; }
+  .term .p { color: #4ec9b0; } .term .err { color: #f14c4c; } .term .good { color: #3fb950; }
+  .status { grid-column: 1 / -1; background: #007acc; color: #fff; font-size: 12px; padding: 2px 12px; display: flex; justify-content: space-between; }
+  .toast {
+    position: absolute; right: 14px; bottom: 36px; width: 360px; background: #252526; border: 1px solid #454545; padding: 12px 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.5); font-size: 13px; line-height: 1.45; opacity: 0; transform: translateY(14px); transition: all .3s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: none; }
+  .toast small { display: block; opacity: .6; margin-top: 4px; }
+  .quick {
+    position: absolute; left: 50%; top: 60px; transform: translateX(-50%); width: 520px; background: #252526; border: 1px solid #454545;
+    box-shadow: 0 6px 24px rgba(0,0,0,.6); padding: 10px 12px; z-index: 60; display: none;
+  }
+  .quick.show { display: block; }
+  .quick div.q { font-size: 12px; opacity: .75; margin-bottom: 6px; }
+  .quick div.in { background: #3c3c3c; border: 1px solid var(--accent); padding: 5px 8px; font-size: 13px; min-height: 28px; }
+  .cursor { position: absolute; width: 22px; height: 22px; z-index: 100; pointer-events: none; transition: left .55s ease, top .55s ease; left: 700px; top: 500px; }
+  .cursor svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,.7)); }
+  .ripple { position: absolute; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; z-index: 99; animation: rip .5s ease-out forwards; pointer-events: none; }
+  @keyframes rip { from { transform: scale(.4); opacity: 1 } to { transform: scale(2.6); opacity: 0 } }
+  .cap {
+    position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 70; padding: 6px 16px; border-radius: 20px;
+    background: rgba(0,0,0,.72); color: #fff; font-size: 15px; font-weight: 600; opacity: 0; transition: opacity .3s; white-space: nowrap;
+  }
+  .cap.show { opacity: 1; }
+</style></head>
+<body>
+<div class="win">
+  <div class="act"><i>📄</i><i>🔍</i><i>🌿</i><i class="on">🐛</i></div>
+  <div class="side"><div class="title">Bug Zoo: Zoo</div><iframe id="zoo" src="sidebar.html"></iframe></div>
+  <div class="main">
+    <div class="tabs"><b>app.js</b></div>
+    <div class="code" id="code"></div>
+    <div class="term"><div class="h">Terminal</div><pre id="term"></pre></div>
+  </div>
+  <div class="status"><span>⎇ main</span><span>Bug Zoo</span></div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="quick" id="quick"><div class="q" id="quickq"></div><div class="in" id="quickin"></div></div>
+<div class="cursor" id="cursor"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#000" stroke-width="1.2"/></svg></div>
+<div class="cap" id="cap"></div>
+
+<script>
+(async function () {
+  const D = await (await fetch('data.json')).json();
+  const $ = (id) => document.getElementById(id);
+  const zoo = $('zoo');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const send = (msg) => zoo.contentWindow.postMessage(msg, '*');
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const FIXED = ['function greet(user) {', '  // BUG: user can be undefined', '  console.log("Hello, " + user?.profile?.name);', '}', '', 'greet(getUser());'];
+  const BROKEN = ['function greet(user) {', '  // BUG: user can be undefined', '  console.log("Hello, " + user.profile.name);', '}', '', 'greet(getUser());'];
+
+  function paintCode(lines, hl) {
+    $('code').innerHTML = lines.map((l, i) => {
+      const h = esc(l).replace(/(\/\/.*$)|("[^"]*")|\b(function)\b|\b(console\.log|greet|getUser)\b/g, (m, c, st, kw) => '<span class="' + (c ? 'cm' : st ? 'st' : kw ? 'kw' : 'fn') + '">' + m + '</span>');
+      return '<div class="' + (hl === i ? 'ok' : '') + '"><span class="n">' + (i + 1) + '</span><span class="t">' + h + '</span></div>';
+    }).join('');
+  }
+
+  let term = '';
+  const paintTerm = () => { $('term').innerHTML = term; };
+  async function typeCmd(cmd) {
+    term += '<span class="p">PS my-app&gt;</span> ';
+    for (const ch of cmd) { term += esc(ch); paintTerm(); await sleep(55); }
+    await sleep(350);
+    term += '\n'; paintTerm();
+  }
+  function termOut(text, cls) { term += (cls ? '<span class="' + cls + '">' : '') + esc(text) + (cls ? '</span>' : '') + '\n'; paintTerm(); }
+
+  let toastTimer;
+  function toast(html, ms = 3500) {
+    $('toast').innerHTML = html; $('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), ms);
+  }
+  let capTimer;
+  function caption(text, ms = 3200) {
+    $('cap').textContent = text; $('cap').classList.add('show');
+    clearTimeout(capTimer); capTimer = setTimeout(() => $('cap').classList.remove('show'), ms);
+  }
+
+  const cursor = $('cursor');
+  function frameOffset() { const r = zoo.getBoundingClientRect(); return { x: r.left, y: r.top }; }
+  async function moveTo(x, y) { cursor.style.left = x + 'px'; cursor.style.top = y + 'px'; await sleep(650); }
+  async function clickEl(finder) {
+    const doc = zoo.contentDocument;
+    const el = typeof finder === 'string' ? doc.querySelector(finder) : finder(doc);
+    if (!el) throw new Error('missing ' + finder);
+    const r = el.getBoundingClientRect(); const o = frameOffset();
+    await moveTo(o.x + r.left + r.width / 2, o.y + r.top + r.height / 2);
+    const rp = document.createElement('div'); rp.className = 'ripple';
+    rp.style.left = (o.x + r.left + r.width / 2 - 7) + 'px'; rp.style.top = (o.y + r.top + r.height / 2 - 7) + 'px';
+    document.body.appendChild(rp); setTimeout(() => rp.remove(), 600);
+    await sleep(120); el.click(); await sleep(250);
+  }
+  const byText = (sel, text) => (doc) => Array.from(doc.querySelectorAll(sel)).find((e) => e.textContent.includes(text));
+
+  async function quickInput(question, text) {
+    $('quickq').textContent = question; $('quickin').textContent = ''; $('quick').classList.add('show');
+    await sleep(500);
+    for (const ch of text) { $('quickin').textContent += ch; await sleep(70); }
+    await sleep(500); $('quick').classList.remove('show');
+  }
+
+  // What the extension would answer when the sidebar asks for something.
+  let arena = D.arenaA;
+  window.addEventListener('message', async (e) => {
+    const m = e.data && e.data.__bz && e.data.msg;
+    if (!m) return;
+    if (m.type === 'ready') {
+      window.__sidebarReady = true;
+    } else if (m.type === 'fight') {
+      const b = m.section === 'ladder' ? D.battleLadder : (m.section === 'friend' ? D.battleFriend : D.battlePractice);
+      send({ type: 'battle', battle: b });
+    } else if (m.type === 'submit') {
+      toast('Opening a pre-filled GitHub issue…<small>Press “Submit new issue” there to send your win to the ladder.</small>');
+    } else if (m.type === 'addFriend') {
+      await quickInput('Add a friend: paste a friend code (BZ1…), a link, a file path, or a player name from the ladder', 'ByteBaker');
+      arena = D.arenaB; send({ type: 'ladder', ladder: arena });
+      toast('Added ByteBaker.');
+    } else if (m.type === 'copyCode') {
+      toast('Friend code copied.<small>Send it to a friend; they paste it into “Add friend”.</small>');
+    }
+  });
+
+  async function waitReady() { while (!window.__sidebarReady) await sleep(100); }
+
+  const scenarios = {
+    async catch() {
+      await waitReady();
+      paintCode(BROKEN); term = ''; paintTerm();
+      send({ type: 'state', state: D.states.S0, events: null }); send({ type: 'ladder', ladder: D.arenaA });
+      caption('Run something that crashes…'); await sleep(1800);
+      await typeCmd('node app.js');
+      D.crash.split('\n').forEach((l) => termOut(l, /Error|\^/.test(l) ? 'err' : ''));
+      send({ type: 'state', state: D.states.S1, events: D.events.spawn });
+      const w = D.states.S1.wild[0];
+      toast('A wild <b>' + w.name + '</b> the ' + w.type + ' appeared! Fix the bug and re-run the command to catch it.');
+      caption('A wild bug appears!', 3600); await sleep(4800);
+      caption('Fix the bug…'); paintCode(FIXED, 2); await sleep(2600);
+      await typeCmd('node app.js'); termOut('Hello, world', 'good');
+      send({ type: 'state', state: D.states.S2, events: D.events.caught });
+      toast('Caught <b>' + w.name + '</b> the ' + w.type + '! It joined your zoo.');
+      caption('Caught! It moves into your pen', 3600); await sleep(5200);
+    },
+    async fight() {
+      await waitReady();
+      paintCode(FIXED, 2); term = ''; paintTerm();
+      send({ type: 'state', state: D.states.S2, events: null }); send({ type: 'ladder', ladder: D.arenaA });
+      caption('The ladder lives at the bottom of the panel', 3000); await sleep(3200);
+      caption('Star = within reach. Press Fight!', 3000);
+      await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes(D.target)).querySelector('.fight'));
+      await sleep(7600);
+      caption('Win it, then submit your result to the ladder', 3000);
+      await clickEl('#submit'); await sleep(3600);
+      await clickEl('#close'); await sleep(1200);
+    },
+    async friends() {
+      await waitReady();
+      paintCode(FIXED, 2); term = ''; paintTerm();
+      send({ type: 'state', state: D.states.S2, events: null }); send({ type: 'ladder', ladder: D.arenaA });
+      await sleep(1500);
+      caption('Friends tab: add rivals by code, link or ladder name', 3200);
+      await clickEl('.tab[data-tab="friends"]'); await sleep(1200);
+      await clickEl('#add'); await sleep(2400);
+      caption('Fight your friend any time', 2600);
+      await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes('ByteBaker')).querySelector('.fight'));
+      await sleep(1500);
+      await clickEl('#skip'); await sleep(1600);
+      await clickEl('#close'); await sleep(900);
+      caption('Share your own team with a code', 2600);
+      await clickEl('#copy'); await sleep(3200);
+    },
+  };
+
+  window.runScenario = async (name) => { await scenarios[name](); window.__done = true; };
+  window.__ready = true;
+})();
+</script>
+</body></html>

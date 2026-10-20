@@ -37,6 +37,12 @@ bugzoo run node app.js    # 3. same command, clean run: caught!
 
 Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...). No project to try it on? `playground/` has three broken programs; see [playground/GUIDE.md](playground/GUIDE.md).
 
+## VS Code extension
+
+Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode/) turns failing terminal commands into monsters in the side bar, with the ladder, friends and animated fights built in. It shares the same data file as the CLI.
+
+![A failing command spawns a wild monster; the fix catches it](vscode/docs/catch.gif)
+
 ## Commands
 
 | Command | What it does |

@@ -4,6 +4,22 @@ Your failing terminal commands become little monsters that wander around the sid
 
 It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo), so monsters, rarity, power, evolution and achievements are identical, and both share `~/.bugzoo/dex.json`.
 
+## See it in action
+
+*The GIFs use demo data and a made-up ladder; the zoo, fights and replays are the real extension.*
+
+**A crash spawns a monster. Fix it, and it is caught.**
+
+![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
+
+**Climb the ladder with a turn-by-turn battle replay.**
+
+![Fighting a ladder player and submitting the win](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
+
+**Add friends, fight them any time, share your team with a code.**
+
+![Adding a friend, fighting them and copying your friend code](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.gif)
+
 ## How it works
 
 1. Run a command in the integrated terminal (`node app.js`, `pytest`, `npm test`, ...).
