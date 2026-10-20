@@ -2,12 +2,15 @@
 
 const fs = require('node:fs');
 const vscode = require('vscode');
-const { buildState, diffStates } = require('./lib/state');
+const { buildState, diffStates, loadLadderRows } = require('./lib/state');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
 const { store } = require('./lib/engine');
 
 const views = new Set(); // every live webview (sidebar + editor tabs)
 let lastState = null;
+let lastLadder = null;
+let ladderTimer = null;
+const LADDER_REFRESH_MS = 10 * 60 * 1000;
 let refreshTimer = null;
 
 const config = () => vscode.workspace.getConfiguration('bugzoo');
@@ -27,6 +30,15 @@ function pushState(withEvents) {
   lastState = next;
   for (const v of views) v.webview.postMessage({ type: 'state', state: next, events });
   return events;
+}
+
+async function refreshLadder() {
+  try {
+    lastLadder = await loadLadderRows();
+  } catch {
+    return; // keep whatever we showed before
+  }
+  for (const v of views) v.webview.postMessage({ type: 'ladder', ladder: lastLadder });
 }
 
 function scheduleRefresh() {
@@ -65,6 +77,7 @@ function webviewHtml(webview, extensionUri) {
 <body>
 <div class="bar" id="bar"></div>
 <div class="zoo" id="zoo"><div class="pen" id="pen" data-label="caught"></div><div class="empty" id="empty"></div></div>
+<div class="ladder" id="ladder" hidden></div>
 <script nonce="${nonce}" src="${asset('zoo.js')}"></script>
 </body></html>`;
 }
@@ -77,6 +90,8 @@ function attach(view, extensionUri) {
     if (msg && msg.type === 'ready') {
       const state = lastState || safeState();
       if (state) view.webview.postMessage({ type: 'state', state, events: null });
+      if (lastLadder) view.webview.postMessage({ type: 'ladder', ladder: lastLadder });
+      else refreshLadder();
     }
   });
   view.onDidDispose(() => views.delete(view));
@@ -160,12 +175,15 @@ function activate(context) {
     }),
   );
   lastState = safeState();
+  refreshLadder();
+  ladderTimer = setInterval(refreshLadder, LADDER_REFRESH_MS);
   watchDex(context);
   captureTerminal(context);
 }
 
 function deactivate() {
   clearTimeout(refreshTimer);
+  clearInterval(ladderTimer);
 }
 
 module.exports = { activate, deactivate };

@@ -1,6 +1,6 @@
 'use strict';
 
-const { store, power } = require('./engine');
+const { store, power, remote } = require('./engine');
 
 /**
  * Turn the dex file into what the zoo view draws.
@@ -49,4 +49,22 @@ function diffStates(prev, next) {
   };
 }
 
-module.exports = { buildState, diffStates };
+/** The public ladder as plain rows for the zoo view. Never throws: offline gives the cached copy or nothing. */
+async function loadLadderRows() {
+  const dex = store.load();
+  const me = (dex.profile && dex.profile.name) || '';
+  const l = await remote.loadLadder();
+  const order = l.order.length ? l.order : [...l.players.values()].sort((a, b) => b.score - a.score).map((p) => p.name);
+  const rows = order
+    .map((name, i) => ({ name, p: l.players.get(String(name).toLowerCase()), rank: i + 1 }))
+    .filter((r) => r.p)
+    .map(({ name, p, rank }) => ({
+      rank, name: p.name || name,
+      power: p.team.reduce((s, m) => s + m.power, 0),
+      team: p.team.map((m) => m.name),
+      me: !!me && String(p.name).toLowerCase() === me.toLowerCase(),
+    }));
+  return { rows, me, source: l.source, offline: l.source === 'cache' || l.source === 'none' };
+}
+
+module.exports = { buildState, diffStates, loadLadderRows };

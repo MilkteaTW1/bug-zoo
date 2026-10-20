@@ -5,12 +5,13 @@
   const bar = document.getElementById('bar');
   const pen = document.getElementById('pen');
   const empty = document.getElementById('empty');
+  const ladderEl = document.getElementById('ladder');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TONE = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
   const TEXT = {
-    en: { caught: 'caught', seen: 'seen', pen: 'caught', empty: 'The zoo is empty.<br>Run a command that fails in the terminal<br>and a monster will show up.', wild: 'wild', power: 'power', evo: 'form', since: 'since' },
-    'zh-TW': { caught: '已捕獲', seen: '已遇見', pen: '已捕獲', empty: '動物園還是空的。<br>在終端機跑一個會出錯的指令,<br>怪物就會出現。', wild: '野生', power: '戰力', evo: '型態', since: '出現於' },
+    en: { caught: 'caught', seen: 'seen', pen: 'caught', empty: 'The zoo is empty.<br>Run a command that fails in the terminal<br>and a monster will show up.', wild: 'wild', power: 'power', evo: 'form', since: 'since', ladder: 'Ladder', offline: 'offline copy', noladder: 'Ladder unavailable' },
+    'zh-TW': { caught: '已捕獲', seen: '已遇見', pen: '已捕獲', empty: '動物園還是空的。<br>在終端機跑一個會出錯的指令,<br>怪物就會出現。', wild: '野生', power: '戰力', evo: '型態', since: '出現於', ladder: '榜單', offline: '離線資料', noladder: '榜單暫時無法載入' },
   };
   let lang = 'en';
   const tr = (k) => (TEXT[lang] || TEXT.en)[k];
@@ -213,9 +214,27 @@
     requestAnimationFrame(tick);
   }
 
+  let ladderData = null;
+  let ladderCollapsed = false;
+  function renderLadder() {
+    if (!ladderData) { ladderEl.hidden = true; zoo.style.setProperty('--ladder-h', '0px'); return; }
+    ladderEl.hidden = false;
+    ladderEl.classList.toggle('collapsed', ladderCollapsed);
+    const rows = ladderData.rows.slice(0, 50).map((r) =>
+      '<div class="row' + (r.me ? ' me' : '') + '" title="' + esc(r.team.join(', ')) + '"><span class="rk">' + r.rank +
+      '</span><span>' + esc(r.name) + '</span><span class="pw">⚔ ' + r.power + '</span></div>').join('');
+    const note = ladderData.rows.length === 0 ? tr('noladder') : (ladderData.offline ? tr('offline') : '');
+    ladderEl.innerHTML = '<h3 id="lh"><span>🏆 ' + tr('ladder') + '</span><span>' + (ladderCollapsed ? '▸' : '▾') + '</span></h3>' +
+      '<div class="rows">' + rows + '</div>' + (note ? '<div class="note">' + note + '</div>' : '');
+    document.getElementById('lh').addEventListener('click', () => { ladderCollapsed = !ladderCollapsed; renderLadder(); });
+    zoo.style.setProperty('--ladder-h', ladderEl.offsetHeight + 'px');
+    for (const m of mons.values()) chooseTarget(m);
+  }
+
   window.addEventListener('message', (e) => {
     const msg = e.data;
-    if (msg && msg.type === 'state') render(msg.state, msg.events);
+    if (msg && msg.type === 'state') { render(msg.state, msg.events); renderLadder(); }
+    if (msg && msg.type === 'ladder') { ladderData = msg.ladder; renderLadder(); }
   });
   window.addEventListener('resize', () => { for (const m of mons.values()) chooseTarget(m); });
   requestAnimationFrame(tick);

@@ -11,6 +11,8 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 3. Fix the code and run the same command again. A clean run catches it.
 4. Caught monsters wander calmly in the pen, glow when they evolve, and nap now and then. Click one to pet it.
 
+The public ladder sits at the bottom of the panel (click its title to fold it). Wild bugs show their type, the date they first appeared and their battle power.
+
 Open the zoo from the Bug Zoo icon in the activity bar, or run **Bug Zoo: Open the zoo in an editor tab** to give it more room.
 
 ## Requirements
@@ -27,7 +29,7 @@ Open the zoo from the Bug Zoo icon in the activity bar, or run **Bug Zoo: Open t
 
 ## Privacy
 
-Everything stays on your machine. The extension reads the output of terminal commands only to find error types, and stores the same small data file as the CLI. Nothing is sent anywhere.
+Everything stays on your machine. The extension reads the output of terminal commands only to find error types, and stores the same small data file as the CLI. The only network request is the same one the CLI makes: reading the public ladder from the `MilkteaTW1/bug-zoo` GitHub repo every 10 minutes. Your errors and data are never sent anywhere.
 
 ## Development
 

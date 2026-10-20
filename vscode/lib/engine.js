@@ -12,4 +12,6 @@ module.exports = {
   store: require(path.join(root, 'store')),
   parse: require(path.join(root, 'parse')),
   power: require(path.join(root, 'power')),
+  remote: require(path.join(root, 'remote')),
+  ladder: require(path.join(root, 'ladder')),
 };
