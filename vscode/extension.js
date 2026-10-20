@@ -2,7 +2,8 @@
 
 const fs = require('node:fs');
 const vscode = require('vscode');
-const { buildState, diffStates, loadLadderRows } = require('./lib/state');
+const { buildState, diffStates } = require('./lib/state');
+const fight = require('./lib/fight');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
 const { store } = require('./lib/engine');
 
@@ -35,11 +36,62 @@ function pushState(withEvents) {
 
 async function refreshLadder() {
   try {
-    lastLadder = await loadLadderRows();
+    lastLadder = await fight.loadArena();
   } catch {
     return; // keep whatever we showed before
   }
   for (const v of views) v.webview.postMessage({ type: 'ladder', ladder: lastLadder });
+}
+
+const post = (view, msg) => view.webview.postMessage(msg);
+
+async function askName() {
+  const name = await vscode.window.showInputBox({
+    title: 'Bug Zoo player name',
+    prompt: 'Your name on the ladder (shown to other players)',
+    validateInput: (v) => (v.trim() ? null : 'Pick a name'),
+  });
+  return name && fight.saveName(name) ? name : null;
+}
+
+async function onWebviewMessage(view, msg) {
+  if (!msg) return;
+  if (msg.type === 'ready') {
+    const state = lastState || safeState();
+    if (state) post(view, { type: 'state', state, events: null });
+    if (lastLadder) post(view, { type: 'ladder', ladder: lastLadder });
+    else refreshLadder();
+  } else if (msg.type === 'fight') {
+    post(view, { type: 'battle', battle: fight.fight(msg.section, msg.name) });
+  } else if (msg.type === 'submit') {
+    if (fight.needsName() && !(await askName())) return;
+    const url = fight.submissionUrl();
+    if (url) await vscode.env.openExternal(vscode.Uri.parse(url));
+  } else if (msg.type === 'addFriend') {
+    const input = await vscode.window.showInputBox({
+      title: 'Add a friend',
+      prompt: 'Paste a friend code (BZ1...), a link, a file path, or a player name from the ladder',
+    });
+    if (!input) return;
+    const r = await fight.addFriend(input);
+    if (r.ok) vscode.window.showInformationMessage(`${r.updated ? 'Updated' : 'Added'} ${r.name}.`);
+    else vscode.window.showWarningMessage(r.reason === 'self' ? 'That is you!' : 'Could not read that friend.');
+    refreshLadder();
+  } else if (msg.type === 'removeFriend') {
+    fight.removeFriend(msg.name);
+    refreshLadder();
+  } else if (msg.type === 'copyCode') {
+    if (fight.needsName() && !(await askName())) return;
+    const code = fight.myCode();
+    if (!code) {
+      vscode.window.showInformationMessage('Catch a bug first: your friend code is made from your strongest catches.');
+      return;
+    }
+    await vscode.env.clipboard.writeText(code);
+    vscode.window.showInformationMessage('Friend code copied. Send it to a friend; they paste it into Add friend.');
+  } else if (msg.type === 'refreshArena') {
+    refreshLadder();
+  }
 }
 
 function scheduleRefresh() {
@@ -79,7 +131,9 @@ function webviewHtml(webview, extensionUri) {
 <div class="bar" id="bar"></div>
 <div class="zoo" id="zoo"><div class="pen" id="pen" data-label="caught"></div><div class="empty" id="empty"></div></div>
 <div class="ladder" id="ladder" hidden></div>
+<div class="arena" id="arena" hidden></div>
 <script nonce="${nonce}" src="${asset('zoo.js')}"></script>
+<script nonce="${nonce}" src="${asset('arena.js')}"></script>
 </body></html>`;
 }
 
@@ -87,14 +141,7 @@ function attach(view, extensionUri) {
   view.webview.options = { enableScripts: true, localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')] };
   view.webview.html = webviewHtml(view.webview, extensionUri);
   views.add(view);
-  view.webview.onDidReceiveMessage((msg) => {
-    if (msg && msg.type === 'ready') {
-      const state = lastState || safeState();
-      if (state) view.webview.postMessage({ type: 'state', state, events: null });
-      if (lastLadder) view.webview.postMessage({ type: 'ladder', ladder: lastLadder });
-      else refreshLadder();
-    }
-  });
+  view.webview.onDidReceiveMessage((msg) => onWebviewMessage(view, msg));
   view.onDidDispose(() => views.delete(view));
 }
 

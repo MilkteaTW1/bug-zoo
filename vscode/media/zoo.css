@@ -70,3 +70,58 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .mon.wild pre, .mon.hop .body, .mon.drop, .fx { animation: none; }
 }
+
+/* ---- ladder / friends panel and battle arena ---- */
+.ladder h3 .tabs { display: flex; gap: 12px; }
+.ladder .tab { cursor: pointer; font-weight: 600; opacity: .55; }
+.ladder .tab.on { opacity: 1; border-bottom: 1px solid currentColor; }
+.ladder .row { grid-template-columns: 22px 1fr auto auto; }
+.ladder .row .nm i { opacity: .6; font-style: normal; font-size: 10px; }
+.ladder .row .reach { color: #e8b923; margin-left: 4px; }
+.ladder .row .act { display: flex; gap: 4px; min-width: 0; }
+.ladder .btns { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 4px 2px; }
+.btn {
+  font: inherit; font-size: 11px; padding: 1px 8px; cursor: pointer; border-radius: 3px;
+  color: var(--vscode-button-secondaryForeground, var(--vscode-foreground));
+  background: var(--vscode-button-secondaryBackground, rgba(128,128,128,.25));
+  border: 1px solid transparent;
+}
+.btn:hover { background: var(--vscode-button-secondaryHoverBackground, rgba(128,128,128,.4)); }
+.btn.primary { color: var(--vscode-button-foreground); background: var(--vscode-button-background); }
+.btn.primary:hover { background: var(--vscode-button-hoverBackground); }
+.btn.ghost { background: transparent; opacity: .7; padding: 1px 4px; }
+.btn.fight { padding: 0 6px; }
+
+.arena {
+  position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 10px;
+  overflow-y: auto; font-size: 11px;
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background, #1e1e1e));
+}
+.arena[hidden] { display: none; }
+.bt-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.bt-name { text-align: center; opacity: .75; }
+.side { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.bcard { position: relative; width: 84px; text-align: center; transition: opacity .4s, filter .4s; }
+.bcard pre {
+  margin: 0; font: 600 12px/1.05 var(--vscode-editor-font-family, monospace); color: var(--tone); text-shadow: 0 0 6px var(--tone);
+}
+.bcard .cn { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bcard .cp { font-size: 10px; opacity: .7; }
+.bcard .hp { height: 4px; margin: 2px 6px; background: rgba(128,128,128,.3); border-radius: 2px; overflow: hidden; }
+.bcard .hp i { display: block; height: 100%; width: 100%; background: #34a853; transition: width .35s; }
+.bcard.dead { opacity: .25; filter: grayscale(1); }
+.bcard.lunge { animation: lunge .4s ease-out; }
+.bcard.hurt { animation: hurt .35s; }
+.bcard .dmg { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); font-weight: 700; color: #f14c4c; animation: rise 0.9s ease-out forwards; }
+.bcard .dmg.crit { color: #ffb300; font-size: 14px; }
+@keyframes lunge { 0%,100% { transform: translateY(0) } 40% { transform: translateY(-10px) scale(1.08) } }
+@keyframes hurt { 0%,100% { transform: translateX(0) } 25% { transform: translateX(-4px) } 75% { transform: translateX(4px) } }
+.bt-log { text-align: center; min-height: 16px; opacity: .85; padding: 2px 0; border-top: 1px dashed rgba(128,128,128,.35); border-bottom: 1px dashed rgba(128,128,128,.35); }
+.bt-foot { margin-top: 4px; }
+.bt-foot .res { text-align: center; font-size: 15px; font-weight: 700; }
+.bt-foot .res.win { color: #34a853; }
+.bt-foot .res.lose { color: #f14c4c; }
+.bt-foot .rnote { text-align: center; opacity: .85; margin: 4px 0; line-height: 1.5; }
+.bt-foot .ach { text-align: center; margin: 4px 0; color: #e8b923; }
+.bt-foot .btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { .bcard.lunge, .bcard.hurt, .bcard .dmg { animation: none; } }

@@ -5,7 +5,6 @@
   const bar = document.getElementById('bar');
   const pen = document.getElementById('pen');
   const empty = document.getElementById('empty');
-  const ladderEl = document.getElementById('ladder');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const TONE = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
@@ -215,27 +214,20 @@
     requestAnimationFrame(tick);
   }
 
-  let ladderData = null;
-  let ladderCollapsed = false;
-  function renderLadder() {
-    if (!ladderData) { ladderEl.hidden = true; zoo.style.setProperty('--ladder-h', '0px'); return; }
-    ladderEl.hidden = false;
-    ladderEl.classList.toggle('collapsed', ladderCollapsed);
-    const rows = ladderData.rows.slice(0, 50).map((r) =>
-      '<div class="row' + (r.me ? ' me' : '') + '" title="' + esc(r.team.join(', ')) + '"><span class="rk">' + r.rank +
-      '</span><span>' + esc(r.name) + '</span><span class="pw">⚔ ' + r.power + '</span></div>').join('');
-    const note = ladderData.rows.length === 0 ? tr('noladder') : (ladderData.offline ? tr('offline') : '');
-    ladderEl.innerHTML = '<h3 id="lh"><span>🏆 ' + tr('ladder') + '</span><span>' + (ladderCollapsed ? '▸' : '▾') + '</span></h3>' +
-      '<div class="rows">' + rows + '</div>' + (note ? '<div class="note">' + note + '</div>' : '');
-    document.getElementById('lh').addEventListener('click', () => { ladderCollapsed = !ladderCollapsed; renderLadder(); });
-    zoo.style.setProperty('--ladder-h', ladderEl.offsetHeight + 'px');
-    for (const m of mons.values()) chooseTarget(m);
-  }
+  // arena.js (the ladder, friends and fights) shares the page through this handle.
+  window.bugzoo = {
+    vscode,
+    lang: () => lang,
+    esc,
+    relayout(ladderHeight) {
+      zoo.style.setProperty('--ladder-h', ladderHeight + 'px');
+      for (const m of mons.values()) chooseTarget(m);
+    },
+  };
 
   window.addEventListener('message', (e) => {
     const msg = e.data;
-    if (msg && msg.type === 'state') { render(msg.state, msg.events); renderLadder(); }
-    if (msg && msg.type === 'ladder') { ladderData = msg.ladder; renderLadder(); }
+    if (msg && msg.type === 'state') render(msg.state, msg.events);
   });
   window.addEventListener('resize', () => { for (const m of mons.values()) chooseTarget(m); });
   requestAnimationFrame(tick);

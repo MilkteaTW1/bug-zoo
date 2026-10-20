@@ -11,7 +11,16 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 3. Fix the code and run the same command again. A clean run catches it.
 4. Caught monsters wander calmly in the pen, glow when they evolve, and nap now and then. Click one to pet it.
 
-The public ladder sits at the bottom of the panel (click its title to fold it). Wild bugs show their type, the date they first appeared and their battle power.
+Wild bugs show their type, the date they first appeared and their battle power. Only bugs from the project folders you have open are shown.
+
+## Fight
+
+The bottom of the panel has two tabs.
+
+- **Ladder**: the public ladder. Players marked with a star are within reach (up to 3 ranks above you). Press **Fight** to watch a turn-by-turn replay of your top three monsters against theirs. A win over someone in reach, or any ladder fight when you are not on the ladder yet, offers **Submit to the ladder**, which opens a pre-filled GitHub issue for you to send.
+- **Friends**: add a friend by code (`BZ1...`), link, file or ladder name, fight them any time, or fight the practice dummy Legacy Codebase. **Copy my code** gives you a code to send to a friend.
+
+Fights use the same rules as `bugzoo battle`: results are deterministic and replayable, and your wins and losses count toward the same achievements.
 
 Open the zoo from the Bug Zoo icon in the activity bar, or run **Bug Zoo: Open the zoo in an editor tab** to give it more room.
 
