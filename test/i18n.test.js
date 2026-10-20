@@ -12,19 +12,51 @@ const auto = require('../src/autostart');
 
 const REGISTER = auto.REGISTER_ARG; // same quoting-safe form that `bugzoo setup` writes
 
-test('every English message has a Traditional Chinese translation and vice versa', () => {
+test('every language has exactly the same keys as English', () => {
   // Reads the same tables through t(): a missing key would echo the key itself.
   const src = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'i18n.js'), 'utf8');
-  const keysOf = (lang) => {
-    const start = src.indexOf(lang === 'en' ? '  en: {' : "  'zh-TW': {");
-    const end = lang === 'en' ? src.indexOf("  'zh-TW': {") : src.indexOf('\nlet current');
-    return new Set([...src.slice(start, end).matchAll(/^\s{4}'([^']+)':/gm)].map((m) => m[1]));
-  };
-  const en = keysOf('en');
-  const zh = keysOf('zh');
-  assert.ok(en.size > 40);
-  assert.deepEqual([...en].filter((k) => !zh.has(k)), []);
-  assert.deepEqual([...zh].filter((k) => !en.has(k)), []);
+  const body = src.slice(src.indexOf('const M = {'), src.indexOf('\nlet current'));
+  const blocks = [...body.matchAll(/^  (?:'([^']+)'|([a-zA-Z]+)): \{/gm)]
+    .map((m, i, all) => ({
+      lang: m[1] || m[2],
+      text: body.slice(m.index, i + 1 < all.length ? all[i + 1].index : body.length),
+    }));
+  const keysOf = (text) => new Set([...text.matchAll(/^\s{4}'([^']+)':/gm)].map((m) => m[1]));
+
+  // Every registered language must have a table, and English is the reference.
+  assert.deepEqual(blocks.map((b) => b.lang).sort(), [...i18n.LANGS].sort());
+  const reference = keysOf(blocks.find((b) => b.lang === 'en').text);
+  assert.ok(reference.size > 40);
+
+  for (const { lang, text } of blocks) {
+    if (lang === 'en') continue;
+    const keys = keysOf(text);
+    assert.deepEqual([...reference].filter((k) => !keys.has(k)), [], `${lang} is missing keys`);
+    assert.deepEqual([...keys].filter((k) => !reference.has(k)), [], `${lang} has keys English lacks`);
+  }
+});
+
+test('translations keep every {placeholder} of the English original', () => {
+  const src = fs.readFileSync(path.resolve(__dirname, '..', 'src', 'i18n.js'), 'utf8');
+  const body = src.slice(src.indexOf('const M = {'), src.indexOf('\nlet current'));
+  const blocks = [...body.matchAll(/^  (?:'([^']+)'|([a-zA-Z]+)): \{/gm)]
+    .map((m, i, all) => ({
+      lang: m[1] || m[2],
+      text: body.slice(m.index, i + 1 < all.length ? all[i + 1].index : body.length),
+    }));
+  const entriesOf = (text) => new Map([...text.matchAll(/^\s{4}'([^']+)': '((?:[^'\\]|\\.)*)'/gm)]
+    .map((m) => [m[1], m[2]]));
+  const holes = (s) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+
+  const en = entriesOf(blocks.find((b) => b.lang === 'en').text);
+  for (const { lang, text } of blocks) {
+    if (lang === 'en') continue;
+    const table = entriesOf(text);
+    for (const [key, value] of table) {
+      if (!en.has(key)) continue;
+      assert.deepEqual(holes(value), holes(en.get(key)), `${lang}/${key} changed its placeholders`);
+    }
+  }
 });
 
 test('t() interpolates and falls back to English then the key', () => {
@@ -36,9 +68,29 @@ test('t() interpolates and falls back to English then the key', () => {
 });
 
 test('language detection follows BUGZOO_LANG then the locale', () => {
+  // Traditional Chinese
   assert.equal(i18n.detectLang({ BUGZOO_LANG: 'zh-TW' }), 'zh-TW');
   assert.equal(i18n.detectLang({ LANG: 'zh_TW.UTF-8' }), 'zh-TW');
+  assert.equal(i18n.detectLang({ LANG: 'zh-Hant-TW' }), 'zh-TW');
+  // Simplified Chinese
+  assert.equal(i18n.detectLang({ LANG: 'zh_CN.UTF-8' }), 'zh-CN');
+  assert.equal(i18n.detectLang({ LANG: 'zh-CN' }), 'zh-CN');
+  assert.equal(i18n.detectLang({ LANG: 'zh-Hans-CN' }), 'zh-CN');
+  assert.equal(i18n.detectLang({ LANG: 'zh-SG' }), 'zh-CN');
+  assert.equal(i18n.detectLang({ LANG: 'zh' }), 'zh-CN');
+  // Everything else
   assert.equal(i18n.detectLang({ LANG: 'en_US.UTF-8' }), 'en');
+  assert.equal(i18n.detectLang({ LANG: 'ja_JP.UTF-8' }), 'en');
+  assert.equal(i18n.detectLang({ LANG: 'C' }), 'en');
+  // LC_ALL wins over LANG; an empty value falls through to the next one
+  assert.equal(i18n.detectLang({ LC_ALL: 'zh_CN', LANG: 'en_US' }), 'zh-CN');
+  assert.equal(i18n.detectLang({ BUGZOO_LANG: '', LANG: 'zh_TW' }), 'zh-TW');
+});
+
+test('every language detectLang can return is registered', () => {
+  for (const raw of ['zh_TW', 'zh_CN', 'zh-Hant', 'zh-Hans', 'zh', 'en_US', 'ja_JP']) {
+    assert.ok(i18n.LANGS.includes(i18n.detectLang({ LANG: raw })), `${raw} resolved to an unregistered language`);
+  }
 });
 
 test('width counts CJK as two columns so tables stay aligned', () => {
