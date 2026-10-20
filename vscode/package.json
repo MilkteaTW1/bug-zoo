@@ -4,6 +4,7 @@
   "description": "Your failing terminal commands become little monsters that roam around VS Code. Fix the bug to catch them.",
   "version": "0.1.0",
   "publisher": "MilkteaTW1",
+  "icon": "icon.png",
   "license": "MIT",
   "engines": { "vscode": "^1.93.0" },
   "categories": ["Other", "Visualization"],
