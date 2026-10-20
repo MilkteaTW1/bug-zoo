@@ -613,7 +613,7 @@ function detectLang(env = process.env) {
   const tag = String(raw).trim().toLowerCase().replace(/_/g, '-');
   if (!tag) return 'en';
 
-  if (/^zh-(?:tw|hant)\b/.test(tag)) return 'zh-TW'; // zh-TW, zh-Hant, zh-Hant-TW
+  if (/^zh-(?:tw|hk|mo|hant)\b/.test(tag)) return 'zh-TW'; // zh-TW, zh-HK, zh-MO, zh-Hant, zh-Hant-TW
   if (/^zh\b/.test(tag)) return 'zh-CN';             // zh, zh-CN, zh-Hans, zh-SG, zh-MY
   return 'en';
 }

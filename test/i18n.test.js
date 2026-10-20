@@ -72,6 +72,8 @@ test('language detection follows BUGZOO_LANG then the locale', () => {
   assert.equal(i18n.detectLang({ BUGZOO_LANG: 'zh-TW' }), 'zh-TW');
   assert.equal(i18n.detectLang({ LANG: 'zh_TW.UTF-8' }), 'zh-TW');
   assert.equal(i18n.detectLang({ LANG: 'zh-Hant-TW' }), 'zh-TW');
+  assert.equal(i18n.detectLang({ LANG: 'zh_HK.UTF-8' }), 'zh-TW');
+  assert.equal(i18n.detectLang({ LANG: 'zh-MO' }), 'zh-TW');
   // Simplified Chinese
   assert.equal(i18n.detectLang({ LANG: 'zh_CN.UTF-8' }), 'zh-CN');
   assert.equal(i18n.detectLang({ LANG: 'zh-CN' }), 'zh-CN');

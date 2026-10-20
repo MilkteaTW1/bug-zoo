@@ -25,7 +25,7 @@ npm install -g bug-zoo
 bugzoo setup
 ```
 
-Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
+Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / 简体中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
 
 ## Play in 30 seconds
 

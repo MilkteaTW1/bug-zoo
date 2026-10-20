@@ -1,5 +1,10 @@
 # Changelog / 更新紀錄
 
+## Unreleased
+
+- **Simplified Chinese (zh-CN)**, thanks to @cjy851096 (#5). Hong Kong and Macau locales (zh-HK, zh-MO) stay Traditional.
+  新增简体中文，感谢 @cjy851096（#5）。zh-HK、zh-MO 仍使用繁體。
+
 ## 0.3.2
 
 - **Join the ladder even if you lose.** A player who is not on the ladder yet is offered the submission after any ladder fight; they join at the bottom, and only a win within reach moves them up.

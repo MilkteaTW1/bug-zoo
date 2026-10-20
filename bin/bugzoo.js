@@ -179,7 +179,7 @@ const normalizeLang = (v) => {
   // The picker offers the languages in LANGS order as 1..n.
   if (/^\d+$/.test(s)) return i18n.LANGS[Number(s) - 1] || null;
   if (i18n.LANGS.includes(s)) return s;
-  if (/^zh-(?:tw|hant)\b/.test(s)) return 'zh-TW';
+  if (/^zh-(?:tw|hk|mo|hant)\b/.test(s)) return 'zh-TW';
   if (/^zh\b/.test(s)) return 'zh-CN';
   if (/^en\b/.test(s)) return 'en';
   return null;
