@@ -12,7 +12,7 @@ git checkout -b my-change
 npm test                                     # Node 18+, no dependencies to install
 ```
 
-Then open a pull request. Mention `Closes #<issue>` if it fixes one. For the language issue (#3) write `Refs #3` instead, so it stays open for the next language. Look for issues labelled
+Then open a pull request. Mention `Closes #<issue>` if it fixes one. For the open-ended issues (#2 parsers, #3 languages, #6 achievements, #7 monster faces, #8 proofreading) write `Refs #N` instead, so they stay open for the next person. Look for issues labelled
 [good first issue](https://github.com/MilkteaTW1/bug-zoo/labels/good%20first%20issue); comment on one to say you are taking it.
 
 ## Guidelines
