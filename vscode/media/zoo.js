@@ -9,8 +9,8 @@
 
   const TONE = { common: '#9aa0a6', uncommon: '#34a853', rare: '#1a9bd7', legendary: '#b33fd1' };
   const TEXT = {
-    en: { caught: 'caught', seen: 'seen', pen: 'caught', empty: 'The zoo is empty.<br>Run a command that fails in the terminal<br>and a monster will show up.', wild: 'wild', power: 'power', evo: 'form' },
-    'zh-TW': { caught: '已捕獲', seen: '已遇見', pen: '已捕獲', empty: '動物園還是空的。<br>在終端機跑一個會出錯的指令,<br>怪物就會出現。', wild: '野生', power: '戰力', evo: '型態' },
+    en: { caught: 'caught', seen: 'seen', pen: 'caught', empty: 'The zoo is empty.<br>Run a command that fails in the terminal<br>and a monster will show up.', wild: 'wild', power: 'power', evo: 'form', since: 'since' },
+    'zh-TW': { caught: '已捕獲', seen: '已遇見', pen: '已捕獲', empty: '動物園還是空的。<br>在終端機跑一個會出錯的指令,<br>怪物就會出現。', wild: '野生', power: '戰力', evo: '型態', since: '出現於' },
   };
   let lang = 'en';
   const tr = (k) => (TEXT[lang] || TEXT.en)[k];
@@ -62,15 +62,33 @@
     return el;
   }
 
+  function shortDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d)) return '';
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  }
+
+  function fullDate(iso) {
+    const d = new Date(iso);
+    return isNaN(d) ? '' : d.toLocaleString();
+  }
+
   function label(c, wild) {
     let s = '<b>' + esc(c.name) + '</b>';
     if (!wild && c.stage) s += ' ' + '★'.repeat(c.stage);
+    if (wild) {
+      s += '<div class="meta">' + esc(c.type) + (c.since ? ' · ' + shortDate(c.since) : '') + '</div>';
+      if (c.power) s += '<div class="meta">⚔ ' + tr('power') + ' ' + c.power + '</div>';
+    }
     return s;
   }
 
   function tip(c, wild) {
     const parts = [c.name + ' the ' + c.type, c.rarity];
+    if (wild && c.since) parts.push(tr('since') + ' ' + fullDate(c.since));
     if (wild && c.power) parts.push(tr('power') + ' ' + c.power);
+    if (wild && c.sample) parts.push(c.sample);
     if (!wild) parts.push(tr('caught') + ' x' + c.captures, tr('evo') + ' ' + (c.stage + 1));
     return parts.join(' · ');
   }

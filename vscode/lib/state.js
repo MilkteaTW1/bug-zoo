@@ -10,10 +10,12 @@ const { store, power } = require('./engine');
 function buildState() {
   const dex = store.load();
   const pendingInfo = {};
+  const since = {};
   const wildIds = new Set();
   for (const p of Object.values(dex.pending)) {
     for (const id of p.ids) {
       wildIds.add(id);
+      if (!since[id] || p.since < since[id]) since[id] = p.since;
       if (p.info && p.info[id]) pendingInfo[id] = p.info[id];
     }
   }
@@ -21,6 +23,9 @@ function buildState() {
     id: c.id, name: c.name, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
     count: c.count, captures: c.captures, stage: power.stageOf(c.captures || 0),
     power: pendingInfo[c.id] ? pendingInfo[c.id].power : undefined,
+    since: since[c.id] || null,
+    lastSeen: c.lastSeen || null,
+    sample: c.sample ? String(c.sample).slice(0, 160) : '',
   });
   const all = Object.values(dex.creatures);
   const wild = all.filter((c) => wildIds.has(c.id)).map(pack);

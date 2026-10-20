@@ -30,6 +30,7 @@ body {
   color: var(--tone); text-shadow: 0 0 8px var(--tone);
 }
 .mon .name { font-size: 11px; margin-top: 2px; white-space: nowrap; opacity: .9; color: var(--vscode-foreground); }
+.mon .name .meta { font-size: 10px; opacity: .75; }
 .mon .name b { color: var(--tone); }
 .mon.wild pre { animation: jitter .35s infinite; }
 .mon.wild .name::before { content: "! "; color: #f14c4c; font-weight: 700; }
