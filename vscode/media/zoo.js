@@ -17,6 +17,8 @@
 
   const mons = new Map();
   let last = performance.now();
+  let penOn = false;
+  const MAX_WILD = 14;
 
   const rand = (a, b) => a + Math.random() * (b - a);
   const size = () => ({ w: zoo.clientWidth, h: zoo.clientHeight });
@@ -26,8 +28,9 @@
     const { w, h } = size();
     const mw = m.el.offsetWidth || 60;
     const mh = m.el.offsetHeight || 50;
+    // Wild bugs stay above the pen; caught ones stay inside it.
     const top = m.wild ? 28 : h * 0.54;
-    const bottom = h - 10;
+    const bottom = m.wild && penOn ? h * 0.5 : h - 10;
     return {
       minX: 6,
       maxX: Math.max(6, w - mw - 6),
@@ -144,7 +147,7 @@
 
     const fresh = new Set(((events && events.brandNew) || []).concat((events && events.spawned) || []).map((c) => c.id));
     for (const m of mons.values()) m.seen = false;
-    state.wild.forEach((c) => upsert(c, true, fresh.has(c.id)));
+    state.wild.slice(0, MAX_WILD).forEach((c) => upsert(c, true, fresh.has(c.id)));
     state.caught.slice(0, 30).forEach((c) => upsert(c, false, false));
     for (const [id, m] of Array.from(mons)) {
       if (!m.seen) { m.el.remove(); mons.delete(id); }
@@ -152,6 +155,9 @@
     const nothing = state.wild.length + state.caught.length === 0;
     empty.style.display = nothing ? 'flex' : 'none';
     pen.style.display = state.caught.length ? 'block' : 'none';
+    const hadPen = penOn;
+    penOn = state.caught.length > 0;
+    if (hadPen !== penOn) for (const m of mons.values()) if (m.wild) chooseTarget(m);
   }
 
   function tick(now) {
