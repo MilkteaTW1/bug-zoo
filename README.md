@@ -280,6 +280,14 @@ npm test
 
 Nothing else needs editing: the language shows up in `bugzoo setup`, is picked from the system locale automatically, and also translates the [VS Code extension](vscode/) (its texts are the `vs.*` keys in the same file). Optionally add `vscode/package.nls.<locale>.json` for the extension's command names. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Contributors
+
+Thanks to everyone who helped:
+
+- [@cjy851096](https://github.com/cjy851096): Simplified Chinese (zh-CN) ([#5](https://github.com/MilkteaTW1/bug-zoo/pull/5))
+
+Want to be on this list? Pick a [good first issue](https://github.com/MilkteaTW1/bug-zoo/labels/good%20first%20issue) and read [CONTRIBUTING.md](CONTRIBUTING.md). Adding a language is one file.
+
 ## License
 
 MIT
@@ -569,6 +577,14 @@ npm test
 ```
 
 不用改其他檔案：新語言會自動出現在 `bugzoo setup`、依系統語系自動選用，也會同時翻譯 [VS Code 擴充套件](vscode/)（它的文字就是同一個檔案裡的 `vs.*`）。可另外新增 `vscode/package.nls.<locale>.json` 翻譯擴充套件的指令名稱。詳見 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+## 貢獻者
+
+感謝所有幫忙的人：
+
+- [@cjy851096](https://github.com/cjy851096)：簡體中文（zh-CN）（[#5](https://github.com/MilkteaTW1/bug-zoo/pull/5)）
+
+想上榜嗎？挑一個 [good first issue](https://github.com/MilkteaTW1/bug-zoo/labels/good%20first%20issue)，並看看 [CONTRIBUTING.md](CONTRIBUTING.md)。新增一個語言只要一個檔案。
 
 ## 授權
 
