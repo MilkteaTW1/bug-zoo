@@ -1,27 +1,71 @@
 {
   "name": "bug-zoo-vscode",
   "displayName": "Bug Zoo",
-  "description": "Your failing terminal commands become little monsters that roam around VS Code. Fix the bug to catch them.",
-  "version": "0.1.0",
+  "description": "Your failing terminal commands become little monsters that roam your sidebar. Fix the bug to catch them, then fight other players on a public ladder.",
+  "version": "0.1.1",
   "publisher": "MilkteaTW1",
   "icon": "icon.png",
   "license": "MIT",
-  "engines": { "vscode": "^1.93.0" },
-  "categories": ["Other", "Visualization"],
-  "keywords": ["bug-zoo", "errors", "game", "fun", "terminal"],
-  "repository": { "type": "git", "url": "git+https://github.com/MilkteaTW1/bug-zoo.git", "directory": "vscode" },
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization",
+    "Education"
+  ],
+  "keywords": [
+    "bug-zoo",
+    "errors",
+    "game",
+    "fun",
+    "terminal",
+    "debugging",
+    "gamification",
+    "pokemon",
+    "monsters",
+    "stack trace",
+    "error handling",
+    "productivity",
+    "pet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MilkteaTW1/bug-zoo.git",
+    "directory": "vscode"
+  },
   "main": "./extension.js",
-  "activationEvents": ["onStartupFinished"],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "viewsContainers": {
-      "activitybar": [{ "id": "bugzoo", "title": "Bug Zoo", "icon": "media/icon.svg" }]
+      "activitybar": [
+        {
+          "id": "bugzoo",
+          "title": "Bug Zoo",
+          "icon": "media/icon.svg"
+        }
+      ]
     },
     "views": {
-      "bugzoo": [{ "type": "webview", "id": "bugzoo.zoo", "name": "Zoo" }]
+      "bugzoo": [
+        {
+          "type": "webview",
+          "id": "bugzoo.zoo",
+          "name": "Zoo"
+        }
+      ]
     },
     "commands": [
-      { "command": "bugzoo.openZoo", "title": "Bug Zoo: Open the zoo in an editor tab" },
-      { "command": "bugzoo.toggleCapture", "title": "Bug Zoo: Toggle terminal capture" }
+      {
+        "command": "bugzoo.openZoo",
+        "title": "Bug Zoo: Open the zoo in an editor tab"
+      },
+      {
+        "command": "bugzoo.toggleCapture",
+        "title": "Bug Zoo: Toggle terminal capture"
+      }
     ],
     "configuration": {
       "title": "Bug Zoo",
@@ -43,5 +87,13 @@
     "vendor": "node scripts/vendor.js",
     "test": "node --test test/*.test.js",
     "package": "node scripts/vendor.js && npx --yes @vscode/vsce package"
+  },
+  "galleryBanner": {
+    "color": "#07070d",
+    "theme": "dark"
+  },
+  "homepage": "https://github.com/MilkteaTW1/bug-zoo#readme",
+  "bugs": {
+    "url": "https://github.com/MilkteaTW1/bug-zoo/issues"
   }
 }

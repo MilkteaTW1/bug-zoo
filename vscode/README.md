@@ -2,6 +2,8 @@
 
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/MilkteaTW1.bug-zoo-vscode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode)
 
+![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
+
 Your failing terminal commands become little monsters that wander around the side bar. Fix the bug, run the same command again, and the monster is caught and moves into your pen.
 
 It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo), so monsters, rarity, power, evolution and achievements are identical, and both share `~/.bugzoo/dex.json`.
@@ -13,10 +15,6 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 [![Watch the 36-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
 
 *Click to watch the 36-second promo video. 中文版影片:[點這裡](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)*
-
-**A crash spawns a monster. Fix it, and it is caught.**
-
-![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
 
 **Climb the ladder with a turn-by-turn battle replay.**
 
