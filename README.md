@@ -14,6 +14,8 @@ Turn your error messages into collectible monsters.
 
 **English** | [繁體中文](#zh-TW)
 
+Website: [inkacuity.com/projects/bug-zoo](https://inkacuity.com/projects/bug-zoo) · 專案介紹頁
+
 ![Bug Zoo demo](docs/demo.en.gif)
 
 *A bug appears, you fix it, it is caught, your team fights. Real output; Node-internal stack frames trimmed.*
