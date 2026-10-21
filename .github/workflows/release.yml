@@ -125,7 +125,7 @@ jobs:
           git commit -m "Release v${{ steps.ver.outputs.cli }} and extension ${{ steps.ver.outputs.ext }}"
           git tag "v${{ steps.ver.outputs.cli }}"
           git tag "vscode-v${{ steps.ver.outputs.ext }}"
-          git push origin HEAD:main --follow-tags
+          git push origin HEAD:main "v${{ steps.ver.outputs.cli }}" "vscode-v${{ steps.ver.outputs.ext }}"
 
 
       - name: GitHub releases
