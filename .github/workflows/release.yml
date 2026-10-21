@@ -1,0 +1,143 @@
+name: Release
+
+# One workflow ships everything: the CLI (npm), the VS Code extension (Marketplace + Open VSX) and the
+# GitHub releases. It runs by itself every Monday and only releases when the shipped code changed since the
+# last release. You can also run it by hand from the Actions tab and pick the size of the version bump.
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump for the CLI (the extension always gets a patch bump)
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      force:
+        description: Release even if nothing changed since the last release
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write # npm trusted publishing and provenance
+
+jobs:
+  release:
+    # The weekly run stays off until the repository variable RELEASE_ENABLED is set to true (see CONTRIBUTING).
+    if: github.event_name != 'schedule' || vars.RELEASE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_PAT: ${{ secrets.OVSX_PAT }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Anything new to ship?
+        id: changes
+        run: |
+          last=$(git describe --tags --match 'v[0-9]*' --abbrev=0)
+          echo "last release: $last"
+          if git diff --quiet "$last" HEAD -- src bin package.json vscode/extension.js vscode/lib vscode/media vscode/package.json vscode/package.nls.json vscode/package.nls.zh-cn.json vscode/package.nls.zh-tw.json; then
+            changed=false
+          else
+            changed=true
+          fi
+          if [ "${{ inputs.force }}" = "true" ]; then changed=true; fi
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "last=$last" >> "$GITHUB_OUTPUT"
+          [ "$changed" = "true" ] || echo "Nothing changed since $last, skipping." >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-node@v7
+        if: steps.changes.outputs.changed == 'true'
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      - name: Test
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          npm test
+          npm run lang:check
+          cd vscode && npm test
+
+      - name: Bump versions
+        if: steps.changes.outputs.changed == 'true'
+        id: ver
+        run: |
+          npm version "${{ inputs.bump || 'patch' }}" --no-git-tag-version
+          (cd vscode && npm version patch --no-git-tag-version)
+          echo "cli=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "ext=$(node -p "require('./vscode/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Build the extension package
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          cd vscode
+          node scripts/vendor.js
+          npx --yes @vscode/vsce package --out "$RUNNER_TEMP/bug-zoo-vscode-${{ steps.ver.outputs.ext }}.vsix"
+
+      - name: Release notes
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          {
+            echo "Changes since ${{ steps.changes.outputs.last }}:"
+            echo
+            git log --no-merges --pretty='- %s' "${{ steps.changes.outputs.last }}..HEAD" -- src bin vscode ':!vscode/*.vsix' | grep -v '^- Release ' || true
+          } > "$RUNNER_TEMP/notes.md"
+          cat "$RUNNER_TEMP/notes.md"
+
+      - name: Publish to npm
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          # With an NPM_TOKEN it uses the token; without one it uses npm trusted publishing (OIDC).
+          npm install -g npm@latest
+          if [ -n "$NPM_TOKEN" ]; then export NODE_AUTH_TOKEN="$NPM_TOKEN"; fi
+          if npm view "bug-zoo@${{ steps.ver.outputs.cli }}" version >/dev/null 2>&1; then echo "already on npm"; exit 0; fi
+          npm publish --provenance --access public
+
+
+      - name: Publish to the VS Code Marketplace
+        if: steps.changes.outputs.changed == 'true' && env.VSCE_PAT != ''
+        run: npx --yes @vscode/vsce publish --packagePath "$RUNNER_TEMP/bug-zoo-vscode-${{ steps.ver.outputs.ext }}.vsix" --pat "$VSCE_PAT" --skip-duplicate
+
+
+      - name: Publish to Open VSX
+        if: steps.changes.outputs.changed == 'true' && env.OVSX_PAT != ''
+        run: npx --yes ovsx publish "$RUNNER_TEMP/bug-zoo-vscode-${{ steps.ver.outputs.ext }}.vsix" --pat "$OVSX_PAT" --skip-duplicate
+
+
+      - name: Commit and tag
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json vscode/package.json
+          git diff --cached --quiet && { echo "no version change"; exit 1; }
+          git commit -m "Release v${{ steps.ver.outputs.cli }} and extension ${{ steps.ver.outputs.ext }}"
+          git tag "v${{ steps.ver.outputs.cli }}"
+          git tag "vscode-v${{ steps.ver.outputs.ext }}"
+          git push origin HEAD:main --follow-tags
+
+
+      - name: GitHub releases
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ steps.ver.outputs.cli }}" --title "Bug Zoo v${{ steps.ver.outputs.cli }}" --notes-file "$RUNNER_TEMP/notes.md" --latest
+          gh release create "vscode-v${{ steps.ver.outputs.ext }}" "$RUNNER_TEMP/bug-zoo-vscode-${{ steps.ver.outputs.ext }}.vsix" --title "VS Code extension v${{ steps.ver.outputs.ext }}" --notes-file "$RUNNER_TEMP/notes.md" --latest=false
+
+      - name: Missing publish tokens
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          [ -n "$VSCE_PAT" ] || echo "::warning::VSCE_PAT is not set, the VS Code Marketplace was skipped. The .vsix is attached to the GitHub release."
+          [ -n "$OVSX_PAT" ] || echo "::warning::OVSX_PAT is not set, Open VSX was skipped."

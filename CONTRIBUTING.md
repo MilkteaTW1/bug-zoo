@@ -27,3 +27,7 @@ Then open a pull request. Mention `Closes #<issue>` if it fixes one. For the ope
 Issues titled `Challenge: ...` are ladder submissions made by the CLI and are handled automatically.
 Normal issues and pull requests are never touched by that workflow.
 標題以 `Challenge:` 開頭的 issue 是 CLI 自動送出的天梯結果，由機器人處理；一般 issue 與 PR 不受影響。
+
+## Releases
+
+Releases are automatic. `.github/workflows/release.yml` runs every Monday (once the repository variable `RELEASE_ENABLED` is `true`) and, if anything shipped changed since the last release, tests, bumps the versions, publishes the CLI to npm and the extension to the VS Code Marketplace and Open VSX, tags, and creates the GitHub releases. The maintainer can also start it from the Actions tab and choose a patch, minor or major bump. Publishing uses npm trusted publishing or the `NPM_TOKEN` secret, plus the optional `VSCE_PAT` and `OVSX_PAT` secrets; a missing optional token just skips that store.
