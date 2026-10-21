@@ -1,11 +1,16 @@
 {
   "name": "bug-zoo",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Turn your error messages into collectible monsters. A terminal bestiary for developers.",
   "bin": {
     "bugzoo": "bin/bugzoo.js"
   },
-  "files": ["bin", "src", "LICENSE", "README.md"],
+  "files": [
+    "bin",
+    "src",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "node --test",
     "lang": "node tools/new-lang.js",
@@ -14,10 +19,22 @@
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["cli", "errors", "bestiary", "pokedex", "developer-tools", "fun"],
+  "keywords": [
+    "cli",
+    "errors",
+    "bestiary",
+    "pokedex",
+    "developer-tools",
+    "fun"
+  ],
   "author": "MilkteaTW1",
-  "repository": { "type": "git", "url": "git+https://github.com/MilkteaTW1/bug-zoo.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MilkteaTW1/bug-zoo.git"
+  },
   "homepage": "https://github.com/MilkteaTW1/bug-zoo#readme",
-  "bugs": { "url": "https://github.com/MilkteaTW1/bug-zoo/issues" },
+  "bugs": {
+    "url": "https://github.com/MilkteaTW1/bug-zoo/issues"
+  },
   "license": "MIT"
 }
