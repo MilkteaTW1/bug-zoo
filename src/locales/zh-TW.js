@@ -30,6 +30,7 @@ module.exports = {
   bugzoo friend               列出好友（也可用：code | add <代碼|網址|檔案|名稱>
                               | remove <名稱> | refresh）
   bugzoo ladder [資料夾]      查看天梯
+  bugzoo ladder join          一步加入天梯（需要先有捕獲與玩家名稱）
   bugzoo scan                 掃描這個專案：規模與最多檔案依賴的模組
   bugzoo rank                 查看你的分數與稱號
   bugzoo share [--name 名稱] [--out 檔案]
@@ -247,6 +248,13 @@ module.exports = {
     'lang.ask': '輸入編號，直接按 Enter 維持不變：',
     'lang.set': '語言已切換為 {lang}。',
     'lang.bad': '找不到語言「{value}」。可用的語言：{list}',
+
+    // bugzoo ladder join
+    'ladder.join.intro': '加入天梯：你的隊伍會和 {defender}（最後一名）打一場入場賽。不論輸贏都會從最底下加入，贏了就取代他的名次。',
+    'ladder.join.already': '你已經在天梯上了，第 {rank} 名。用 `bugzoo battle` 挑戰排在你上面的人往上爬。',
+    'ladder.join.empty': '天梯上還沒有可以對戰的人，目前沒有東西可以加入，晚點再試。',
+    'ladder.join.needCatch': '先捕獲一隻 bug：你的隊伍由捕獲的 bug 組成。跑一個會失敗的指令，修好後再跑一次。',
+    'ladder.joinHint': '一行指令就能加入天梯：bugzoo ladder join',
 
     // VS Code extension (vscode/): the zoo view, the ladder panel and the notifications.
     'vs.caught': '已捕獲',

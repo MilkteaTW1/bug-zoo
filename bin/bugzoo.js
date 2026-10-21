@@ -412,6 +412,42 @@ async function showLadder(args) {
   return 0;
 }
 
+/** `bugzoo ladder join`: submit your team to the ladder in one step, as an entry fight against last place. */
+async function cmdLadderJoin() {
+  const dex = store.load();
+  const name = cleanName((dex.profile && dex.profile.name) || '');
+  if (battle.topTeam(dex.trophies, dex.creatures).length === 0) {
+    console.error(t('ladder.join.needCatch'));
+    return 2;
+  }
+  if (!name) {
+    console.error(t('battle.needName'));
+    return 2;
+  }
+  const source = await remote.loadLadder();
+  ladderNotice(source);
+  const order = ladder.sync(source.order, source.players);
+  const mine = ladder.indexOf(order, name);
+  if (mine > -1 && source.players.has(name.toLowerCase())) {
+    console.log(t('ladder.join.already', { rank: mine + 1 }));
+    return 0;
+  }
+  if (order.length === 0) {
+    console.error(t('ladder.join.empty'));
+    return 2;
+  }
+  const defender = order[order.length - 1];
+  console.log(t('ladder.join.intro', { defender }));
+  const url = acceptor.issueUrl({ repo: remote.repoOf(), challenger: name, defender, payload: sharePayload(dex, name) });
+  console.log(url);
+  console.log(t('battle.submitNote'));
+  if (interactive() && yes(await ask(t('battle.openAsk')))) {
+    openUrl(url);
+    console.log(t('battle.opened'));
+  }
+  return 0;
+}
+
 async function cmdBattle(args) {
   const { flags, positional } = parseFlags(args);
   const dex = store.load();
@@ -655,6 +691,9 @@ async function main() {
       process.exit(cmdLeaderboard(rest));
       break;
     case 'ladder': {
+      if (parseFlags(rest).positional[0] === 'join') {
+        process.exit(await cmdLadderJoin());
+      }
       const rc = cmdLadder(rest);
       process.exit(rc === null ? await showLadder(rest) : rc);
       break;

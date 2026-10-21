@@ -75,6 +75,7 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
 | `bugzoo ladder` | Show the ladder |
+| `bugzoo ladder join` | Join the ladder in one step: prints (and offers to open) the pre-filled GitHub issue for your entry fight |
 | `bugzoo rank` | Your score and title |
 | `bugzoo lang [code]` | Show the languages, or switch in one line: `bugzoo lang zh-CN` (changes nothing else) |
 | `bugzoo setup` | Language, player name, optional automatic capture and the AI-assistant hook (`--lang`, `--name`, `--auto on\|off`, `--ai on\|off`) |
@@ -224,7 +225,7 @@ Fight whom? (number, or q to quit)
 
 - Teams fight one at a time; the survivor keeps its remaining HP. The fight is seeded from both teams, so both players get the same result and nobody can re-roll luck.
 - **The ladder is read straight from this GitHub repo** (`leaderboard/`). No clone, no server of ours. If GitHub is unreachable the last saved copy is used.
-- **New here? Your first ladder fight puts you on the ladder, win or lose.** You start at the bottom, then climb.
+- **New here? Run `bugzoo ladder join`.** It needs a player name and one catch, fights last place for you and prints the pre-filled issue link. You land on the ladder win or lose, then climb. (`bugzoo battle` does the same through a fight you pick.)
 - **Beat someone up to 3 ranks above you to take their spot.** The CLI prints a pre-filled GitHub issue link; press *Submit new issue* and a workflow replays the fight from your shared team, then updates the ladder within a minute or two.
 - Fighting friends and the practice opponent is friendly: it never changes the ladder.
 - A player name belongs to the first GitHub account that submits with it, so nobody can submit as someone else.
@@ -373,6 +374,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
 | `bugzoo ladder` | 查看天梯 |
+| `bugzoo ladder join` | 一行加入天梯：產生（並可直接開啟）入場賽的 GitHub issue 連結 |
 | `bugzoo rank` | 你的分數與稱號 |
 | `bugzoo lang [代碼]` | 查看語言清單，或一行切換：`bugzoo lang zh-CN`（不會動到其他設定） |
 | `bugzoo setup` | 語言、玩家名稱、選用的自動捕捉與 AI 助手 hook（`--lang`、`--name`、`--auto on\|off`、`--ai on\|off`） |
@@ -521,6 +523,7 @@ bugzoo battle
 ```
 
 - 隊伍依序單挑，存活者保留剩餘血量。戰鬥用雙方隊伍當亂數種子，所以雙方算出的結果一致，也不能重複洗運氣。
+- **新玩家？執行 `bugzoo ladder join`。** 需要玩家名稱和一隻捕獲，它會替你和最後一名打一場並印出預填好的 issue 連結，不論輸贏都會上榜，之後再往上爬。
 - **天梯直接從這個 GitHub repo 讀取**（`leaderboard/`），不用 clone、也沒有我們自己的伺服器。連不上 GitHub 時會用上次儲存的副本。
 - **新玩家第一次打天梯，不論輸贏都會加入天梯。** 從最底下開始往上爬。
 - **打贏排名在你上面 3 名以內的人，就奪下他的名次。** CLI 會印出一個預先填好的 GitHub Issue 連結，按下 *Submit new issue*，工作流程會用你分享的隊伍重新播放戰鬥，一兩分鐘內更新天梯。

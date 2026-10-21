@@ -1,5 +1,10 @@
 # Changelog / 更新紀錄
 
+## 0.3.7
+
+- **`bugzoo ladder join`**: join the ladder in one command. It fights last place for you and prints (and offers to open) the pre-filled GitHub issue; you land on the ladder win or lose. Your very first catch now tells you about it.
+  `bugzoo ladder join`：一行指令加入天梯，自動和最後一名打入場賽並產生（可直接開啟）預填的 GitHub issue，不論輸贏都會上榜。第一次捕獲後也會提示。
+
 ## 0.3.5
 
 - **Monster names in every language.** Each language file now has a `names` block (prefix + suffix lists), so Simplified Chinese players see Chinese monster names (they used to see English ones; only Traditional Chinese had them). A new language translates its own `names` too. The VS Code zoo tooltip is translated as well (it said "the" and showed the rarity in English).

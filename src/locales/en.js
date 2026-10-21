@@ -32,6 +32,7 @@ Usage:
   bugzoo friend               List friends   (also: code | add <code|url|file|name>
                               | remove <name> | refresh)
   bugzoo ladder [dir]         Show the ladder
+  bugzoo ladder join          Join the ladder in one step (needs a catch and a name)
   bugzoo scan                 Scan this project: size and most-depended-on modules
   bugzoo rank                 Show your score and title
   bugzoo share [--name N] [--out file]
@@ -250,6 +251,13 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'lang.ask': 'Pick a number, or press Enter to keep it: ',
     'lang.set': 'Language set to {lang}.',
     'lang.bad': 'Unknown language "{value}". Available: {list}',
+
+    // bugzoo ladder join
+    'ladder.join.intro': 'Joining the ladder: your team plays an entry fight against {defender} (last place). You join at the bottom win or lose, and a win takes their spot.',
+    'ladder.join.already': 'You are already on the ladder, at #{rank}. Fight someone above you with `bugzoo battle` to climb.',
+    'ladder.join.empty': 'The ladder has nobody to fight yet, so there is nothing to join. Try again later.',
+    'ladder.join.needCatch': 'Catch a bug first: your team is made from your catches. Run a command that fails, fix it, and run it again.',
+    'ladder.joinHint': 'Join the ladder with one command: bugzoo ladder join',
 
     // VS Code extension (vscode/): the zoo view, the ladder panel and the notifications.
     'vs.caught': 'caught',

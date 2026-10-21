@@ -303,3 +303,36 @@ test('a challenger who is not on the ladder joins at the bottom even when they l
   assert.equal(out.results[0].outcome, 'lost');
   assert.deepEqual(out.state.order, ['strong', 'newbie']);
 });
+
+test('`bugzoo ladder join` prints the entry-fight issue against last place, and refuses without a catch or a name', () => {
+  const root = tmp('bz-ljoin-');
+  const home = path.join(root, 'home');
+  const lb = path.join(root, 'lb');
+  seedPlayer(home, 600);
+  fs.mkdirSync(path.join(lb, 'scores'), { recursive: true });
+  for (const [n, p] of [['top', 30], ['last', 20]]) {
+    fs.writeFileSync(path.join(lb, 'scores', `${n}.json`), JSON.stringify(score(n, p)));
+  }
+  fs.writeFileSync(path.join(lb, 'ladder.json'), JSON.stringify({ v: 1, order: ['top', 'last'], processed: [] }));
+  const env = { BUGZOO_HOME: home, BUGZOO_LADDER_DIR: lb };
+
+  const r = cli(['ladder', 'join'], env);
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /last/);
+  assert.match(r.stdout, /issues\/new\?title=Challenge%3A%20tester%20vs%20last/);
+
+  // already on the ladder: no new link
+  fs.writeFileSync(path.join(lb, 'scores', 'tester.json'), JSON.stringify(score('tester', 5)));
+  fs.writeFileSync(path.join(lb, 'ladder.json'), JSON.stringify({ v: 1, order: ['top', 'last', 'tester'], processed: [] }));
+  const again = cli(['ladder', 'join'], env);
+  assert.equal(again.status, 0, again.stderr);
+  assert.match(again.stdout, /already on the ladder, at #3/);
+  assert.ok(!/issues\/new/.test(again.stdout));
+
+  // nothing caught yet
+  const empty = path.join(root, 'empty-home');
+  fs.mkdirSync(empty, { recursive: true });
+  const none = cli(['ladder', 'join'], { BUGZOO_HOME: empty, BUGZOO_LADDER_DIR: lb });
+  assert.notEqual(none.status, 0);
+  assert.match(none.stderr, /Catch a bug first/);
+});

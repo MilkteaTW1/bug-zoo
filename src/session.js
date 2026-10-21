@@ -44,6 +44,8 @@ function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = 
   const banner = render.outcomeBanner(result);
   if (banner) out.push('', banner);
   const more = render.extras(result);
+  // The first catch ever: tell the player how to get on the ladder.
+  if ((result.achievements || []).includes('first-catch')) more.push(`\x1b[2m${i18n.t('ladder.joinHint')}\x1b[0m`);
   if (more.length > 0) out.push(...(banner ? [] : ['']), ...more);
   return out.length > 0 ? `${out.join('\n')}\n\n` : '';
 }
