@@ -50,6 +50,7 @@ test('the language picker lists every language and accepts numbers, codes and lo
   assert.equal(i18n.parseLang('1'), i18n.LANGS[0]);
   assert.equal(i18n.parseLang('zh_CN.UTF-8'), 'zh-CN');
   assert.equal(i18n.parseLang('zh-HK'), 'zh-TW');
+  assert.equal(i18n.parseLang('ko_KR'), 'ko');
   assert.equal(i18n.parseLang('EN'), 'en');
   assert.equal(i18n.parseLang('99'), null);
   assert.equal(i18n.parseLang('xx'), null);
@@ -92,6 +93,10 @@ test('language detection follows BUGZOO_LANG then the locale', () => {
   assert.equal(i18n.detectLang({ LANG: 'zh-Hans-CN' }), 'zh-CN');
   assert.equal(i18n.detectLang({ LANG: 'zh-SG' }), 'zh-CN');
   assert.equal(i18n.detectLang({ LANG: 'zh' }), 'zh-CN');
+  // Korean
+  assert.equal(i18n.detectLang({ LANG: 'ko_KR.UTF-8' }), 'ko');
+  assert.equal(i18n.detectLang({ LANG: 'ko-KR' }), 'ko');
+  assert.equal(i18n.detectLang({ LANG: 'ko' }), 'ko');
   // Everything else
   assert.equal(i18n.detectLang({ LANG: 'en_US.UTF-8' }), 'en');
   assert.equal(i18n.detectLang({ LANG: 'ja_JP.UTF-8' }), 'en');
@@ -102,7 +107,7 @@ test('language detection follows BUGZOO_LANG then the locale', () => {
 });
 
 test('every language detectLang can return is registered', () => {
-  for (const raw of ['zh_TW', 'zh_CN', 'zh-Hant', 'zh-Hans', 'zh', 'en_US', 'ja_JP']) {
+  for (const raw of ['zh_TW', 'zh_CN', 'zh-Hant', 'zh-Hans', 'zh', 'ko_KR', 'en_US', 'ja_JP']) {
     assert.ok(i18n.LANGS.includes(i18n.detectLang({ LANG: raw })), `${raw} resolved to an unregistered language`);
   }
 });
