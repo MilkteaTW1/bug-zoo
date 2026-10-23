@@ -1,0 +1,8 @@
+{
+  "view.zoo": "Zoo",
+  "command.openZoo": "Bug Zoo: abrir el zoo en una pestaña del editor",
+  "command.toggleCapture": "Bug Zoo: activar/desactivar la captura de terminal",
+  "config.captureTerminal": "Convierte en monstruos los comandos que fallan en la terminal integrada (necesita terminal shell integration). Desactívalo si ya usas `bugzoo setup --auto on`, o cada ejecución contaría dos veces.",
+  "config.notifications": "Mostrar una notificación cuando aparece un monstruo o se captura.",
+  "command.setLanguage": "Bug Zoo: cambiar idioma"
+}
