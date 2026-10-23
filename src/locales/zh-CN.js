@@ -9,8 +9,8 @@ module.exports = {
   detect: ['zh'],
   // Monster names are prefix + suffix, picked from the error's hash. The two lists may have any length.
   names: {
-    prefix: ['阴森', '毛茸', '毒舌', '摇晃', '忧郁', '电击', '阴暗', '小不点', '碎屑', '诅咒', '故障', '小笔'],
-    suffix: ['小怪', '蝙蝠', '啃咬虫', '飞蛾', '蟾蜍', '鬼火', '甲虫', '小鬼', '爬虫', '蜗牛', '精灵', '螨'],
+    prefix: ['阴森', '毛球', '毒舌', '摇晃', '忧郁', '电击', '阴暗', '小不点', '碎屑', '诅咒', '故障', '笔尖'],
+    suffix: ['小怪', '蝙蝠', '啃咬虫', '飞蛾', '蟾蜍', '鬼火', '甲虫', '小鬼', '爬虫', '蜗牛', '精灵', '螨虫'],
   },
   help: `bugzoo - 把你的错误变成可收集的怪物
 
@@ -48,7 +48,7 @@ module.exports = {
   部分 bug 消失    消失的那些捕获成功
   出现新的 bug     逃走了，新的 bug 变成你的目标
 
-在天梯上打赢排名在你上面 3 名以内的人，就能夺下他的名次。
+在天梯上打赢排名在你上面 3 名以内的人，就能夺下对方的名次。
 `,
   messages: {
     'fmt.creature': '{name}（{type}）',
@@ -61,7 +61,7 @@ module.exports = {
     'enc.appeared': '野生的 {type} 出现了！',
     'enc.new': '* 新发现 *',
     'enc.seen': '遇到 {n} 次',
-    'enc.power': '错误大小：战力 {power}',
+    'enc.power': 'bug 体型：战力 {power}',
 
     'out.caughtTag': '[捕获成功]',
     'out.escapedTag': '[逃走了]',
@@ -142,7 +142,7 @@ module.exports = {
     'setup.status': '语言：{lang}｜名字：{name}｜自动捕获：{auto}',
     'evo.tag': '[进化]',
     'evo.line': '{name} 进化了！现在是“{stage}”，战力 ×{mult}。',
-    'evo.stage0': '普通',
+    'evo.stage0': '基础形态',
     'evo.stage1': '第二形态',
     'evo.stage2': '觉醒形态',
     'evo.next': '再捕获 {n} 次就会进化',
@@ -209,7 +209,7 @@ module.exports = {
     'battle.noLadder': '无法连上天梯（{reason}）。好友与练习对手仍可使用。',
     'battle.friendly': '切磋：这场不会影响天梯。',
     'battle.outOfReach': '切磋：只有打赢排名在你上面 {reach} 名以内的人才能晋级。',
-    'battle.promote': '你击败了第 {rank} 名 {name}！提交即可夺下他的名次：',
+    'battle.promote': '你击败了第 {rank} 名 {name}！提交即可夺下对方的名次：',
     'battle.join': '你还不在天梯上。提交这场战斗即可加入天梯（不论输赢，从最底下开始）：',
     'battle.needName': '要提交天梯结果，请先设置玩家名（bugzoo setup --name <名字>）。',
     'battle.openAsk': '要现在用浏览器打开吗？[Y/n]：',
@@ -250,7 +250,7 @@ module.exports = {
     'lang.bad': '找不到语言“{value}”。可用的语言：{list}',
 
     // bugzoo ladder join
-    'ladder.join.intro': '加入天梯：你的队伍会和 {defender}（最后一名）打一场入场赛。不论输赢都会从最底下加入，赢了就夺下他的名次。',
+    'ladder.join.intro': '加入天梯：你的队伍会和 {defender}（最后一名）打一场入场赛。不论输赢都会从最底下加入，赢了就夺下对方的名次。',
     'ladder.join.already': '你已经在天梯上了，第 {rank} 名。用 `bugzoo battle` 挑战排在你上面的人往上爬。',
     'ladder.join.empty': '天梯上还没有可以对战的人，目前没有东西可以加入，晚点再试。',
     'ladder.join.needCatch': '先捕获一只 bug：你的队伍由捕获的 bug 组成。跑一个会失败的命令，修好后再跑一次。',
@@ -265,9 +265,9 @@ module.exports = {
     'vs.power': '战力',
     'vs.evo': '形态',
     'vs.since': '出现于',
-    'vs.ladder': '榜单',
+    'vs.ladder': '天梯',
     'vs.offline': '离线数据',
-    'vs.noladder': '榜单暂时无法加载',
+    'vs.noladder': '天梯暂时无法加载',
     'vs.friends': '好友',
     'vs.fight': '对战',
     'vs.you': '你',
@@ -280,13 +280,13 @@ module.exports = {
     'vs.win': '你赢了！',
     'vs.lose': '你输了',
     'vs.close': '关闭',
-    'vs.submit': '提交到榜单',
+    'vs.submit': '提交到天梯',
     'vs.replay': '重播',
     'vs.skip': '跳过',
-    'vs.promote': '你打败了 {name}！到 GitHub 提交这场胜利就能夺下他的名次。',
-    'vs.join': '到 GitHub 提交你的队伍就能加入榜单。',
-    'vs.outOfReach': '赢得漂亮，但榜单只在挑战你上方 {reach} 名以内的玩家时才会变动。',
-    'vs.friendly': '友谊赛：不会影响榜单。',
+    'vs.promote': '你打败了 {name}！到 GitHub 提交这场胜利就能夺下对方的名次。',
+    'vs.join': '到 GitHub 提交你的队伍就能加入天梯。',
+    'vs.outOfReach': '赢得漂亮，但天梯只在挑战你上方 {reach} 名以内的玩家时才会变动。',
+    'vs.friendly': '友谊赛：不会影响天梯。',
     'vs.lost': '多修几个 bug、养强队伍再来挑战吧。',
     'vs.practiceNote': '练习对战：不计入战绩。',
     'vs.hits': '攻击',
@@ -295,14 +295,14 @@ module.exports = {
     'vs.kind.code': '代码',
     'vs.kind.url': '链接',
     'vs.kind.file': '文件',
-    'vs.kind.ladder': '榜单',
+    'vs.kind.ladder': '天梯',
     'vs.vs': 'VS',
     'vs.achievement': '成就',
     'vs.nameTitle': 'Bug Zoo 玩家名',
-    'vs.namePrompt': '你在榜单上的名字（会显示给其他玩家）',
+    'vs.namePrompt': '你在天梯上的名字（会显示给其他玩家）',
     'vs.namePick': '请输入名字',
     'vs.addTitle': '加好友',
-    'vs.addPrompt': '粘贴好友代码（BZ1...）、链接、文件路径，或榜单上的玩家名',
+    'vs.addPrompt': '粘贴好友代码（BZ1...）、链接、文件路径，或天梯上的玩家名',
     'vs.friendAdded': '已添加 {name}。',
     'vs.friendUpdated': '已更新 {name}。',
     'vs.friendSelf': '那是你自己！',
