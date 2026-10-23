@@ -14,9 +14,14 @@ const EXC = '((?:[\\w$]+\\.)*[A-Z][\\w$]*(?:Error|Exception))';
 
 /**
  * Known error formats. Each rule: a multiline regex plus how to read a type and a message.
- * Covers Node, Python, pytest, Java, .NET, Go, Rust, TypeScript, gcc/clang and Gradle.
+ * Covers Node, Python, pytest, Ruby, Java, .NET, Go, Rust, TypeScript, gcc/clang and Gradle.
  */
 const RULES = [
+  { // Ruby: "app.rb:3:in `<main>': undefined method `name' for nil:NilClass (NoMethodError)"
+    re: /^\s*\S+\.rb:\d+(?::in `[^']*')?:\s*(.*?)\s+\(([\w:]+(?:Error|Exception))\)\s*$/gm,
+    type: (m) => m[2],
+    msg: (m) => m[1],
+  },
   { // TypeError: x | java.lang.NullPointerException: x | Exception in thread "main" ... | Unhandled exception. System.X: y
     re: new RegExp(`^\\s*(?:Uncaught\\s+|Caused by:\\s+|Exception in thread "[^"]*"\\s+|Unhandled [Ee]xception[.:]\\s+)?${EXC}[ \\t]*(?::[ \\t]*(.*))?$`, 'gm'),
     type: (m) => lastSegment(m[1]),
