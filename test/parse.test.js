@@ -27,6 +27,10 @@ test('Python: traceback ends with the error', () => {
 test('Ruby: runtime errors include the file, frame, message and type', () => {
   const t = "app.rb:3:in `<main>': undefined method `name' for nil:NilClass (NoMethodError)\n";
   assert.deepEqual(first(t), { type: 'NoMethodError', message: "undefined method `name' for nil:NilClass" });
+  assert.deepEqual(first("app.rb:3:in 'Object#foo': undefined method `name' for nil:NilClass (NoMethodError)\n"),
+    { type: 'NoMethodError', message: "undefined method `name' for nil:NilClass" });
+  assert.deepEqual(first("app.rb:4:in 'block in Object#foo': undefined local variable or method `bar' (NameError)\n"),
+    { type: 'NameError', message: "undefined local variable or method `bar'" });
   assert.deepEqual(first("app.rb:1: syntax error, unexpected end-of-input, expecting `end' (SyntaxError)\n"),
     { type: 'SyntaxError', message: "syntax error, unexpected end-of-input, expecting `end'" });
 });

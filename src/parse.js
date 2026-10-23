@@ -17,8 +17,8 @@ const EXC = '((?:[\\w$]+\\.)*[A-Z][\\w$]*(?:Error|Exception))';
  * Covers Node, Python, pytest, Ruby, Java, .NET, Go, Rust, TypeScript, gcc/clang and Gradle.
  */
 const RULES = [
-  { // Ruby: "app.rb:3:in `<main>': undefined method `name' for nil:NilClass (NoMethodError)"
-    re: /^\s*\S+\.rb:\d+(?::in `[^']*')?:\s*(.*?)\s+\(([\w:]+(?:Error|Exception))\)\s*$/gm,
+  { // Ruby: "app.rb:3:in `<main>': ..." or "app.rb:3:in 'Object#foo': ..."
+    re: /^\s*\S+\.rb:\d+(?::in (?:`[^']*'|'[^']*'))?:\s*(.*?)\s+\(([\w:]+(?:Error|Exception))\)\s*$/gm,
     type: (m) => m[2],
     msg: (m) => m[1],
   },
