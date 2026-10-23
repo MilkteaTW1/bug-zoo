@@ -2,7 +2,7 @@
   "name": "bug-zoo-vscode",
   "displayName": "Bug Zoo",
   "description": "Your failing terminal commands become little monsters that roam your sidebar. Fix the bug to catch them, then fight other players on a public ladder.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "MilkteaTW1",
   "icon": "icon.png",
   "license": "MIT",
