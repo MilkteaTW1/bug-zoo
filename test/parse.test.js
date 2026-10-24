@@ -24,6 +24,17 @@ test('Python: traceback ends with the error', () => {
   assert.deepEqual(first(t), { type: 'KeyError', message: "'k'" });
 });
 
+test('Ruby: runtime errors include the file, frame, message and type', () => {
+  const t = "app.rb:3:in `<main>': undefined method `name' for nil:NilClass (NoMethodError)\n";
+  assert.deepEqual(first(t), { type: 'NoMethodError', message: "undefined method `name' for nil:NilClass" });
+  assert.deepEqual(first("app.rb:3:in 'Object#foo': undefined method `name' for nil:NilClass (NoMethodError)\n"),
+    { type: 'NoMethodError', message: "undefined method `name' for nil:NilClass" });
+  assert.deepEqual(first("app.rb:4:in 'block in Object#foo': undefined local variable or method `bar' (NameError)\n"),
+    { type: 'NameError', message: "undefined local variable or method `bar'" });
+  assert.deepEqual(first("app.rb:1: syntax error, unexpected end-of-input, expecting `end' (SyntaxError)\n"),
+    { type: 'SyntaxError', message: "syntax error, unexpected end-of-input, expecting `end'" });
+});
+
 test('pytest: errors are on stdout, failures use E-lines', () => {
   const out = '============ FAILURES ============\n    def test_math():\n>       assert 1 + 1 == 3\nE       assert (1 + 1) == 3\n\ntest_x.py:2: AssertionError\n';
   assert.equal(first('', 1, out).type, 'AssertionError');
