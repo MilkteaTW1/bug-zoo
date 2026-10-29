@@ -2,6 +2,12 @@
 
 Turn your error messages into collectible monsters.
 
+```bash
+npm install -g bug-zoo && bugzoo setup
+```
+
+Or install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode). 或安裝 VS Code 擴充套件。
+
 [![Tests](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml/badge.svg)](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/bug-zoo)](https://www.npmjs.com/package/bug-zoo) [![license](https://img.shields.io/npm/l/bug-zoo)](LICENSE)
 
 **Catch bugs, build a team, battle your friends.**
