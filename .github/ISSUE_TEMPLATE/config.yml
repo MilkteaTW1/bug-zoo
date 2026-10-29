@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Add a language / 新增語言
+    url: https://github.com/MilkteaTW1/bug-zoo/blob/main/CONTRIBUTING.md
+    about: A new language is one file; see CONTRIBUTING
+  - name: Custom work / 客製需求
+    url: https://inkacuity.com/projects/bug-zoo
+    about: Need a custom feature or integration? Get in touch

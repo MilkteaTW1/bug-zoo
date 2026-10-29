@@ -1,0 +1,24 @@
+name: Bug report / 問題回報
+description: Something did not work as expected.
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you saw. Paste the exact error text if there is one.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: bug-zoo version
+      placeholder: "0.3.9 (npm or VS Code extension?)"
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Node.js version and OS
+      placeholder: "Node 20, Windows 11"

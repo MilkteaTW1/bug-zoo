@@ -291,6 +291,10 @@ Thanks to everyone who helped:
 
 Want to be on this list? Pick a [good first issue](https://github.com/MilkteaTW1/bug-zoo/labels/good%20first%20issue) and read [CONTRIBUTING.md](CONTRIBUTING.md). Adding a language is one file.
 
+## Need something custom?
+
+Custom features, integrations or setup help are available. See [墨鋒 Inkacuity](https://inkacuity.com/projects/bug-zoo) or email [ink@inkacuity.com](mailto:ink@inkacuity.com).
+
 ## License
 
 MIT
@@ -590,6 +594,10 @@ npm test
 - [@cjy851096](https://github.com/cjy851096)：簡體中文（zh-CN）（[#5](https://github.com/MilkteaTW1/bug-zoo/pull/5)）
 
 想上榜嗎？挑一個 [good first issue](https://github.com/MilkteaTW1/bug-zoo/labels/good%20first%20issue)，並看看 [CONTRIBUTING.md](CONTRIBUTING.md)。新增一個語言只要一個檔案。
+
+## 需要客製？
+
+想要專屬功能、整合或部署協助？歡迎找我，詳情請見 [墨鋒 Inkacuity](https://inkacuity.com/projects/bug-zoo)，或寄信到 [ink@inkacuity.com](mailto:ink@inkacuity.com)。
 
 ## 授權
 
