@@ -1,0 +1,30 @@
+{
+  "v": 2,
+  "name": "LOSMASVIOS",
+  "caught": {
+    "common": 0,
+    "uncommon": 0,
+    "rare": 2,
+    "legendary": 0
+  },
+  "repeats": 0,
+  "seen": 2,
+  "score": 120,
+  "team": [
+    {
+      "name": "Murkling",
+      "type": "CompileError",
+      "rarity": "rare",
+      "power": 103,
+      "stage": 0
+    },
+    {
+      "name": "Gloomgnaw",
+      "type": "CompileError",
+      "rarity": "rare",
+      "power": 91,
+      "stage": 0
+    }
+  ],
+  "updated": "2026-10-29T00:04:45.944Z"
+}

@@ -1,11 +1,13 @@
 {
   "v": 1,
   "order": [
+    "LOSMASVIOS",
     "MilkteaTW1",
     "example-player",
     "code-monkey"
   ],
   "processed": [
-    "20261014T050652Z-MilkteaTW1-vs-example-player.json"
+    "20261014T050652Z-MilkteaTW1-vs-example-player.json",
+    "20261029T000445Z-LOSMASVIOS-vs-MilkteaTW1.json"
   ]
 }
