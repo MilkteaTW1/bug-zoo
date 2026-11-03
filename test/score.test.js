@@ -4,7 +4,6 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { normalizeArgv } = require('../src/key');
 const { computeScore, titleFor, summarize, validateEntry } = require('../src/score');
-const { rank, toMarkdown } = require('../src/leaderboard');
 
 test('flags, numbers and ./ prefixes are ignored when matching commands', () => {
   const base = normalizeArgv(['node', 'app.js']);
@@ -57,9 +56,3 @@ test('names cannot break the markdown table', () => {
   assert.equal(v.entry.name, 'abscript');
 });
 
-test('leaderboard keeps the best entry per name and sorts by score', () => {
-  const mk = (name, common) => validateEntry({ name, caught: { common } }).entry;
-  const ranked = rank([mk('Ann', 1), mk('ann', 5), mk('Bob', 3)]);
-  assert.deepEqual(ranked.map((e) => `${e.name}:${e.score}`), ['ann:50', 'Bob:30']);
-  assert.match(toMarkdown(ranked), /\| 1 \| ann \|/);
-});

@@ -1,15 +1,14 @@
 'use strict';
 
 const {
-  store, remote, ladder, battle, friends, opponents, accept, achievements, score, creature, i18n, quests, tower, shop, power,
+  store, battle, friends, opponents, achievements, score, creature, i18n, quests, tower, shop, power,
 } = require('./engine');
 
 const { cleanName } = score;
 const lower = (s) => String(s).toLowerCase();
 
 let lastList = null; // what the player currently sees: the rows a fight is picked from
-let lastSource = null;
-let pendingSubmit = null; // { defender } after a win that moves (or joins) the ladder
+let current = null; // the match being steered: { match, row, me, foe }
 
 function setLang(dex) {
   i18n.setLang((dex.profile && dex.profile.lang) || i18n.detectLang());
@@ -30,25 +29,14 @@ function myself(dex) {
   return { name: name || 'You', team, score: score.summarize(dex).score, named: !!name };
 }
 
-const ladderLookup = (source) => async (name) => {
-  const p = source.players.get(lower(name));
-  return p ? { name: p.name, team: p.team } : null;
-};
-
-/**
- * Everything the bottom panel shows: the ladder (with who you can challenge), your friends, the practice
- * dummy. Offline gives the saved copy.
- */
+/** Everything the bottom panel shows: your friends and the practice dummy. */
 async function loadArena() {
   const dex = store.load();
   setLang(dex);
   const me = myself(dex);
-  const source = await remote.loadLadder();
-  lastSource = source;
 
-  // Keep live friends current (links, files, ladder names); a code stays a fixed snapshot.
-  const lookup = ladderLookup(source);
-  const refreshed = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f, { lookupLadder: lookup })));
+  // Keep live friends current (links and files); a code stays a fixed snapshot.
+  const refreshed = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f)));
   if (JSON.stringify(refreshed.map((r) => r.friend)) !== JSON.stringify(dex.friends)) {
     const fresh = store.load();
     fresh.friends = refreshed.map((r) => r.friend);
@@ -56,42 +44,26 @@ async function loadArena() {
     dex.friends = fresh.friends;
   }
 
-  const offline = source.source === 'cache' || source.source === 'none';
   if (me.team.length === 0) {
-    // No team yet: the ladder is read-only until the first catch.
     lastList = null;
-    const order = source.order.length
-      ? source.order
-      : [...source.players.values()].sort((a, b) => b.score - a.score).map((p) => p.name);
-    const rows = order
-      .map((n, i) => ({ p: source.players.get(lower(n)), i }))
-      .filter((r) => r.p)
-      .map(({ p, i }) => ({
-        section: 'ladder', rank: i + 1, name: p.name, power: friends.teamPower(p.team), team: wireTeam(p.team, dex),
-      }));
-    return { rows, me: { name: me.name, named: me.named, canFight: false }, offline };
+    return { rows: [], me: { name: me.name, named: me.named, canFight: false }, offline: false };
   }
-
-  lastList = opponents.buildList({ me, source, friends: dex.friends });
+  lastList = opponents.buildList({ me, friends: dex.friends });
   const rows = lastList.rows.map((r) => ({
-    section: r.section, rank: r.rank, name: r.name, power: r.power, team: wireTeam(r.team, dex),
-    isMe: !!r.isMe, reach: !!r.ranked, kind: r.kind || null,
+    section: r.section, name: r.name, power: r.power, team: wireTeam(r.team, dex), kind: r.kind || null,
   }));
-  return { rows, me: { name: me.name, named: me.named, canFight: true, rank: lastList.myRank || 0 }, offline };
+  return { rows, me: { name: me.name, named: me.named, canFight: true }, offline: false };
 }
 
-function sharePayload(dex, name) {
-  const s = score.summarize(dex);
-  return {
-    v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team), updated: new Date().toISOString(),
-  };
-}
+const earnedOf = (ids) => ids.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) }));
 
-/** Run one fight against a row of the list the player sees. Returns the whole replay, or { error }. */
+/**
+ * Start a fight against a row of the list the player sees. The player then picks who answers each round
+ * (see pick()); the foe's first fighter is already chosen. Returns the opening state, or { error }.
+ */
 function fight(section, name) {
   if (!lastList) return { error: 'noTeam' };
-  const row = lastList.rows.find((r) => r.section === section && lower(r.name) === lower(name) && !r.isMe);
+  const row = lastList.rows.find((r) => r.section === section && lower(r.name) === lower(name));
   if (!row) return { error: 'gone' };
 
   const dex = store.load();
@@ -99,11 +71,32 @@ function fight(section, name) {
   const me = myself(dex);
   if (me.team.length === 0) return { error: 'noTeam' };
   const foe = { name: row.name, team: row.team };
+  const match = battle.startMatch(me, foe);
+  current = { match, row, me };
+  return {
+    interactive: true,
+    me: { name: me.name, team: wireTeam(me.team, dex) },
+    foe: { name: foe.name, team: wireTeam(foe.team, dex) },
+    foeIdx: match.foeIdx, round: 0, outcome: row.section === 'practice' ? 'practice' : 'friendly',
+  };
+}
 
-  const result = battle.duel(me, foe);
-  const won = result.winner === me.name && result.loser !== me.name;
+/** One round of the fight in progress, with the monster the player picked. Returns the events and what is next. */
+function pick(index) {
+  if (!current || current.match.over) return { error: 'gone' };
+  const { match, row, me } = current;
+  let events;
+  try {
+    events = battle.playRound(match, Number(index));
+  } catch {
+    return { error: 'badPick' };
+  }
+  if (!match.over) return { events, foeIdx: match.foeIdx, round: match.round, over: false };
+
+  const dex = store.load();
+  setLang(dex);
+  const won = match.winner === me.name && match.loser !== me.name;
   const practice = row.section === 'practice';
-
   let earned = [];
   let questsDone = [];
   let coins = 0;
@@ -114,29 +107,10 @@ function fight(section, name) {
     earned = achievements.evaluate(dex);
     store.save(dex);
   }
-
-  let outcome = practice ? 'practice' : 'friendly';
-  pendingSubmit = null;
-  if (row.section === 'ladder') {
-    const joining = !lastSource.players.has(lower(me.name));
-    const chk = ladder.checkChallenge(lastList.order, me.name, row.name);
-    if ((won && chk.ok) || joining) {
-      outcome = won && chk.ok ? 'promote' : 'join';
-      pendingSubmit = { defender: row.name };
-    } else if (won) {
-      outcome = 'outOfReach';
-    } else {
-      outcome = 'lost';
-    }
-  }
-
+  current = null;
   return {
-    me: { name: me.name, team: wireTeam(me.team, dex) },
-    foe: { name: foe.name, team: wireTeam(foe.team, dex) },
-    log: result.log, winner: result.winner, won, outcome, rank: row.rank || null, reach: ladder.REACH,
-    earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
-    quests: questsDone.map(questName), coins,
-    canSubmit: !!pendingSubmit,
+    events, over: true,
+    result: { won, outcome: practice ? 'practice' : 'friendly', earned: earnedOf(earned), quests: questsDone.map(questName), coins },
   };
 }
 
@@ -154,7 +128,7 @@ function towerFight() {
   if (me.team.length === 0) return { error: 'noTeam' };
   const floor = dex.tower.cleared + 1;
   const foe = tower.foeFor(floor);
-  const result = battle.duel({ name: me.name, team: me.team }, foe);
+  const result = battle.autoMatch({ name: me.name, team: me.team }, foe);
   const won = result.winner === me.name && result.loser !== me.name;
   const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
   if (won) dex.tower.cleared = floor;
@@ -165,9 +139,8 @@ function towerFight() {
     me: { name: me.name, team: wireTeam(me.team, dex) },
     foe: { name: foe.name, team: wireTeam(foe.team, dex) },
     log: result.log, winner: result.winner, won, outcome: won ? 'towerWin' : 'towerLose', floor,
-    earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
+    earned: earnedOf(earned),
     quests: questsDone.map(questName), coins,
-    canSubmit: false,
   };
 }
 
@@ -218,17 +191,6 @@ function setTeam(ids) {
   store.save(dex);
 }
 
-/** The pre-filled GitHub issue that asks the ladder to replay this win. Null when nothing is pending. */
-function submissionUrl(name) {
-  if (!pendingSubmit) return null;
-  const dex = store.load();
-  const challenger = cleanName(name || (dex.profile && dex.profile.name) || '');
-  if (!challenger) return null;
-  return accept.issueUrl({
-    repo: remote.repoOf(), challenger, defender: pendingSubmit.defender, payload: sharePayload(dex, challenger),
-  });
-}
-
 function needsName() {
   const dex = store.load();
   return !cleanName((dex.profile && dex.profile.name) || '');
@@ -247,7 +209,7 @@ async function addFriend(input) {
   const dex = store.load();
   let found = null;
   try {
-    found = await friends.parseFriend(input, { lookupLadder: remote.lookupPlayer });
+    found = await friends.parseFriend(input);
   } catch { /* unreachable link */ }
   if (!found) return { ok: false, reason: 'bad' };
   const mine = cleanName((dex.profile && dex.profile.name) || '');
@@ -281,4 +243,4 @@ function brag(kind) {
   return require('./engine').brag.text(dex, kind);
 }
 
-module.exports = { brag, loadArena, fight, towerFight, setTeam, questName, buy, feed, feedTargets, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };
+module.exports = { brag, loadArena, fight, towerFight, setTeam, questName, buy, feed, feedTargets, pick, needsName, saveName, addFriend, removeFriend, myCode };

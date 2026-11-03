@@ -54,19 +54,15 @@ test('artFor is stable, so a shared monster keeps its face', () => {
 test('`bugzoo battle --pick N --card file` writes the card for that exact fight', () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bz-card-'));
   const home = path.join(root, 'home');
-  const lb = path.join(root, 'lb', 'scores');
   fs.mkdirSync(home, { recursive: true });
-  fs.mkdirSync(lb, { recursive: true });
   fs.writeFileSync(path.join(home, 'dex.json'), JSON.stringify({
-    creatures: {}, pending: {}, runs: {}, battles: { wins: 0, losses: 0 }, friends: [],
+    creatures: {}, pending: {}, runs: {}, battles: { wins: 0, losses: 0 },
+    friends: [{ name: 'rival', kind: 'code', team: [m('Weakling', 'TypeError', 'common', 10)] }],
     profile: { name: 'tester', lang: 'en' },
     trophies: [{ id: 't:1', name: 'Bigbug', type: 'StackOverflow', rarity: 'legendary', power: 500, art: ['AA', 'BB', 'CC'], factors: {}, project: 'x', at: 'now' }],
   }));
-  fs.writeFileSync(path.join(lb, 'rival.json'), JSON.stringify({
-    v: 2, name: 'rival', caught: { common: 1 }, team: [m('Weakling', 'TypeError', 'common', 10)],
-  }));
   const card = path.join(root, 'result.svg');
-  const env = { ...process.env, BUGZOO_HOME: home, BUGZOO_LADDER_DIR: path.join(root, 'lb'), BUGZOO_LANG: 'en' };
+  const env = { ...process.env, BUGZOO_HOME: home, BUGZOO_LANG: 'en' };
 
   const r = spawnSync(process.execPath, [BIN, 'battle', '--pick', '1', '--card', card], { env, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);

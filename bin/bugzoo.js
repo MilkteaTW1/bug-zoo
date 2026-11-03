@@ -14,8 +14,6 @@ const tower = require('../src/tower');
 const nickLib = require('../src/nick');
 const shop = require('../src/shop');
 const hook = require('../src/hook');
-const ladder = require('../src/ladder');
-const leaderboard = require('../src/leaderboard');
 const store = require('../src/store');
 const render = require('../src/render');
 const session = require('../src/session');
@@ -26,10 +24,8 @@ const achievements = require('../src/achievements');
 const aihook = require('../src/aihook');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
-const remote = require('../src/remote');
 const brag = require('../src/brag');
 const opponents = require('../src/opponents');
-const acceptor = require('../src/accept');
 const i18n = require('../src/i18n');
 
 const { t } = i18n;
@@ -169,7 +165,7 @@ async function ensureSetup(cmd) {
     return;
   }
   i18n.setLang(i18n.detectLang());
-  const skip = new Set(['setup', 'lang', 'hook', 'ai-hook', 'help', '--help', '-h', undefined, 'ladder']);
+  const skip = new Set(['setup', 'lang', 'hook', 'ai-hook', 'help', '--help', '-h', undefined]);
   if (!skip.has(cmd) && interactive()) await runSetup({ flags: {}, ask: true });
 }
 
@@ -273,14 +269,6 @@ function cmdRank() {
   console.log(t('rank.points', { c: POINTS.common, u: POINTS.uncommon, r: POINTS.rare, l: POINTS.legendary }));
 }
 
-function sharePayload(dex, name) {
-  const s = summarize(dex);
-  return {
-    v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: myTeam(dex), updated: new Date().toISOString(),
-  };
-}
-
 /** `bugzoo brag [catches|power|tower]`: a short text to paste somewhere when you want to show off. */
 function cmdBrag(args) {
   const dex = store.load();
@@ -290,41 +278,6 @@ function cmdBrag(args) {
     return 2;
   }
   console.log(brag.text(dex, kind));
-  return 0;
-}
-
-function cmdShare(args) {
-  const { flags } = parseFlags(args);
-  const dex = store.load();
-  const name = cleanName(typeof flags.name === 'string' ? flags.name : ((dex.profile && dex.profile.name) || ''));
-  if (!name) {
-    console.error(t('share.needName'));
-    return 2;
-  }
-  dex.profile = { ...(dex.profile || {}), name };
-  store.save(dex);
-  const payload = sharePayload(dex, name);
-  const file = typeof flags.out === 'string' ? flags.out : 'bugzoo-score.json';
-  fs.writeFileSync(file, JSON.stringify(payload, null, 2) + '\n');
-  console.log(t('share.wrote', { file, name, score: payload.score, n: payload.team.length }));
-  return 0;
-}
-
-function cmdLeaderboard(args) {
-  const { flags, positional } = parseFlags(args);
-  if (positional.length === 0) {
-    console.error(t('misc.leaderUsage'));
-    return 2;
-  }
-  const { entries, skipped } = leaderboard.collect(positional);
-  const md = leaderboard.toMarkdown(leaderboard.rank(entries));
-  if (typeof flags.out === 'string') {
-    fs.writeFileSync(flags.out, md);
-    console.log(t('misc.leaderWrote', { file: flags.out, valid: entries.length, skipped: skipped.length }));
-  } else {
-    console.log(md);
-  }
-  for (const s of skipped) console.error(`skipped ${s.file}: ${s.reason}`);
   return 0;
 }
 
@@ -339,7 +292,7 @@ function cmdScan() {
   }
 }
 
-// --- ladder, battle, friends -------------------------------------------------------------------
+// --- battle, friends -------------------------------------------------------------------
 
 /** English creature name -> what to show, for the player's own team. */
 function ownLabeler(dex) {
@@ -354,119 +307,13 @@ const myTeam = (dex) => battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_
 
 function listWords() {
   return {
-    ladder: t('battle.secLadder'),
     friends: t('battle.secFriends'),
     practice: t('battle.secPractice'),
     you: t('battle.tagYou'),
-    ranked: t('battle.tagRanked'),
     kind: (k) => t(`friend.kind.${k}`),
     pad: i18n.pad,
     power: (p) => t('battle.rowPower', { p: String(p).padStart(4) }),
   };
-}
-
-function ladderNotice(source) {
-  if (!source.note) return;
-  const { code, reason, when } = source.note;
-  if (code === 'cached') console.error(t('battle.cachedLadder', { reason, when }));
-  else if (source.source === 'none') console.error(t('battle.noLadder', { reason }));
-}
-
-const ladderLookup = (source) => async (name) => {
-  const p = source.players.get(String(name).toLowerCase());
-  return p ? { name: p.name, team: p.team } : null;
-};
-
-function cmdLadder(args) {
-  const { flags, positional } = parseFlags(args);
-  const sub = positional[0];
-
-  if (sub === 'process' || sub === 'accept') {
-    const dir = (sub === 'process' ? positional[1] : positional[1]) || 'leaderboard';
-    if (sub === 'accept') {
-      const bodyFile = flags['body-file'];
-      if (typeof bodyFile !== 'string') {
-        console.error('Usage: bugzoo ladder accept [dir] --body-file <file> --actor <github-login>');
-        return 2;
-      }
-      const r = acceptor.accept({
-        body: fs.readFileSync(bodyFile, 'utf8'),
-        actor: typeof flags.actor === 'string' ? flags.actor : '',
-        dir,
-      });
-      console.log(r.message);
-      return r.ok ? 0 : 1;
-    }
-
-    const p = { scores: path.join(dir, 'scores'), state: path.join(dir, 'ladder.json'), challenges: path.join(dir, 'challenges') };
-    let state = { v: 1, order: [], processed: [] };
-    try {
-      state = JSON.parse(fs.readFileSync(p.state, 'utf8'));
-    } catch { /* first run */ }
-    const { players } = ladder.loadPlayers(p.scores);
-    const { state: next, results } = ladder.processChallenges(state, players, ladder.loadChallenges(p.challenges));
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(p.state, JSON.stringify(next, null, 2) + '\n');
-    if (typeof flags.out === 'string') fs.writeFileSync(flags.out, ladder.toMarkdown(next.order, players));
-    for (const r of results) {
-      const detail = r.outcome === 'rejected' ? r.reason : `${r.challenger} vs ${r.defender} (#${r.from} -> #${r.to})`;
-      console.log(`${r.outcome.padEnd(9)} ${r.file}: ${detail}`);
-    }
-    console.log(t('ladder.processed', { players: next.order.length, n: results.length }));
-    return 0;
-  }
-
-  return null; // handled asynchronously by showLadder
-}
-
-async function showLadder(args) {
-  const { positional } = parseFlags(args);
-  const source = await remote.loadLadder({ dir: positional[0] });
-  ladderNotice(source);
-  const order = ladder.sync(source.order, source.players);
-  if (order.length === 0) {
-    console.log(t('ladder.none', { dir: positional[0] || remote.repoOf() }));
-    return 0;
-  }
-  const dex = store.load();
-  console.log(ladder.toText(order, source.players, { me: dex.profile && dex.profile.name, tags: { you: t('ladder.you'), challengeable: t('ladder.challengeable') } }));
-  return 0;
-}
-
-/** `bugzoo ladder join`: submit your team to the ladder in one step, as an entry fight against last place. */
-async function cmdLadderJoin() {
-  const dex = store.load();
-  const name = cleanName((dex.profile && dex.profile.name) || '');
-  if (myTeam(dex).length === 0) {
-    console.error(t('ladder.join.needCatch'));
-    return 2;
-  }
-  if (!name) {
-    console.error(t('battle.needName'));
-    return 2;
-  }
-  const source = await remote.loadLadder();
-  ladderNotice(source);
-  const order = ladder.sync(source.order, source.players);
-  const mine = ladder.indexOf(order, name);
-  if (mine > -1 && source.players.has(name.toLowerCase())) {
-    console.log(t('ladder.join.already', { rank: mine + 1 }));
-    return 0;
-  }
-  if (order.length === 0) {
-    console.error(t('ladder.join.empty'));
-    return 2;
-  }
-  const defender = order[order.length - 1];
-  console.log(t('ladder.join.intro', { defender }));
-  const url = acceptor.issueUrl({ repo: remote.repoOf(), challenger: name, defender, payload: sharePayload(dex, name) });
-  console.log(url);
-  console.log(t('battle.submitNote'));
-  if (interactive() && yes(await ask(t('battle.openAsk')))) {
-    openUrl(url);
-    console.log(t('battle.opened'));
-  }
-  return 0;
 }
 
 /** `bugzoo nick <monster> [nickname]` gives a caught monster a nickname (no nickname clears it). */
@@ -642,29 +489,25 @@ async function cmdBattle(args) {
 
   let foe = null; // { name, team }
   let row = null;
-  let list = null;
-  let joining = false; // not on the ladder yet: any ladder fight submits and joins at the bottom
 
   if (positional[0]) {
-    // `bugzoo battle <friend code | url | file | player name>`: fight directly, no list.
-    const found = await friends.parseFriend(positional[0], { lookupLadder: remote.lookupPlayer }).catch(() => null);
+    // `bugzoo battle <friend code | url | file | saved friend's name>`: fight directly, no list.
+    let found = null;
+    const saved = dex.friends.find((f) => f.name.toLowerCase() === positional.join(' ').toLowerCase());
+    if (saved) found = { name: saved.name, team: saved.team };
+    else found = await friends.parseFriend(positional.join(' ')).catch(() => null);
     if (!found) {
       console.error(t('friend.bad'));
       return 2;
     }
     foe = { name: found.name, team: found.team };
   } else {
-    const source = await remote.loadLadder({ dir: typeof flags.dir === 'string' ? flags.dir : undefined });
-    ladderNotice(source);
-
-    // Keep live friends current (links, files, ladder names); a code is a fixed snapshot.
-    const lookup = ladderLookup(source);
-    const refreshed = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f, { lookupLadder: lookup })));
+    // Keep live friends current (links and files); a code is a fixed snapshot.
+    const refreshed = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f)));
     dex.friends = refreshed.map((r) => r.friend);
     store.save(dex);
 
-    list = opponents.buildList({ me, source, friends: dex.friends });
-    joining = !source.players.has(me.name.toLowerCase());
+    const list = opponents.buildList({ me, friends: dex.friends });
     console.log(opponents.render(list, listWords()));
     console.log('');
 
@@ -682,8 +525,30 @@ async function cmdBattle(args) {
 
   console.log(`\n${me.name}: ${showTeam(me, labelOf)}`);
   console.log(`${foe.name}: ${showTeam(foe, (n) => n)}\n`);
-  const result = battle.duel(me, foe);
-  for (const ev of result.log) console.log(`  ${render.battleLine(ev, labelOf)}`);
+
+  // Somebody at the terminal chooses who fights each round; otherwise (pipes, --auto) the best match-up is picked.
+  const steer = interactive() && !flags.auto;
+  const match = battle.startMatch(me, foe);
+  const mineNames = match.me.team.map((m) => labelOf(m.name));
+  while (!match.over) {
+    const foeNow = match.foe.team[match.foeIdx];
+    let idx;
+    if (steer) {
+      console.log(t('battle.round', { n: match.round + 1, foe: foeNow.name, element: t(`element.${elementOf(foeNow.type)}`), hp: foeNow.hp, max: foeNow.maxHp }));
+      const living = match.me.team.map((m, i) => ({ m, i })).filter((x) => x.m.hp > 0);
+      living.forEach(({ m, i }, k) => {
+        console.log(`  ${k + 1}. ${mineNames[i]} [${t(`element.${elementOf(m.type)}`)}] ${t('battle.hp', { hp: m.hp, max: m.maxHp })} (${m.power})`);
+      });
+      const answer = await ask(t('battle.pickFighter'));
+      const n = Number.parseInt(answer, 10);
+      idx = living[(Number.isFinite(n) ? n : 0) - 1] ? living[n - 1].i : battle.autoPick(match);
+    } else {
+      idx = battle.autoPick(match);
+    }
+    for (const ev of battle.playRound(match, idx)) console.log(`  ${render.battleLine(ev, labelOf)}`);
+    if (steer) console.log('');
+  }
+  const result = { winner: match.winner, loser: match.loser, log: match.log };
 
   const won = result.winner === me.name && result.loser !== me.name;
   console.log(`\n${t(won ? 'battle.win' : 'battle.lose', { winner: result.winner, loser: result.loser })}`);
@@ -698,31 +563,6 @@ async function cmdBattle(args) {
     console.log(`\n${render.coinLine(coins)}`);
     for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
     for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
-  }
-
-  // Only a win over someone up to 3 ranks above you moves the ladder.
-  if (row && row.section === 'ladder') {
-    const chk = ladder.checkChallenge(list.order, me.name, row.name);
-    if ((won && chk.ok) || joining) {
-      console.log(`\n${won && chk.ok ? t('battle.promote', { rank: row.rank, name: row.name }) : t('battle.join')}`);
-      if (!profileName) {
-        console.log(t('battle.needName'));
-      } else {
-        const url = acceptor.issueUrl({
-          repo: remote.repoOf(), challenger: profileName, defender: row.name, payload: sharePayload(dex, profileName),
-        });
-        console.log(url);
-        console.log(t('battle.submitNote'));
-        if (interactive() && yes(await ask(t('battle.openAsk')))) {
-          openUrl(url);
-          console.log(t('battle.opened'));
-        }
-      }
-    } else if (won && !chk.ok) {
-      console.log(`\n${t('battle.outOfReach', { reach: ladder.REACH })}`);
-    }
-  } else if (!practice) {
-    console.log(`\n${t('battle.friendly')}`);
   }
 
   // A shareable card: --card [file], or offered after the fight when a person is at the terminal.
@@ -776,7 +616,7 @@ async function cmdFriend(args) {
     const input = positional.slice(1).join(' ');
     let found = null;
     try {
-      found = await friends.parseFriend(input, { lookupLadder: remote.lookupPlayer });
+      found = await friends.parseFriend(input);
     } catch { /* unreachable link etc. */ }
     if (!found) {
       console.error(t('friend.bad'));
@@ -810,9 +650,7 @@ async function cmdFriend(args) {
   }
 
   if (sub === 'refresh') {
-    const source = await remote.loadLadder({});
-    const lookup = ladderLookup(source);
-    const results = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f, { lookupLadder: lookup })));
+    const results = await Promise.all(dex.friends.map((f) => friends.refreshFriend(f)));
     dex.friends = results.map((r) => r.friend);
     store.save(dex);
     console.log(t('friend.refreshed', { n: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok).length }));
@@ -891,20 +729,6 @@ async function main() {
     case 'brag':
       process.exit(cmdBrag(rest));
       break;
-    case 'share':
-      process.exit(cmdShare(rest));
-      break;
-    case 'leaderboard':
-      process.exit(cmdLeaderboard(rest));
-      break;
-    case 'ladder': {
-      if (parseFlags(rest).positional[0] === 'join') {
-        process.exit(await cmdLadderJoin());
-      }
-      const rc = cmdLadder(rest);
-      process.exit(rc === null ? await showLadder(rest) : rc);
-      break;
-    }
     case 'ai-hook': {
       // Called by Claude Code after each Bash tool call. Reads the event on stdin, prints a systemMessage.
       // `--home DIR` and `--log FILE` exist so the hook can be tried out without touching your real zoo.

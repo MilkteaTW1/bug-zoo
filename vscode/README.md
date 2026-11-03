@@ -10,15 +10,15 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 
 ## See it in action
 
-*The GIFs use demo data and a made-up ladder; the zoo, fights and replays are the real extension.*
+*The GIFs use demo data; the zoo, fights and replays are the real extension.*
 
 [![Watch the 56-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
 
 *Click to watch the 56-second promo video: the catch loop, then what's new in v0.5 (50 species, the shop, evolution, teams and the Tower), in VS Code and in the terminal. 中文版影片:[點這裡](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)*
 
-**Climb the ladder with a turn-by-turn battle replay.**
+**Pick who fights every round.**
 
-![Fighting a ladder player and submitting the win](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
+![Choosing who answers in a fight against a friend](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
 
 **Add friends, fight them any time, share your team with a code.**
 
@@ -43,10 +43,9 @@ Wild bugs show their type, the date they first appeared and their battle power. 
 
 ## Fight
 
-The bottom of the panel has two tabs.
+The bottom of the panel has a Friends tab and the other tabs below.
 
-- **Ladder**: the public ladder. Players marked with a star are within reach (up to 3 ranks above you). Press **Fight** to watch a turn-by-turn replay of your top three monsters against theirs. A win over someone in reach, or any ladder fight when you are not on the ladder yet, offers **Submit to the ladder**, which opens a pre-filled GitHub issue for you to send.
-- **Friends**: add a friend by code (`BZ1...`), link, file or ladder name, fight them any time, or fight the practice dummy Legacy Codebase. **Copy my code** gives you a code to send to a friend.
+- **Friends**: add a friend by code (`BZ1...`), link or file, fight them any time, or fight the practice dummy Legacy Codebase. In a fight the opponent shows who it sends out and you click which of your living monsters answers each round. **Copy my code** gives you a code to send to a friend, and the 📤 button in the panel header copies a short boast about your catches, team power or Tower progress.
 
 - **Achievements, Quests, Tower, Team**: the same tabs as the CLI. Achievements shows all of them with their unlock dates, Quests today's three goals, Tower the next floor (press **Fight**), and Team lets you click up to three monsters in the order they fight (**Auto** goes back to your strongest). Battles show each monster's element and whether a hit was super effective.
 - **Zoo**: the bar shows species caught (`3/50`) and your no-error streak toward the next companion. Shiny catches and companions are marked, hovering shows the species and element, and double-click renames a monster.
@@ -71,7 +70,7 @@ Open the zoo from the Bug Zoo icon in the activity bar, or run **Bug Zoo: Open t
 
 ## Privacy
 
-Your errors and terminal output stay on your machine. The extension reads the output of terminal commands only to find error types, and stores the same small data file as the CLI. The only network request is the same one the CLI makes: reading the public ladder from the `MilkteaTW1/bug-zoo` GitHub repo every 10 minutes. Your errors and data are never sent anywhere.
+Your errors and terminal output stay on your machine. The extension reads the output of terminal commands only to find error types, and stores the same small data file as the CLI. The extension makes no network request of its own, unless you add a friend by link. Your errors and data are never sent anywhere.
 
 ## Development
 
@@ -91,13 +90,13 @@ The zoo, the ladder panel and the notifications use the same language files as t
 
 語言可以隨時切換：按 Bug Zoo 面板標題列的地球按鈕（或指令「Bug Zoo：切換語言」），擴充套件與 CLI 會一起換成同一個語言；清單會自動列出專案裡現有的所有語言。
 
-把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建天梯、好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。
+把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。
 
 [![觀看 56 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
 
 ![指令失敗出現野生怪物,修好後捕獲](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.zh.gif)
 
-![挑戰天梯玩家並提交勝利](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
+![在對戰中選擇誰來應戰](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
 
 ![加好友、對戰、複製好友代碼](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.zh.gif)
 
