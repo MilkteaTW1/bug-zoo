@@ -13,6 +13,7 @@ module.exports = {
     // EN: ['ling', 'bat', 'gnaw', 'moth', 'toad', 'wisp', 'beetle', 'imp', 'crawler', 'snail', 'sprite', 'mite']
     suffix: ['꼬마괴물', '박쥐', '쏠쥐', '나방', '두꺼비', '도깨비불', '풍뎅이', '도깨비', '꿈틀이', '달팽이', '요정', '진드기'],
   },
+  species: ['슬라임', '나방', '딱정벌레', '유령', '게', '부엉이', '달팽이', '개구리', '박쥐', '물고기', '문어', '뱀', '거미', '고양이', '강아지', '토끼', '버섯', '선인장', '로봇', '용', '여우', '펭귄', '거북이', '벌', '벌레', '해파리', '그렘린', '임프', '골렘', '도깨비불', '쥐', '까마귀', '바다표범', '오징어', '도마뱀', '두더지', '개미', '반딧불이', '구름', '바위', '큐브', '픽셀', '혜성', '랜턴', '열쇠', '톱니바퀴', '알', '새', '곰', '고슴도치'],
   /* EN help (original):
 bugzoo - turn your errors into collectible monsters
 
@@ -26,6 +27,7 @@ Usage:
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
   bugzoo team                 Your strongest catches, with their evolution
+  bugzoo nick <몬스터> [별명]   잡은 몬스터에 별명 붙이기
   bugzoo achievements         Your achievements
   bugzoo battle [--card f.svg]
                               Show the ladder, your friends and a practice
@@ -171,6 +173,25 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.tower-3.desc': '탑 3층을 클리어하기.', // EN: 'Clear floor 3 of the tower.'
     'ach.tower-12.name': '탑의 정상', // EN: 'Top of the tower'
     'ach.tower-12.desc': '탑 12층을 모두 클리어하기.', // EN: 'Clear all 12 floors of the tower.'
+    'gift.tag': '[동료]',
+    'gift.line': '에러 없이 명령 {n}개 연속 성공! {type}의 {name}이(가) 동료로 동물원에 합류했습니다.',
+    'ach.companion.name': '새 친구',
+    'ach.companion.desc': '에러 없이 명령 5개를 연속으로 실행해 동료를 얻으세요.',
+    'ach.companions-10.name': '단짝',
+    'ach.companions-10.desc': '동료 10마리를 얻으세요.',
+    'ach.species-10.name': '종 관찰자',
+    'ach.species-10.desc': '서로 다른 종 10개를 잡으세요.',
+    'ach.species-25.name': '야외 도감',
+    'ach.species-25.desc': '서로 다른 종 25개를 잡으세요.',
+    'ach.species-50.name': '완전한 도감',
+    'ach.species-50.desc': '50개 종을 모두 잡으세요.',
+    'ach.holiday.name': '명절 버그',
+    'ach.holiday.desc': '새해, 발렌타인데이, 핼러윈, 크리스마스에 버그를 잡으세요.',
+    'dex.species': '종: {n}/{total}',
+    'nick.usage': '몬스터에 별명 붙이기: bugzoo nick <몬스터> <별명>   (별명을 비우면 삭제)',
+    'nick.unknown': '"{name}"이라는 이름의 잡은 몬스터가 없습니다.',
+    'nick.set': '{name}의 별명은 이제 {nick}입니다.',
+    'nick.cleared': '{name}의 별명이 삭제되었습니다.',
     'tower.title': '탑 - {total}층 중 {n}층', // EN: 'The Tower - floor {n} of {total}'
     'tower.foe': '{name} [{element}] 전투력 {power}', // EN: '{name} [{element}] power {power}'
     'tower.hint': '도전: bugzoo tower fight   출전 멤버 바꾸기: bugzoo team', // EN: 'Fight it: bugzoo tower fight   Change who fights: bugzoo team'

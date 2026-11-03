@@ -23,6 +23,13 @@ const isFridayEvening = (iso) => {
   return !Number.isNaN(d.getTime()) && d.getDay() === 5 && d.getHours() >= 16;
 };
 
+// New Year, Valentine's day, Halloween and Christmas, on the player's own calendar.
+const HOLIDAYS = ['01-01', '02-14', '10-31', '12-25'];
+const isHoliday = (iso) => {
+  const d = localDay(iso);
+  return d !== null && HOLIDAYS.includes(d.slice(5));
+};
+
 function context(dex) {
   const creatures = Object.values(dex.creatures || {});
   const caught = creatures.filter((c) => c.captures > 0);
@@ -59,6 +66,10 @@ function context(dex) {
     questsDone: (dex.quests && dex.quests.total) || 0,
     perfectDays: (dex.quests && dex.quests.perfect) || 0,
     tower: (dex.tower && dex.tower.cleared) || 0,
+    gifts: (dex.stats && dex.stats.giftTotal) || 0,
+    species: new Set(caught.filter((c) => typeof c.species === 'number').map((c) => c.species)).size,
+    holiday: trophies.some((t) => isHoliday(t.at)),
+    holidayAt: earliest(trophies.filter((t) => isHoliday(t.at))),
   };
 }
 
@@ -84,6 +95,12 @@ const DEFS = [
   { id: 'perfect-day', test: (c) => c.perfectDays >= 1 },
   { id: 'tower-3', test: (c) => c.tower >= 3 },
   { id: 'tower-12', test: (c) => c.tower >= 12 },
+  { id: 'companion', test: (c) => c.gifts >= 1 },
+  { id: 'companions-10', test: (c) => c.gifts >= 10 },
+  { id: 'species-10', test: (c) => c.species >= 10 },
+  { id: 'species-25', test: (c) => c.species >= 25 },
+  { id: 'species-50', test: (c) => c.species >= 50 },
+  { id: 'holiday', test: (c) => c.holiday, at: (c) => c.holidayAt },
 ];
 
 const IDS = DEFS.map((d) => d.id);

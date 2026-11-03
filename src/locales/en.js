@@ -12,6 +12,7 @@ module.exports = {
     prefix: ['Grim', 'Fluff', 'Snark', 'Wobble', 'Gloom', 'Zap', 'Murk', 'Pip', 'Crumb', 'Hex', 'Glitch', 'Nib'],
     suffix: ['ling', 'bat', 'gnaw', 'moth', 'toad', 'wisp', 'beetle', 'imp', 'crawler', 'snail', 'sprite', 'mite'],
   },
+  species: ['Slime', 'Moth', 'Beetle', 'Ghost', 'Crab', 'Owl', 'Snail', 'Frog', 'Bat', 'Fish', 'Octopus', 'Snake', 'Spider', 'Cat', 'Dog', 'Rabbit', 'Mushroom', 'Cactus', 'Robot', 'Dragon', 'Fox', 'Penguin', 'Turtle', 'Bee', 'Worm', 'Jellyfish', 'Gremlin', 'Imp', 'Golem', 'Wisp', 'Rat', 'Crow', 'Seal', 'Squid', 'Lizard', 'Mole', 'Ant', 'Firefly', 'Cloud', 'Rock', 'Cube', 'Pixel', 'Comet', 'Lantern', 'Key', 'Gear', 'Egg', 'Bird', 'Bear', 'Hedgehog'],
   help: `bugzoo - turn your errors into collectible monsters
 
 Usage:
@@ -24,6 +25,7 @@ Usage:
                               (Not needed once automatic capture is on.)
   bugzoo dex                  Your collection and bugs waiting to be caught
   bugzoo team                 Your strongest catches, with their evolution
+  bugzoo nick <monster> [name]  Give a caught monster a nickname
   bugzoo achievements         Your achievements
   bugzoo battle [--card f.svg]
                               Show the ladder, your friends and a practice
@@ -128,6 +130,25 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.tower-3.desc': 'Clear floor 3 of the tower.',
     'ach.tower-12.name': 'Top of the tower',
     'ach.tower-12.desc': 'Clear all 12 floors of the tower.',
+    'gift.tag': '[COMPANION]',
+    'gift.line': '{n} commands in a row without an error! {name} the {type} joins your zoo as a companion.',
+    'ach.companion.name': 'A new friend',
+    'ach.companion.desc': 'Get a companion by running 5 commands in a row without an error.',
+    'ach.companions-10.name': 'Best friends',
+    'ach.companions-10.desc': 'Get 10 companions.',
+    'ach.species-10.name': 'Species spotter',
+    'ach.species-10.desc': 'Catch 10 different species.',
+    'ach.species-25.name': 'Field guide',
+    'ach.species-25.desc': 'Catch 25 different species.',
+    'ach.species-50.name': 'Complete bestiary',
+    'ach.species-50.desc': 'Catch all 50 species.',
+    'ach.holiday.name': 'Holiday bug',
+    'ach.holiday.desc': 'Catch a bug on New Year’s Day, Valentine’s Day, Halloween or Christmas.',
+    'dex.species': 'Species: {n}/{total}',
+    'nick.usage': 'Give a monster a nickname: bugzoo nick <monster> <nickname>   (no nickname clears it)',
+    'nick.unknown': 'No caught monster is called "{name}".',
+    'nick.set': '{name} is now called {nick}.',
+    'nick.cleared': '{name} lost its nickname.',
     'tower.title': 'The Tower - floor {n} of {total}',
     'tower.foe': '{name} [{element}] power {power}',
     'tower.hint': 'Fight it: bugzoo tower fight   Change who fights: bugzoo team',

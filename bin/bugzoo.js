@@ -454,6 +454,31 @@ async function cmdLadderJoin() {
   return 0;
 }
 
+/** `bugzoo nick <monster> [nickname]` gives a caught monster a nickname (no nickname clears it). */
+function cmdNick(args) {
+  const dex = store.load();
+  const [who, ...rest] = args;
+  if (!who) {
+    console.log(t('nick.usage'));
+    return 1;
+  }
+  const want = who.toLowerCase();
+  const mine = Object.values(dex.creatures).filter((c) => c.captures > 0);
+  const hit = mine.find((c) => [c.nick, c.name, render.shownName(c)].some((n) => n && n.toLowerCase() === want));
+  if (!hit) {
+    console.log(t('nick.unknown', { name: who }));
+    return 1;
+  }
+  // Keep only printable characters that cannot break the terminal, a table or the SVG card.
+  const nick = Array.from(rest.join(' ')).filter((ch) => ch >= ' ' && ch.charCodeAt(0) !== 127 && !'<>&"'.includes(ch)).join('').trim().slice(0, 16);
+  if (nick) hit.nick = nick;
+  else delete hit.nick;
+  for (const tr of dex.trophies) if (tr.id === hit.id) { if (nick) tr.nick = nick; else delete tr.nick; }
+  store.save(dex);
+  console.log(t(nick ? 'nick.set' : 'nick.cleared', { name: hit.name, nick }));
+  return 0;
+}
+
 /** `bugzoo tower` shows the next floor and its enemies; `tower fight` takes it on with your current lineup. */
 function cmdTower(args) {
   const dex = store.load();
@@ -738,6 +763,9 @@ async function main() {
       break;
     case 'team':
       process.exit(cmdTeam(rest));
+      break;
+    case 'nick':
+      process.exit(cmdNick(rest));
       break;
     case 'tower':
       process.exit(cmdTower(rest));

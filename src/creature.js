@@ -2,6 +2,7 @@
 
 const { normalize, hash } = require('./parse');
 const i18n = require('./i18n');
+const species = require('./species');
 
 const COMMON = ['TypeError', 'ReferenceError', 'SyntaxError', 'KeyError', 'ValueError', 'NameError',
   'IndexError', 'AttributeError', 'ImportError', 'ModuleNotFoundError', 'IndentationError'];
@@ -38,12 +39,14 @@ function makeCreature(type, message) {
   const n = (i) => parseInt(h.slice(i * 2, i * 2 + 2), 16);
   const name = EN_NAMES.prefix[n(0) % EN_NAMES.prefix.length] + EN_NAMES.suffix[n(1) % EN_NAMES.suffix.length];
   const eyes = EYES[n(2) % EYES.length];
-  const body = BODIES[n(3) % BODIES.length](eyes);
+  const kind = n(5) % species.COUNT;
+  const body = species.draw(kind, eyes);
   return {
     id: `${type}:${variant}`,
     type,
     variant,
     name,
+    species: kind,
     rarity: rarityOf(type),
     art: body,
     hue: Math.round((n(4) / 255) * 360),
@@ -65,6 +68,13 @@ function localName(id, lang) {
   return names.prefix[n(0) % names.prefix.length] + names.suffix[n(1) % names.suffix.length];
 }
 
+/** The species name ("Moth", "飛蛾") of a creature in a language; '' for monsters caught before species existed. */
+function speciesName(c, lang = i18n.getLang()) {
+  if (!c || typeof c.species !== 'number') return '';
+  const list = (i18n.LOCALES[lang] && i18n.LOCALES[lang].species) || i18n.LOCALES.en.species;
+  return list[c.species % list.length] || '';
+}
+
 /** Traditional Chinese name (kept for older callers). */
 const zhName = (id) => localName(id, 'zh-TW');
 
@@ -75,4 +85,4 @@ function artFor(seed) {
   return BODIES[n(3) % BODIES.length](EYES[n(2) % EYES.length]);
 }
 
-module.exports = { makeCreature, rarityOf, localName, zhName, artFor, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };
+module.exports = { makeCreature, speciesName, COMMON, UNCOMMON, rarityOf, localName, zhName, artFor, RARITY_ORDER, RARITY_COLOR, RARITY_HEX };

@@ -1,11 +1,13 @@
 'use strict';
 
-const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, localName } = require('./creature');
+const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, localName, speciesName } = require('./creature');
 const { t, getLang, pad } = require('./i18n');
 const { EVOLUTION, stageOf, evolutionMult } = require('./power');
 const { roster, lineup } = require('./battle');
 const { ORDER: ELEMENTS, elementOf, strongAgainst } = require('./element');
 const quests = require('./quests');
+const { EVERY } = require('./companion');
+const { COUNT: SPECIES_COUNT } = require('./species');
 const { IDS: ACHIEVEMENT_IDS } = require('./achievements');
 
 const RESET = '\x1b[0m';
@@ -17,7 +19,7 @@ const YELLOW = '\x1b[33m';
 
 /** Name to show for one of the player's own creatures: the language's own name list, else the English name. */
 function shownName(e) {
-  return (e.id && localName(e.id, getLang())) || e.name;
+  return e.nick || (e.id && localName(e.id, getLang())) || e.name;
 }
 
 const rarityText = (r) => t(`rarity.${r}`);
@@ -30,7 +32,8 @@ function encounter(entry, isNew, power) {
   lines.push(`${BOLD}${t('enc.appeared', { type: entry.type })}${RESET}` +
     `${isNew ? `  ${YELLOW}${t('enc.new')}${RESET}` : ''}`);
   for (const l of entry.art) lines.push(`${color}   ${l}${RESET}`);
-  lines.push(`   ${BOLD}${shownName(entry)}${RESET}  ${color}[${rarityText(entry.rarity)}]${RESET}  ` +
+  const sp = speciesName(entry);
+  lines.push(`   ${BOLD}${shownName(entry)}${RESET}${sp ? ` ${DIM}(${sp})${RESET}` : ''}  ${color}[${rarityText(entry.rarity)}]${RESET}  ` +
     `${DIM}${t('enc.seen', { n: entry.count })}${RESET}`);
   lines.push(`   ${DIM}${entry.sample}${RESET}`);
   if (power) lines.push(`   ${YELLOW}${t('enc.power', { power: power.power })}${RESET}`);
@@ -148,6 +151,9 @@ function extras(result) {
       name: shownName(entry), stage: t(`evo.stage${stage}`), mult: evolutionMult(stage),
     })}${RESET}`);
   }
+  if (result.gift) {
+    lines.push(`${YELLOW}${BOLD}${t('gift.tag')}${RESET}${YELLOW} ${t('gift.line', { name: shownName(result.gift), type: result.gift.type, n: EVERY })}${RESET}`);
+  }
   lines.push(...questLines(result.quests));
   lines.push(...achievementLines(result.achievements));
   return lines;
@@ -182,9 +188,11 @@ function dexList(dex) {
   const out = [`${BOLD}${t('dex.title', { caught, seen: entries.length })}${RESET}`, ''];
   for (const e of entries) {
     const color = RARITY_COLOR[e.rarity];
-    out.push(`${color}${pad(shownName(e) + stars(stageOf(e.captures)), 16)}${RESET} ${pad(e.type, 20)} ${color}${pad(rarityText(e.rarity), 10)}${RESET} ${status(e)}`);
+    out.push(`${color}${pad(shownName(e) + stars(stageOf(e.captures)), 16)}${RESET} ${pad(e.type, 20)} ${color}${pad(rarityText(e.rarity), 10)}${RESET} ${pad(speciesName(e), 10)} ${status(e)}`);
   }
   const pending = Object.values(dex.pending || {}).reduce((n, p) => n + p.ids.length, 0);
+  const kinds = new Set(entries.filter((e) => e.captures > 0 && typeof e.species === 'number').map((e) => e.species)).size;
+  out.push('', `${DIM}${t('dex.species', { n: kinds, total: SPECIES_COUNT })}${RESET}`);
   if (pending > 0) out.push('', `${YELLOW}${t('dex.pending', { n: pending })}${RESET}`);
   return out.join('\n');
 }

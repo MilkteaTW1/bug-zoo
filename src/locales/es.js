@@ -14,6 +14,7 @@ module.exports = {
     // EN: ['ling', 'bat', 'gnaw', 'moth', 'toad', 'wisp', 'beetle', 'imp', 'crawler', 'snail', 'sprite', 'mite']
     suffix: ['bicho', 'murciélago', 'roedor', 'polilla', 'sapo', 'fueguito', 'escarabajo', 'diablillo', 'gusano', 'caracol', 'duende', 'ácaro'],
   },
+  species: ['Limo', 'Polilla', 'Escarabajo', 'Fantasma', 'Cangrejo', 'Búho', 'Caracol', 'Rana', 'Murciélago', 'Pez', 'Pulpo', 'Serpiente', 'Araña', 'Gato', 'Perro', 'Conejo', 'Seta', 'Cactus', 'Robot', 'Dragón', 'Zorro', 'Pingüino', 'Tortuga', 'Abeja', 'Gusano', 'Medusa', 'Duende', 'Diablillo', 'Gólem', 'Fuego-fatuo', 'Rata', 'Cuervo', 'Foca', 'Calamar', 'Lagarto', 'Topo', 'Hormiga', 'Luciérnaga', 'Nube', 'Roca', 'Cubo', 'Píxel', 'Cometa', 'Linterna', 'Llave', 'Engranaje', 'Huevo', 'Pájaro', 'Oso', 'Erizo'],
   help: `bugzoo - convierte tus errores en monstruos coleccionables
 
 Uso:
@@ -26,6 +27,7 @@ Uso:
                               (No hace falta con la captura automática activada.)
   bugzoo dex                 Tu colección y los bugs que esperan ser capturados
   bugzoo team                 Tus capturas más fuertes, con su evolución
+  bugzoo nick <monstruo> [apodo]  Ponle un apodo a un monstruo capturado
   bugzoo achievements         Tus logros
   bugzoo battle [--card f.svg]
                               Muestra la escalera, tus amigos y un oponente de
@@ -131,6 +133,25 @@ Vencer a alguien hasta 3 puestos por encima de ti en la escalera le quita su sit
     'ach.tower-3.desc': 'Supera el piso 3 de la torre.',
     'ach.tower-12.name': 'La cima',
     'ach.tower-12.desc': 'Supera los 12 pisos de la torre.',
+    'gift.tag': '[COMPAÑERO]',
+    'gift.line': '¡{n} comandos seguidos sin error! {name} el {type} se une a tu zoo como compañero.',
+    'ach.companion.name': 'Un nuevo amigo',
+    'ach.companion.desc': 'Consigue un compañero ejecutando 5 comandos seguidos sin error.',
+    'ach.companions-10.name': 'Mejores amigos',
+    'ach.companions-10.desc': 'Consigue 10 compañeros.',
+    'ach.species-10.name': 'Observador de especies',
+    'ach.species-10.desc': 'Captura 10 especies distintas.',
+    'ach.species-25.name': 'Guía de campo',
+    'ach.species-25.desc': 'Captura 25 especies distintas.',
+    'ach.species-50.name': 'Bestiario completo',
+    'ach.species-50.desc': 'Captura las 50 especies.',
+    'ach.holiday.name': 'Bug festivo',
+    'ach.holiday.desc': 'Captura un bug en Año Nuevo, San Valentín, Halloween o Navidad.',
+    'dex.species': 'Especies: {n}/{total}',
+    'nick.usage': 'Ponle un apodo a un monstruo: bugzoo nick <monstruo> <apodo>   (sin apodo se borra)',
+    'nick.unknown': 'Ningún monstruo capturado se llama «{name}».',
+    'nick.set': '{name} ahora se llama {nick}.',
+    'nick.cleared': '{name} perdió su apodo.',
     'tower.title': 'La torre - piso {n} de {total}',
     'tower.foe': '{name} [{element}] poder {power}',
     'tower.hint': 'Combate: bugzoo tower fight   Cambia quién lucha: bugzoo team',

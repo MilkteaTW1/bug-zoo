@@ -12,6 +12,7 @@ module.exports = {
     prefix: ['陰森', '毛茸', '毒舌', '搖晃', '憂鬱', '電擊', '陰暗', '小不點', '碎屑', '詛咒', '故障', '小筆'],
     suffix: ['小怪', '蝙蝠', '啃咬蟲', '飛蛾', '蟾蜍', '鬼火', '甲蟲', '小鬼', '爬蟲', '蝸牛', '精靈', '蟎'],
   },
+  species: ['史萊姆', '飛蛾', '甲蟲', '幽靈', '螃蟹', '貓頭鷹', '蝸牛', '青蛙', '蝙蝠', '魚', '章魚', '蛇', '蜘蛛', '貓', '狗', '兔子', '蘑菇', '仙人掌', '機器人', '龍', '狐狸', '企鵝', '烏龜', '蜜蜂', '蟲', '水母', '搗蛋鬼', '小惡魔', '石像', '鬼火', '老鼠', '烏鴉', '海豹', '魷魚', '蜥蜴', '鼴鼠', '螞蟻', '螢火蟲', '雲', '岩石', '方塊', '像素', '彗星', '提燈', '鑰匙', '齒輪', '蛋', '小鳥', '熊', '刺蝟'],
   help: `bugzoo - 把你的錯誤變成可收集的怪物
 
 用法：
@@ -23,6 +24,7 @@ module.exports = {
                               （開啟自動捕捉後就不用打這個）
   bugzoo dex                  你的圖鑑與等著被捕捉的 bug
   bugzoo team                 你最強的捕獲與牠們的進化狀況
+  bugzoo nick <怪物> [暱稱]   幫已捕捉的怪物取暱稱
   bugzoo achievements         你的成就
   bugzoo battle [--card f.svg]
                               列出天梯、好友與練習對手，輸入編號就開打；
@@ -125,6 +127,25 @@ module.exports = {
     'ach.tower-3.desc': '攻下高塔第 3 層。',
     'ach.tower-12.name': '塔頂',
     'ach.tower-12.desc': '攻下高塔全部 12 層。',
+    'gift.tag': '[夥伴]',
+    'gift.line': '連續 {n} 個指令都沒出錯!{type} 的 {name} 成為你的夥伴加入動物園。',
+    'ach.companion.name': '新朋友',
+    'ach.companion.desc': '連續 5 個指令沒出錯,獲得一隻夥伴。',
+    'ach.companions-10.name': '摯友',
+    'ach.companions-10.desc': '獲得 10 隻夥伴。',
+    'ach.species-10.name': '物種觀察員',
+    'ach.species-10.desc': '捕捉 10 種不同物種。',
+    'ach.species-25.name': '野外圖鑑',
+    'ach.species-25.desc': '捕捉 25 種不同物種。',
+    'ach.species-50.name': '完整圖鑑',
+    'ach.species-50.desc': '捕捉全部 50 種物種。',
+    'ach.holiday.name': '節日 bug',
+    'ach.holiday.desc': '在元旦、情人節、萬聖節或聖誕節捕捉一隻 bug。',
+    'dex.species': '物種:{n}/{total}',
+    'nick.usage': '幫怪物取暱稱:bugzoo nick <怪物> <暱稱>(不填暱稱就是清除)',
+    'nick.unknown': '沒有叫「{name}」的已捕捉怪物。',
+    'nick.set': '{name} 現在叫做 {nick}。',
+    'nick.cleared': '{name} 的暱稱已清除。',
     'tower.title': '高塔 - 第 {n} 層（共 {total} 層）',
     'tower.foe': '{name} [{element}] 戰鬥力 {power}',
     'tower.hint': '挑戰：bugzoo tower fight   更換出戰成員：bugzoo team',
