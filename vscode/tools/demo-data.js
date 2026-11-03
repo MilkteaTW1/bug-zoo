@@ -7,9 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bugzoo-demo-'));
-const ladderDir = path.join(home, 'ladder');
 process.env.BUGZOO_HOME = path.join(home, 'data');
-process.env.BUGZOO_LADDER_DIR = ladderDir;
 
 const { store, creature, power } = require('../lib/engine');
 const { recordCommand } = require('../lib/capture');
@@ -26,20 +24,6 @@ const FAKE_PLAYERS = [
   { name: 'NullPointerNinja', rank: 4, team: [['Wobblemite', 'NameError', 'common', 70], ['Glitchsnail', 'SyntaxError', 'common', 60]] },
   { name: 'SegfaultSam', rank: 5, team: [['Pipimp', 'ImportError', 'common', 55], ['Fluffbat', 'EACCES', 'uncommon', 50]] },
 ];
-
-function writeLadder() {
-  fs.mkdirSync(path.join(ladderDir, 'scores'), { recursive: true });
-  for (const p of FAKE_PLAYERS) {
-    fs.writeFileSync(path.join(ladderDir, 'scores', `${p.name}.json`), JSON.stringify({
-      v: 2, name: p.name, caught: { common: 8, uncommon: 4, rare: 1, legendary: 0 }, repeats: 6, seen: 13,
-      team: p.team.map(([name, type, rarity, pw]) => ({ name, type, rarity, power: pw, stage: 0 })),
-      updated: NOW.toISOString(),
-    }));
-  }
-  fs.writeFileSync(path.join(ladderDir, 'ladder.json'), JSON.stringify({
-    v: 1, order: FAKE_PLAYERS.slice().sort((a, b) => a.rank - b.rank).map((p) => p.name), processed: [],
-  }));
-}
 
 function seedPlayer() {
   const dex = store.load();
@@ -75,6 +59,29 @@ const CRASH = [
   `    at Object.<anonymous> (${PROJECT}/app.js:6:1)`,
 ].join('\n');
 
+/**
+ * A fight the player steers: the opening state, then one reply per round. The picks are the ones the recorder
+ * clicks, so what is on screen is what the engine really played.
+ */
+function steerStory() {
+  const start = fight.fight('friend', FAKE_PLAYERS[1].name);
+  const rounds = [];
+  const picks = [];
+  const down = new Set();
+  let guard = 0;
+  let r = null;
+  while ((!r || !r.over) && guard++ < 50) {
+    // Hand-pick the lineup the recorder will click: the second monster first, then whoever is left.
+    const order = start.me.team.map((_, i) => i).filter((i) => !down.has(i));
+    const i = picks.length === 0 && order.length > 1 ? order[1] : order[0];
+    r = fight.pick(i);
+    picks.push(i);
+    rounds.push(r);
+    for (const ev of r.events || []) if (ev.faint && ev.side === 'foe') down.add(ev.di);
+  }
+  return { start, rounds, picks };
+}
+
 /** States for the shop GIF: before, after each purchase, and after feeding a monster that then evolves. */
 function shopStory(folders) {
   const dex = store.load();
@@ -108,7 +115,6 @@ function soloStory(folders) {
 }
 
 async function build() {
-  writeLadder();
   seedPlayer();
   const folders = [PROJECT];
   const run = (exitCode, output) => recordCommand({ commandLine: 'node app.js', exitCode, cwd: PROJECT, output });
@@ -119,14 +125,14 @@ async function build() {
   run(0, '');
   const S2 = buildState(folders);
 
-  const arenaA = await fight.loadArena();
-  const target = 'RustyRaccoon';
-  const battleLadder = fight.fight('ladder', target);
-  const added = await fight.addFriend('ByteBaker');
+  // A friend to fight, added the way a player would: from a share code.
+  const { friends: friendsLib } = require('../lib/engine');
+  const code = friendsLib.encodeCode(FAKE_PLAYERS[1].name, FAKE_PLAYERS[1].team.map(([name, type, rarity, pw]) => ({ name, type, rarity, power: pw, stage: 0 })));
+  const added = await fight.addFriend(code);
   if (!added.ok) throw new Error('demo friend could not be added');
-  const arenaB = await fight.loadArena();
-  const battleFriend = fight.fight('friend', 'ByteBaker');
-  const battlePractice = fight.fight('practice', 'Legacy Codebase');
+  const arenaA = await fight.loadArena();
+  const arenaB = arenaA;
+  const steer = steerStory();
 
   // The shop and the solo tabs. Seeded coins, so the demo can afford a pizza and two pieces of furniture.
   const shopData = shopStory(folders);
@@ -137,8 +143,7 @@ async function build() {
     crash: CRASH,
     states: { S0, S1, S2 },
     events: { spawn: diffStates(S0, S1), caught: diffStates(S1, S2) },
-    arenaA, arenaB, battleLadder, battleFriend, battlePractice,
-    target,
+    arenaA, arenaB, steer,
   };
 }
 

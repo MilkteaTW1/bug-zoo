@@ -12,9 +12,9 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 
 *The GIFs use demo data; the zoo, fights and replays are the real extension.*
 
-[![Watch the 56-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
+[![Watch the 44-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
 
-*Click to watch the 56-second promo video: the catch loop, then what's new in v0.5 (50 species, the shop, evolution, teams and the Tower), in VS Code and in the terminal. 中文版影片:[點這裡](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)*
+*Click to watch the 44-second promo video: the catch loop, the shop, evolution and teams, then what's new in v0.6 (you pick who fights each round, one-click sharing, bulk buying), in VS Code and in the terminal. 中文版影片:[點這裡](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)*
 
 **Pick who fights every round.**
 
@@ -84,15 +84,15 @@ Press F5 in VS Code with this folder open to try it in an Extension Development 
 
 ### Languages
 
-The zoo, the ladder panel and the notifications use the same language files as the CLI: `src/locales/<code>.js` in this repo (keys starting with `vs.`). Add a language once with `npm run lang -- <code> <name>` at the repo root and it works in both. The command names in the manifest come from `package.nls.<locale>.json` (add one, e.g. `package.nls.ja.json`, copying `package.nls.json`). The language is the one saved by `bugzoo lang` or `bugzoo setup`, otherwise VS Code's display language. The globe button in the Bug Zoo view header (or the command **Bug Zoo: Change language**) switches it for the extension and the CLI at once.
+The zoo, the arena panel and the notifications use the same language files as the CLI: `src/locales/<code>.js` in this repo (keys starting with `vs.`). Add a language once with `npm run lang -- <code> <name>` at the repo root and it works in both. The command names in the manifest come from `package.nls.<locale>.json` (add one, e.g. `package.nls.ja.json`, copying `package.nls.json`). The language is the one saved by `bugzoo lang` or `bugzoo setup`, otherwise VS Code's display language. The globe button in the Bug Zoo view header (or the command **Bug Zoo: Change language**) switches it for the extension and the CLI at once.
 
 ## 繁體中文
 
 語言可以隨時切換：按 Bug Zoo 面板標題列的地球按鈕（或指令「Bug Zoo：切換語言」），擴充套件與 CLI 會一起換成同一個語言；清單會自動列出專案裡現有的所有語言。
 
-把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,唯一的網路請求是每 10 分鐘讀取公開天梯。
+把終端機裡失敗的指令變成在側邊欄跑來跑去的怪物。修好 bug、重跑同一條指令,就能捕獲牠。內建好友對戰和逐回合的戰鬥重播,和 [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug-zoo) 共用 `~/.bugzoo/dex.json`。錯誤內容只留在你的電腦,只有在你加入以連結分享的好友時才會連網。
 
-[![觀看 56 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
+[![觀看 44 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
 
 ![指令失敗出現野生怪物,修好後捕獲](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.zh.gif)
 
