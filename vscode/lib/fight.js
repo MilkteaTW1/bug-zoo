@@ -172,16 +172,16 @@ function towerFight() {
 }
 
 /** Buy a food or a piece of furniture. Returns { ok, reason?, name, price }. */
-function buy(id) {
+function buy(id, count = 1) {
   const dex = store.load();
   setLang(dex);
-  const r = shop.buy(dex, id);
+  const r = shop.buyMany(dex, id, shop.parseCount(count));
   const name = r.item ? i18n.t(`shop.item.${r.item.id}`) : id;
   if (r.ok) {
     achievements.evaluate(dex);
     store.save(dex);
   }
-  return { ok: r.ok, reason: r.reason, name, price: r.item ? r.item.price : 0, coins: dex.coins };
+  return { ok: r.ok, reason: r.reason, name, count: r.count || 0, price: r.ok ? r.spent : (r.item ? r.item.price : 0), coins: dex.coins };
 }
 
 /** The caught monsters a treat can be given to, fondest first, for the picker. */
@@ -194,17 +194,17 @@ function feedTargets() {
 }
 
 /** Give a food from the bag to a monster. Returns the outcome for a toast. */
-function feed(creatureId, foodId) {
+function feed(creatureId, foodId, count = 1) {
   const dex = store.load();
   setLang(dex);
-  const r = shop.feed(dex, creatureId, foodId);
+  const r = shop.feedMany(dex, creatureId, foodId, shop.parseCount(count));
   const c = dex.creatures[creatureId];
   const name = c ? (c.nick || creature.localName(c.id, i18n.getLang()) || c.name) : '';
   if (!r.ok) return { ok: false, reason: r.reason, name, food: i18n.t(`shop.item.${foodId}`) };
   achievements.evaluate(dex);
   store.save(dex);
   return {
-    ok: true, name, food: i18n.t(`shop.item.${foodId}`), gain: r.gain, bond: r.bond, max: shop.BOND_MAX,
+    ok: true, name, food: i18n.t(`shop.item.${foodId}`), count: r.count, gain: r.gain, bond: r.bond, max: shop.BOND_MAX,
     favorite: r.favorite, evolved: r.evolved, mult: r.evolved ? power.evolutionMult(r.evolved) : 0,
     stage: r.evolved ? i18n.t(`evo.stage${r.evolved}`) : '',
   };
@@ -275,4 +275,10 @@ function myCode() {
   return friends.encodeCode(me.name, me.team);
 }
 
-module.exports = { loadArena, fight, towerFight, setTeam, questName, buy, feed, feedTargets, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };
+function brag(kind) {
+  const dex = store.load();
+  setLang(dex);
+  return require('./engine').brag.text(dex, kind);
+}
+
+module.exports = { brag, loadArena, fight, towerFight, setTeam, questName, buy, feed, feedTargets, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };

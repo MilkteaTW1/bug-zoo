@@ -102,12 +102,14 @@ async function onWebviewMessage(view, msg) {
   } else if (msg.type === 'nick') {
     await renameMonster(msg.id);
   } else if (msg.type === 'buy') {
-    const r = fight.buy(msg.id);
-    if (r.ok) vscode.window.showInformationMessage(sayKey('shop.bought', r));
+    const r = fight.buy(msg.id, msg.n);
+    if (r.ok) vscode.window.showInformationMessage(sayKey(r.count > 1 ? 'shop.boughtMany' : 'shop.bought', r));
     else vscode.window.showWarningMessage(sayKey(r.reason === 'poor' ? 'shop.poor' : r.reason === 'owned' ? 'shop.ownedAlready' : 'shop.unknown', r));
     pushState(false);
   } else if (msg.type === 'feed') {
-    await feedMonster(msg.food);
+    await feedMonster(msg.food, msg.n);
+  } else if (msg.type === 'share') {
+    await shareBrag();
   }
 }
 
@@ -130,8 +132,19 @@ async function renameMonster(id) {
   }
 }
 
+/** Offer the three things worth boasting about and put the chosen one on the clipboard. */
+async function shareBrag() {
+  const pick = await vscode.window.showQuickPick(
+    [{ label: say('pickCatches'), kind: 'catches' }, { label: say('pickPower'), kind: 'power' }, { label: say('pickTower'), kind: 'tower' }],
+    { title: say('sharePick') },
+  );
+  if (!pick) return;
+  await vscode.env.clipboard.writeText(fight.brag(pick.kind));
+  vscode.window.showInformationMessage(say('shareCopied'));
+}
+
 /** Pick a caught monster and give it a food from the bag. */
-async function feedMonster(foodId) {
+async function feedMonster(foodId, count) {
   const targets = fight.feedTargets();
   if (targets.length === 0) {
     vscode.window.showInformationMessage(say('needCatch'));
@@ -142,12 +155,12 @@ async function feedMonster(foodId) {
     { title: say('feedTitle'), placeHolder: say('feedPlaceholder') },
   );
   if (!pick) return;
-  const r = fight.feed(pick.id, foodId);
+  const r = fight.feed(pick.id, foodId, count);
   if (!r.ok) {
     vscode.window.showWarningMessage(sayKey(`feed.${r.reason}`, r));
     return;
   }
-  vscode.window.showInformationMessage(sayKey(r.favorite ? 'feed.loved' : 'feed.ate', r));
+  vscode.window.showInformationMessage(sayKey(r.count > 1 ? 'feed.many' : r.favorite ? 'feed.loved' : 'feed.ate', r));
   if (r.evolved) vscode.window.showInformationMessage(sayKey('evo.line', r));
   pushState(false);
   refreshLadder();
@@ -221,6 +234,21 @@ function watchDex(context) {
   }
 }
 
+// Edits are the proof of real work for the thirty-minute focus reward. They are counted at most once every
+// 20 seconds, so holding a key down or a formatter rewriting a file does not add up.
+let lastEditAt = 0;
+function noteEdit(e) {
+  if (!e.contentChanges.length || e.document.uri.scheme === 'output') return;
+  const now = Date.now();
+  if (now - lastEditAt < 20000) return;
+  lastEditAt = now;
+  try {
+    if (store.noteEdit()) scheduleRefresh();
+  } catch {
+    // best effort
+  }
+}
+
 /** Terminal capture through shell integration: read the output of each command, record it when it ends. */
 function captureTerminal(context) {
   if (typeof vscode.window.onDidStartTerminalShellExecution !== 'function') return;
@@ -271,6 +299,9 @@ function activate(context) {
       attach(view, context.extensionUri);
     },
   };
+  if (typeof vscode.workspace.onDidChangeTextDocument === 'function') {
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(noteEdit));
+  }
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('bugzoo.zoo', provider, { webviewOptions: { retainContextWhenHidden: true } }),
     vscode.commands.registerCommand('bugzoo.openZoo', () => {

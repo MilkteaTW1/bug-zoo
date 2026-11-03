@@ -27,6 +27,7 @@ const aihook = require('../src/aihook');
 const autostart = require('../src/autostart');
 const friends = require('../src/friends');
 const remote = require('../src/remote');
+const brag = require('../src/brag');
 const opponents = require('../src/opponents');
 const acceptor = require('../src/accept');
 const i18n = require('../src/i18n');
@@ -280,6 +281,18 @@ function sharePayload(dex, name) {
   };
 }
 
+/** `bugzoo brag [catches|power|tower]`: a short text to paste somewhere when you want to show off. */
+function cmdBrag(args) {
+  const dex = store.load();
+  const kind = args[0] || 'catches';
+  if (!brag.KINDS.includes(kind)) {
+    console.error(`bugzoo brag [${brag.KINDS.join('|')}]`);
+    return 2;
+  }
+  console.log(brag.text(dex, kind));
+  return 0;
+}
+
 function cmdShare(args) {
   const { flags } = parseFlags(args);
   const dex = store.load();
@@ -484,30 +497,39 @@ function findItem(word) {
   return [...shop.FOODS, ...shop.FURNITURE].find((i) => i.id === w || render.itemName(i.id).toLowerCase() === w) || null;
 }
 
-/** `bugzoo buy <item>` spends coins on a food (kept in the bag) or a piece of furniture. */
+/** A trailing count (`3`, `x3`, `max`) on `buy` / `feed`; the rest is the name. */
+function splitCount(words) {
+  const last = words[words.length - 1];
+  if (words.length > 1 && /^(x?\d+|max|all)$/i.test(last)) return { words: words.slice(0, -1), count: shop.parseCount(last) };
+  return { words, count: 1 };
+}
+
+/** `bugzoo buy <item> [count|max]` spends coins on a food (kept in the bag) or a piece of furniture. */
 function cmdBuy(args) {
   const dex = store.load();
-  const it = findItem(args.join(' '));
+  const { words, count } = splitCount(args);
+  const it = findItem(words.join(' '));
   if (!it) {
     console.log(t('shop.unknown'));
     return 1;
   }
-  const r = shop.buy(dex, it.id);
+  const r = shop.buyMany(dex, it.id, count);
   if (!r.ok) {
     console.log(t(r.reason === 'poor' ? 'shop.poor' : 'shop.ownedAlready', { name: render.itemName(it.id), price: it.price, coins: dex.coins }));
     return 1;
   }
   const earned = achievements.evaluate(dex);
   store.save(dex);
-  console.log(t('shop.bought', { name: render.itemName(it.id), price: it.price, coins: dex.coins }));
+  console.log(t(r.count > 1 ? 'shop.boughtMany' : 'shop.bought', { name: render.itemName(it.id), count: r.count, price: r.spent, coins: dex.coins }));
   for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   return 0;
 }
 
-/** `bugzoo feed <monster> <food>` gives a food from the bag to a caught monster; affection decides its form. */
+/** `bugzoo feed <monster> <food> [count|max]` gives food from the bag to a caught monster; affection decides its form. */
 function cmdFeed(args) {
   const dex = store.load();
-  const [who, ...rest] = args;
+  const [who, ...tail] = args;
+  const { words: rest, count } = splitCount(tail);
   const it = findItem(rest.join(' '));
   if (!who || !it || !shop.food(it.id)) {
     console.log(t('feed.usage'));
@@ -520,14 +542,14 @@ function cmdFeed(args) {
     console.log(t('nick.unknown', { name: who }));
     return 1;
   }
-  const r = shop.feed(dex, hit.id, it.id);
+  const r = shop.feedMany(dex, hit.id, it.id, count);
   if (!r.ok) {
     console.log(t(`feed.${r.reason}`, { name: render.shownName(hit), food: render.itemName(it.id) }));
     return 1;
   }
   const earned = achievements.evaluate(dex);
   store.save(dex);
-  console.log(t(r.favorite ? 'feed.loved' : 'feed.ate', { name: render.shownName(hit), food: render.itemName(it.id), gain: r.gain, bond: r.bond, max: shop.BOND_MAX }));
+  console.log(t(r.count > 1 ? 'feed.many' : r.favorite ? 'feed.loved' : 'feed.ate', { name: render.shownName(hit), food: render.itemName(it.id), count: r.count, gain: r.gain, bond: r.bond, max: shop.BOND_MAX }));
   if (r.evolved) console.log(render.evolvedLine(hit, r.evolved));
   for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   return 0;
@@ -865,6 +887,9 @@ async function main() {
       break;
     case 'rank':
       cmdRank();
+      break;
+    case 'brag':
+      process.exit(cmdBrag(rest));
       break;
     case 'share':
       process.exit(cmdShare(rest));

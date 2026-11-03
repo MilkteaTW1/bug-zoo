@@ -29,6 +29,7 @@ Usage:
   bugzoo team                 Your strongest catches, with their evolution
   bugzoo nick <몬스터> [별명]   잡은 몬스터에 별명 붙이기
   bugzoo shop                 상점: 코인, 음식, 가구, 몬스터 호감도
+  bugzoo brag [catches|power|tower]  자랑용 문구 만들기
   bugzoo buy <아이템>        음식이나 가구 구매
   bugzoo feed <몬스터> <음식>  몬스터 먹이기 (호감도로 진화)
   bugzoo achievements         Your achievements
@@ -205,13 +206,15 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'shop.poor': '{name}을(를) 사기에 코인이 부족합니다 ({price} 필요, 보유 {coins}).',
     'shop.ownedAlready': '{name}은(는) 이미 가지고 있습니다.',
     'shop.bought': '{name}을(를) {price} 코인에 샀습니다. {coins} 코인 남음.',
-    'feed.usage': '몬스터에게 먹이기: bugzoo feed <몬스터> <음식>',
+    'shop.boughtMany': '{name} {count}개를 {price} 코인에 샀습니다. {coins} 코인 남음.',
+    'feed.usage': '몬스터에게 먹이기: bugzoo feed <몬스터> <음식> [개수|max]',
     'feed.noFood': '가방에 {food}이(가) 없습니다. 먼저 사세요.',
     'feed.notCaught': '잡은 몬스터에게만 먹일 수 있습니다.',
     'feed.max': '{name}의 호감도는 이미 최대입니다.',
     'feed.unknown': '상점에서 팔지 않는 물건입니다.',
     'feed.loved': '{name}이(가) {food}을(를) 정말 좋아해요! 호감도 +{gain} ({bond}/{max}).',
     'feed.ate': '{name}이(가) {food}을(를) 먹었습니다. 호감도 +{gain} ({bond}/{max}).',
+    'feed.many': '{name}이(가) {food} {count}개를 먹었습니다. 호감도 +{gain} ({bond}/{max}).',
     'shop.item.snack': '버그 간식',
     'shop.item.cookie': '쿠키',
     'shop.item.pizza': '피자',
@@ -231,6 +234,10 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.gourmet.desc': '몬스터에게 20번 먹이세요.',
     'dex.species': '종: {n}/{total}',
     'nick.usage': '몬스터에 별명 붙이기: bugzoo nick <몬스터> <별명>   (별명을 비우면 삭제)',
+    'brag.catches': 'Bug Zoo에서 버그 {total}마리를 잡았어요: {kinds}종, 빛나는 {shiny}마리. 최고의 포획: {best}.',
+    'brag.power': '내 Bug Zoo 팀 전투력은 {power}: {team}.',
+    'brag.tower': 'Bug Zoo 탑 {floors}층 중 {floor}층을 클리어했어요.',
+    'brag.footer': '에러를 몬스터로: npm i -g bug-zoo',
     'nick.unknown': '"{name}"이라는 이름의 잡은 몬스터가 없습니다.',
     'nick.set': '{name}의 별명은 이제 {nick}입니다.',
     'nick.cleared': '{name}의 별명이 삭제되었습니다.',
@@ -432,6 +439,13 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.achievements': '업적', // EN: 'Achievements'
     'vs.achUnlocked': '{date} 달성', // EN: 'unlocked {date}'
     'vs.achLocked': '잠김', // EN: 'locked'
+    'vs.maxBtn': '최대',
+    'vs.shareBtn': '공유',
+    'vs.sharePick': '무엇을 공유할까요?',
+    'vs.pickCatches': '내가 잡은 몬스터',
+    'vs.pickPower': '팀 전투력',
+    'vs.pickTower': '탑 진행도',
+    'vs.shareCopied': '복사했어요. 어디든 붙여넣으세요.',
     'vs.shopTab': '상점',
     'vs.feedBtn': '먹이기',
     'vs.feedTitle': '몬스터 먹이기',

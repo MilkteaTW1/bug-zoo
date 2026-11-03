@@ -93,6 +93,52 @@ function feed(dex, creatureId, foodId) {
   return { ok: true, creature: c, gain: c.bond - from, from, bond: c.bond, favorite, evolved: after > before ? after : 0 };
 }
 
+/** How many the player asked for: a positive whole number, or 'max' for as many as possible. */
+function parseCount(raw) {
+  if (raw === undefined || raw === null || raw === '') return 1;
+  if (/^(max|all)$/i.test(String(raw))) return Infinity;
+  const n = Number.parseInt(String(raw).replace(/^x/i, ''), 10);
+  return Number.isFinite(n) && n > 0 ? Math.min(n, 999) : 1;
+}
+
+/** Buy up to `count` of a food (furniture is once only). Stops at the first thing that fails. */
+function buyMany(dex, id, count = 1) {
+  let done = 0;
+  let spent = 0;
+  let last = null;
+  while (done < count) {
+    const r = buy(dex, id);
+    if (!r.ok) { last = r; break; }
+    done += 1;
+    spent += r.item.price;
+    if (furniture(id)) break;
+  }
+  const it = item(id);
+  if (done === 0) return { ...(last || { ok: false, reason: 'unknown' }), count: 0, spent: 0 };
+  return { ok: true, item: it, count: done, spent };
+}
+
+/** Feed up to `count` of a food to one monster, stopping when the bag is empty or affection is full. */
+function feedMany(dex, creatureId, foodId, count = 1) {
+  let done = 0;
+  let gain = 0;
+  let evolved = 0;
+  let favorite = false;
+  let last = null;
+  let result = null;
+  while (done < count) {
+    const r = feed(dex, creatureId, foodId);
+    if (!r.ok) { last = r; break; }
+    done += 1;
+    gain += r.gain;
+    favorite = favorite || r.favorite;
+    evolved = Math.max(evolved, r.evolved);
+    result = r;
+  }
+  if (done === 0) return { ...(last || { ok: false, reason: 'unknown' }), count: 0 };
+  return { ok: true, creature: result.creature, count: done, gain, from: result.from, bond: result.bond, favorite, evolved };
+}
+
 /** Coins for one fight (a practice dummy pays nothing: the caller just does not call this). */
 const rewardFight = (dex, won, questsDone = []) =>
   earn(dex, (won ? COINS.win : COINS.loss) + questsDone.length * COINS.quest);
@@ -105,5 +151,5 @@ const rewardTower = (dex, floor, won, questsDone = []) =>
 const hearts = (bond) => Math.min(10, Math.floor((bond || 0) / 20));
 
 module.exports = {
-  BOND_MAX, FOODS, FURNITURE, COINS, forCatch, food, furniture, item, ensure, earn, favoriteOf, comfort, buy, feed, hearts, rewardFight, rewardTower,
+  BOND_MAX, FOODS, FURNITURE, COINS, forCatch, food, furniture, item, ensure, earn, favoriteOf, comfort, buy, feed, parseCount, buyMany, feedMany, hearts, rewardFight, rewardTower,
 };

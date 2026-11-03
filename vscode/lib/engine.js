@@ -27,6 +27,7 @@ module.exports = {
   species: load('species'),
   companion: load('companion'),
   shop: load('shop'),
+  brag: load('brag'),
   score: load('score'),
   creature: load('creature'),
   i18n: load('i18n'),

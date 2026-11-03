@@ -26,6 +26,7 @@ module.exports = {
   bugzoo team                 你最強的捕獲與牠們的進化狀況
   bugzoo nick <怪物> [暱稱]   幫已捕捉的怪物取暱稱
   bugzoo shop                 商店:金幣、食物、家具與怪物的好感度
+  bugzoo brag [catches|power|tower]  產生一段可以貼出去的炫耀文字
   bugzoo buy <物品>          購買食物或家具
   bugzoo feed <怪物> <食物>  餵怪物(好感度會讓牠進化)
   bugzoo achievements         你的成就
@@ -159,13 +160,15 @@ module.exports = {
     'shop.poor': '金幣不夠買{name}(需要 {price},你有 {coins})。',
     'shop.ownedAlready': '你已經有{name}了。',
     'shop.bought': '用 {price} 金幣買了{name},剩 {coins} 金幣。',
-    'feed.usage': '餵怪物:bugzoo feed <怪物> <食物>',
+    'shop.boughtMany': '用 {price} 金幣買了 {count} 份{name},剩 {coins} 金幣。',
+    'feed.usage': '餵怪物:bugzoo feed <怪物> <食物> [數量|max]',
     'feed.noFood': '背包裡沒有{food},先去買一份。',
     'feed.notCaught': '只能餵已經捕捉的怪物。',
     'feed.max': '{name}對你的好感已經滿了。',
     'feed.unknown': '商店沒有賣這個。',
     'feed.loved': '{name}超愛{food}!好感 +{gain}({bond}/{max})。',
     'feed.ate': '{name}吃了{food}。好感 +{gain}({bond}/{max})。',
+    'feed.many': '{name}吃了 {count} 份{food}。好感 +{gain}({bond}/{max})。',
     'shop.item.snack': '蟲蟲點心',
     'shop.item.cookie': '餅乾',
     'shop.item.pizza': '披薩',
@@ -185,6 +188,10 @@ module.exports = {
     'ach.gourmet.desc': '餵怪物 20 次。',
     'dex.species': '物種:{n}/{total}',
     'nick.usage': '幫怪物取暱稱:bugzoo nick <怪物> <暱稱>(不填暱稱就是清除)',
+    'brag.catches': '我在 Bug Zoo 抓了 {total} 隻 bug:{kinds} 種、{shiny} 隻閃光。最強的是 {best}。',
+    'brag.power': '我的 Bug Zoo 隊伍戰力 {power}:{team}。',
+    'brag.tower': '我在 Bug Zoo 高塔通過了 {floor}/{floors} 層。',
+    'brag.footer': '把你的錯誤變成怪物:npm i -g bug-zoo',
     'nick.unknown': '沒有叫「{name}」的已捕捉怪物。',
     'nick.set': '{name} 現在叫做 {nick}。',
     'nick.cleared': '{name} 的暱稱已清除。',
@@ -385,6 +392,13 @@ module.exports = {
     'vs.achievements': '成就',
     'vs.achUnlocked': '{date} 解鎖',
     'vs.achLocked': '未解鎖',
+    'vs.maxBtn': '全部',
+    'vs.shareBtn': '分享',
+    'vs.sharePick': '分享什麼?',
+    'vs.pickCatches': '我抓到的怪物',
+    'vs.pickPower': '隊伍戰力',
+    'vs.pickTower': '爬塔進度',
+    'vs.shareCopied': '已複製,可以直接貼上。',
     'vs.shopTab': '商店',
     'vs.feedBtn': '餵食',
     'vs.feedTitle': '餵怪物',

@@ -27,6 +27,7 @@ Usage:
   bugzoo team                 Your strongest catches, with their evolution
   bugzoo nick <monster> [name]  Give a caught monster a nickname
   bugzoo shop                 The shop: coins, food, furniture, how fond your monsters are
+  bugzoo brag [catches|power|tower]  Text to paste when you want to show off
   bugzoo buy <item>          Buy food or furniture
   bugzoo feed <monster> <food>  Feed a monster (affection makes it evolve)
   bugzoo achievements         Your achievements
@@ -162,13 +163,15 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'shop.poor': 'Not enough coins for {name} ({price} needed, you have {coins}).',
     'shop.ownedAlready': 'You already own {name}.',
     'shop.bought': 'Bought {name} for {price} coins. {coins} left.',
-    'feed.usage': 'Feed a monster: bugzoo feed <monster> <food>',
+    'shop.boughtMany': 'Bought {count} x {name} for {price} coins. {coins} left.',
+    'feed.usage': 'Feed a monster: bugzoo feed <monster> <food> [count|max]',
     'feed.noFood': 'You have no {food} in your bag. Buy one first.',
     'feed.notCaught': 'You can only feed monsters you have caught.',
     'feed.max': '{name} cannot get any fonder of you. It is at full affection.',
     'feed.unknown': 'The shop does not sell that.',
     'feed.loved': '{name} LOVES the {food}! +{gain} affection ({bond}/{max}).',
     'feed.ate': '{name} ate the {food}. +{gain} affection ({bond}/{max}).',
+    'feed.many': '{name} ate {count} x {food}. +{gain} affection ({bond}/{max}).',
     'shop.item.snack': 'Bug Snack',
     'shop.item.cookie': 'Cookie',
     'shop.item.pizza': 'Pizza',
@@ -188,6 +191,10 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.gourmet.desc': 'Feed your monsters 20 times.',
     'dex.species': 'Species: {n}/{total}',
     'nick.usage': 'Give a monster a nickname: bugzoo nick <monster> <nickname>   (no nickname clears it)',
+    'brag.catches': 'I have caught {total} bugs in Bug Zoo: {kinds} kinds, {shiny} shiny. Best catch: {best}.',
+    'brag.power': 'My Bug Zoo team has {power} power: {team}.',
+    'brag.tower': 'I cleared {floor} of {floors} floors of the Bug Zoo Tower.',
+    'brag.footer': 'Turn your errors into monsters: npm i -g bug-zoo',
     'nick.unknown': 'No caught monster is called "{name}".',
     'nick.set': '{name} is now called {nick}.',
     'nick.cleared': '{name} lost its nickname.',
@@ -388,6 +395,13 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.achievements': 'Achievements',
     'vs.achUnlocked': 'unlocked {date}',
     'vs.achLocked': 'locked',
+    'vs.maxBtn': 'Max',
+    'vs.shareBtn': 'Share',
+    'vs.sharePick': 'Share what?',
+    'vs.pickCatches': 'My catches',
+    'vs.pickPower': 'My team power',
+    'vs.pickTower': 'Tower progress',
+    'vs.shareCopied': 'Copied. Paste it anywhere.',
     'vs.shopTab': 'Shop',
     'vs.feedBtn': 'Feed',
     'vs.feedTitle': 'Feed a monster',
