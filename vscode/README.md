@@ -43,6 +43,8 @@ The bottom of the panel has two tabs.
 - **Achievements, Quests, Tower, Team**: the same tabs as the CLI. Achievements shows all of them with their unlock dates, Quests today's three goals, Tower the next floor (press **Fight**), and Team lets you click up to three monsters in the order they fight (**Auto** goes back to your strongest). Battles show each monster's element and whether a hit was super effective.
 - **Zoo**: the bar shows species caught (`3/50`) and your no-error streak toward the next companion. Shiny catches and companions are marked, hovering shows the species and element, and double-click renames a monster.
 
+- **Shop**: coins come from catches, fights and quests. Buy food and furniture, feed a monster (affection makes it evolve at 30 and 100, each form 1.5x stronger) and decorate the zoo. Caught monsters show hearts and can be dragged around with the mouse.
+
 Fights use the same rules as `bugzoo battle`: results are deterministic and replayable, and your wins and losses count toward the same achievements.
 
 Open the zoo from the Bug Zoo icon in the activity bar, or run **Bug Zoo: Open the zoo in an editor tab** to give it more room.

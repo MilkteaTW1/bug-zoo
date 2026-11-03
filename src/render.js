@@ -7,6 +7,7 @@ const { roster, lineup } = require('./battle');
 const { ORDER: ELEMENTS, elementOf, strongAgainst } = require('./element');
 const quests = require('./quests');
 const { EVERY } = require('./companion');
+const shop = require('./shop');
 const { COUNT: SPECIES_COUNT } = require('./species');
 const { IDS: ACHIEVEMENT_IDS } = require('./achievements');
 
@@ -75,11 +76,11 @@ function factorLine(f = {}) {
 const stars = (stage) => (stage > 0 ? ` ${'*'.repeat(stage)}` : '');
 
 /** One line about a creature's form: its current stage and how far the next one is. */
-function evolutionLine(captures) {
-  const stage = stageOf(captures);
+function evolutionLine(bond) {
+  const stage = stageOf(bond);
   const next = EVOLUTION[stage + 1];
   const form = t(`evo.stage${stage}`);
-  return next ? `${form}, ${t('evo.next', { n: next.at - captures })}` : `${form}, ${t('evo.max')}`;
+  return next ? `${form}, ${t('evo.next', { n: next.at - bond })}` : `${form}, ${t('evo.max')}`;
 }
 
 const elementName = (type) => t(`element.${elementOf(type)}`);
@@ -106,7 +107,7 @@ function teamList(trophies, creatures = null, chosen = []) {
     out.push(`${fighting.has(tr.id) ? '*' : ' '} ${String(i + 1).padStart(2)}. ${color}${pad(shownName(tr) + stars(tr.stage), 16)}${RESET} ` +
       `${pad(tr.type, 20)} ${pad(`[${elementName(tr.type)}]`, 10)} ${t('team.power')} ${String(tr.power).padStart(4)}  ${DIM}${tr.project}${RESET}`);
     out.push(`      ${DIM}${factorLine(tr.factors)}${RESET}`);
-    if (creatures) out.push(`      ${DIM}${evolutionLine(tr.captures)}${RESET}`);
+    if (creatures) out.push(`      ${DIM}${evolutionLine(tr.bond)}${RESET}`);
   });
   out.push('', `${DIM}${t('team.chartTitle')}${RESET}`, ...elementChart().map((l) => `  ${l}`), '', `${DIM}${t('team.hint')}${RESET}`);
   return out.join('\n');
@@ -140,6 +141,42 @@ function questList(dex, now = new Date()) {
   return out.join('\n');
 }
 
+const coinLine = (n) => `${DIM}${t('coins.line', { n })}${RESET}`;
+
+/** The announcement for a monster that grew into a new form. */
+const evolvedLine = (entry, stage) => `${YELLOW}${BOLD}${t('evo.tag')}${RESET}${YELLOW} ${t('evo.line', {
+  name: shownName(entry), stage: t(`evo.stage${stage}`), mult: evolutionMult(stage),
+})}${RESET}`;
+
+const itemName = (id) => t(`shop.item.${id}`);
+
+/** `bugzoo shop`: coins, what is for sale, the bag, and how fond each monster is of you. */
+function shopList(dex) {
+  shop.ensure(dex);
+  const out = [`${BOLD}${t('shop.title', { coins: dex.coins })}${RESET}`, ''];
+  out.push(`${BOLD}${t('shop.food')}${RESET}`);
+  for (const f of shop.FOODS) {
+    const have = dex.inventory[f.id] ? `  ${DIM}${t('shop.have', { n: dex.inventory[f.id] })}${RESET}` : '';
+    out.push(`  ${pad(itemName(f.id), 14)} ${pad(`${f.price}`, 5)} ${DIM}${t('shop.gives', { n: f.bond })}${RESET}${have}`);
+  }
+  out.push('', `${BOLD}${t('shop.furniture')}${RESET}`);
+  for (const f of shop.FURNITURE) {
+    const owned = dex.furniture.includes(f.id);
+    out.push(`  ${f.icon} ${pad(itemName(f.id), 12)} ${pad(`${f.price}`, 5)} ${owned ? `${GREEN}${t('shop.owned')}${RESET}` : ''}`);
+  }
+  out.push('', `${DIM}${t('shop.comfort', { n: Math.round((shop.comfort(dex) - 1) * 100) })}${RESET}`);
+  const mine = Object.values(dex.creatures).filter((c) => c.captures > 0);
+  if (mine.length > 0) {
+    out.push('', `${BOLD}${t('shop.bonds')}${RESET}`);
+    for (const c of mine.sort((a, b) => (b.bond || 0) - (a.bond || 0)).slice(0, 12)) {
+      const hearts = '♥'.repeat(shop.hearts(c.bond)) || '·';
+      out.push(`  ${pad(shownName(c) + stars(stageOf(c.bond || 0)), 18)} ${pad(hearts, 10)} ${String(c.bond || 0).padStart(3)}/${shop.BOND_MAX}  ${DIM}${t('shop.loves', { food: itemName(shop.favoriteOf(c.id)) })}${RESET}`);
+    }
+  }
+  out.push('', `${DIM}${t('shop.hint')}${RESET}`);
+  return out.join('\n');
+}
+
 /** Evolutions and achievements that came with a run. */
 function extras(result) {
   const lines = [];
@@ -154,6 +191,7 @@ function extras(result) {
   if (result.gift) {
     lines.push(`${YELLOW}${BOLD}${t('gift.tag')}${RESET}${YELLOW} ${t('gift.line', { name: shownName(result.gift), type: result.gift.type, n: EVERY })}${RESET}`);
   }
+  if (result.coins > 0) lines.push(coinLine(result.coins));
   lines.push(...questLines(result.quests));
   lines.push(...achievementLines(result.achievements));
   return lines;
@@ -188,7 +226,7 @@ function dexList(dex) {
   const out = [`${BOLD}${t('dex.title', { caught, seen: entries.length })}${RESET}`, ''];
   for (const e of entries) {
     const color = RARITY_COLOR[e.rarity];
-    out.push(`${color}${pad(shownName(e) + stars(stageOf(e.captures)), 16)}${RESET} ${pad(e.type, 20)} ${color}${pad(rarityText(e.rarity), 10)}${RESET} ${pad(speciesName(e), 10)} ${status(e)}`);
+    out.push(`${color}${pad(shownName(e) + stars(stageOf(e.bond || 0)), 16)}${RESET} ${pad(e.type, 20)} ${color}${pad(rarityText(e.rarity), 10)}${RESET} ${pad(speciesName(e), 10)} ${status(e)}`);
   }
   const pending = Object.values(dex.pending || {}).reduce((n, p) => n + p.ids.length, 0);
   const kinds = new Set(entries.filter((e) => e.captures > 0 && typeof e.species === 'number').map((e) => e.species)).size;
@@ -288,5 +326,5 @@ function battleCard({ me, foe, winner, hits, labelOf = (n) => n, artOf = () => [
 
 module.exports = {
   encounter, outcomeBanner, extras, achievementLines, achievementList, dexList, exportSvg, battleCard, teamList,
-  factorLine, battleLine, shownName, label, elementName, questList, questLines,
+  factorLine, battleLine, shownName, shopList, itemName, coinLine, evolvedLine, label, elementName, questList, questLines,
 };

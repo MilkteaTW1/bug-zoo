@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const vscode = require('vscode');
-const { buildState, diffStates, say, creatureName } = require('./lib/state');
+const { buildState, diffStates, say, sayKey, creatureName } = require('./lib/state');
 const fight = require('./lib/fight');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
 const { store, i18n, nick } = require('./lib/engine');
@@ -101,6 +101,13 @@ async function onWebviewMessage(view, msg) {
     refreshLadder();
   } else if (msg.type === 'nick') {
     await renameMonster(msg.id);
+  } else if (msg.type === 'buy') {
+    const r = fight.buy(msg.id);
+    if (r.ok) vscode.window.showInformationMessage(sayKey('shop.bought', r));
+    else vscode.window.showWarningMessage(sayKey(r.reason === 'poor' ? 'shop.poor' : r.reason === 'owned' ? 'shop.ownedAlready' : 'shop.unknown', r));
+    pushState(false);
+  } else if (msg.type === 'feed') {
+    await feedMonster(msg.food);
   }
 }
 
@@ -121,6 +128,29 @@ async function renameMonster(id) {
     pushState(false);
     vscode.window.showInformationMessage(say(nick.clean(value) ? 'nickSet' : 'nickCleared', { name: c.name, nick: nick.clean(value) }));
   }
+}
+
+/** Pick a caught monster and give it a food from the bag. */
+async function feedMonster(foodId) {
+  const targets = fight.feedTargets();
+  if (targets.length === 0) {
+    vscode.window.showInformationMessage(say('needCatch'));
+    return;
+  }
+  const pick = await vscode.window.showQuickPick(
+    targets.map((t) => ({ label: t.name, description: `\u2665 ${t.bond}/${t.max}`, id: t.id })),
+    { title: say('feedTitle'), placeHolder: say('feedPlaceholder') },
+  );
+  if (!pick) return;
+  const r = fight.feed(pick.id, foodId);
+  if (!r.ok) {
+    vscode.window.showWarningMessage(sayKey(`feed.${r.reason}`, r));
+    return;
+  }
+  vscode.window.showInformationMessage(sayKey(r.favorite ? 'feed.loved' : 'feed.ate', r));
+  if (r.evolved) vscode.window.showInformationMessage(sayKey('evo.line', r));
+  pushState(false);
+  refreshLadder();
 }
 
 function scheduleRefresh() {

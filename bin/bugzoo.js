@@ -12,6 +12,7 @@ const { elementOf } = require('../src/element');
 const quests = require('../src/quests');
 const tower = require('../src/tower');
 const nickLib = require('../src/nick');
+const shop = require('../src/shop');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -477,6 +478,61 @@ function cmdNick(args) {
   return 0;
 }
 
+/** Find a shop item by id or by its name in the player's language. */
+function findItem(word) {
+  const w = String(word || '').toLowerCase();
+  return [...shop.FOODS, ...shop.FURNITURE].find((i) => i.id === w || render.itemName(i.id).toLowerCase() === w) || null;
+}
+
+/** `bugzoo buy <item>` spends coins on a food (kept in the bag) or a piece of furniture. */
+function cmdBuy(args) {
+  const dex = store.load();
+  const it = findItem(args.join(' '));
+  if (!it) {
+    console.log(t('shop.unknown'));
+    return 1;
+  }
+  const r = shop.buy(dex, it.id);
+  if (!r.ok) {
+    console.log(t(r.reason === 'poor' ? 'shop.poor' : 'shop.ownedAlready', { name: render.itemName(it.id), price: it.price, coins: dex.coins }));
+    return 1;
+  }
+  const earned = achievements.evaluate(dex);
+  store.save(dex);
+  console.log(t('shop.bought', { name: render.itemName(it.id), price: it.price, coins: dex.coins }));
+  for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
+  return 0;
+}
+
+/** `bugzoo feed <monster> <food>` gives a food from the bag to a caught monster; affection decides its form. */
+function cmdFeed(args) {
+  const dex = store.load();
+  const [who, ...rest] = args;
+  const it = findItem(rest.join(' '));
+  if (!who || !it || !shop.food(it.id)) {
+    console.log(t('feed.usage'));
+    return 1;
+  }
+  const want = who.toLowerCase();
+  const hit = Object.values(dex.creatures).find((c) => c.captures > 0 &&
+    [c.nick, c.name, render.shownName(c)].some((n) => n && n.toLowerCase() === want));
+  if (!hit) {
+    console.log(t('nick.unknown', { name: who }));
+    return 1;
+  }
+  const r = shop.feed(dex, hit.id, it.id);
+  if (!r.ok) {
+    console.log(t(`feed.${r.reason}`, { name: render.shownName(hit), food: render.itemName(it.id) }));
+    return 1;
+  }
+  const earned = achievements.evaluate(dex);
+  store.save(dex);
+  console.log(t(r.favorite ? 'feed.loved' : 'feed.ate', { name: render.shownName(hit), food: render.itemName(it.id), gain: r.gain, bond: r.bond, max: shop.BOND_MAX }));
+  if (r.evolved) console.log(render.evolvedLine(hit, r.evolved));
+  for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
+  return 0;
+}
+
 /** `bugzoo tower` shows the next floor and its enemies; `tower fight` takes it on with your current lineup. */
 function cmdTower(args) {
   const dex = store.load();
@@ -512,8 +568,10 @@ ${t('tower.progress', { n: dex.tower.cleared, total })}`);
   console.log(`\n${t(won ? 'tower.win' : 'tower.lose', { n: floor })}`);
   const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
   if (won) dex.tower.cleared = floor;
+  const coins = shop.rewardTower(dex, floor, won, questsDone);
   const earned = achievements.evaluate(dex);
   store.save(dex);
+  console.log(`\n${render.coinLine(coins)}`);
   for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
   for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   return 0;
@@ -612,8 +670,10 @@ async function cmdBattle(args) {
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
     const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
+    const coins = shop.rewardFight(dex, won, questsDone);
     const earned = achievements.evaluate(dex);
     store.save(dex);
+    console.log(`\n${render.coinLine(coins)}`);
     for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
     for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   }
@@ -761,6 +821,15 @@ async function main() {
       break;
     case 'team':
       process.exit(cmdTeam(rest));
+      break;
+    case 'shop':
+      console.log(render.shopList(store.load()));
+      break;
+    case 'buy':
+      process.exit(cmdBuy(rest));
+      break;
+    case 'feed':
+      process.exit(cmdFeed(rest));
       break;
     case 'nick':
       process.exit(cmdNick(rest));

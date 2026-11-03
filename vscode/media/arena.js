@@ -73,6 +73,22 @@
       '<div class="btns"><button class="btn primary" id="tower">⚔ ' + tr('fight') + '</button></div>';
   }
 
+  function shopBody() {
+    if (!S) return '';
+    const sh = S.shop;
+    const bag = sh.foods.filter((f) => f.have > 0);
+    let h = '<div class="note">' + esc(fill(tr('shop.title'), { coins: sh.coins })) + (sh.comfort ? ' · ' + esc(fill(tr('shop.comfort'), { n: sh.comfort })) : '') + '</div>';
+    h += '<div class="note">' + esc(tr('shop.food')) + '</div>';
+    h += sh.foods.map((f) => '<div class="ach-row on"><span class="ic">🍖</span><span class="nm">' + esc(f.name) + '<small>' +
+      esc(fill(tr('shop.gives'), { n: f.bond })) + (f.have ? ' · ' + esc(fill(tr('shop.have'), { n: f.have })) : '') + '</small></span><span class="when"><button class="btn buy" data-id="' +
+      f.id + '"' + (sh.coins < f.price ? ' disabled' : '') + '>🪙 ' + f.price + '</button>' +
+      (f.have ? ' <button class="btn feed" data-food="' + f.id + '">' + esc(tr('feedBtn')) + '</button>' : '') + '</span></div>').join('');
+    h += '<div class="note">' + esc(tr('shop.furniture')) + '</div>';
+    h += sh.furniture.map((f) => '<div class="ach-row on"><span class="ic">' + f.icon + '</span><span class="nm">' + esc(f.name) + '</span><span class="when">' +
+      (f.owned ? esc(tr('shop.owned')) : '<button class="btn buy" data-id="' + f.id + '"' + (sh.coins < f.price ? ' disabled' : '') + '>🪙 ' + f.price + '</button>') + '</span></div>').join('');
+    return h + (bag.length ? '' : '');
+  }
+
   function teamBody() {
     if (!S) return '';
     if (!S.team.rows.length) return '<div class="note">' + esc(tr('noTeam')) + '</div>';
@@ -97,6 +113,8 @@
       body = towerBody();
     } else if (tab === 'team') {
       body = teamBody();
+    } else if (tab === 'shop') {
+      body = shopBody();
     } else if (tab === 'ladder') {
       body = d.rows.filter((r) => r.section === 'ladder').slice(0, 50).map((r) => row(r, canFight)).join('');
     } else {
@@ -111,7 +129,7 @@
     }
     if (notice) notes.push(notice);
     const tabs = [
-      ['ladder', '🏆', tr('ladder')], ['friends', '👥', tr('friends')], ['team', '🛡', tr('team')], ['tower', '🗼', tr('tower')],
+      ['ladder', '🏆', tr('ladder')], ['friends', '👥', tr('friends')], ['team', '🛡', tr('team')], ['tower', '🗼', tr('tower')], ['shop', '🛒', tr('shopTab')],
       ['quests', '📋', tr('questsTab') + (S ? ' ' + S.quests.list.filter((q) => q.done).length + '/' + S.quests.list.length : '')],
       ['achievements', '🏅', tr('achievements') + ' ' + achs.filter((x) => x.at).length + '/' + achs.length],
     ];
@@ -141,6 +159,10 @@
       vscode.postMessage({ type: 'setTeam', ids: cur.slice(-3) });
       return;
     }
+    const buy = t.closest('.buy');
+    if (buy) { vscode.postMessage({ type: 'buy', id: buy.dataset.id }); return; }
+    const feedBtn = t.closest('.feed');
+    if (feedBtn) { vscode.postMessage({ type: 'feed', food: feedBtn.dataset.food }); return; }
     if (t.closest('#auto')) { vscode.postMessage({ type: 'setTeam', ids: [] }); return; }
     if (t.closest('#tower')) { notice = ''; vscode.postMessage({ type: 'tower' }); return; }
     if (t.closest('#add')) vscode.postMessage({ type: 'addFriend' });
@@ -207,10 +229,11 @@
         : b.outcome === 'outOfReach' ? fill(tr('outOfReach'), { reach: b.reach })
           : (tr(b.outcome === 'practice' ? 'practiceNote' : b.outcome) || '');
       const ach = (b.earned || []).map((a) => '<div class="ach">🏅 ' + tr('achievement') + ': ' + esc(a.name) + '<br><small>' + esc(a.desc) + '</small></div>').join('');
+      const coin = b.coins ? '<div class="ach">🪙 ' + esc(fill(tr('coinsEarned'), { n: b.coins })) + '</div>' : '';
       const qs = (b.quests || []).map((q) => '<div class="ach">📋 ' + tr('questDone') + ': ' + esc(q) + '</div>').join('');
       document.getElementById('foot').innerHTML =
         '<div class="res ' + (b.won ? 'win' : 'lose') + '">' + (b.won ? '🏆 ' + tr('win') : '💔 ' + tr('lose')) + '</div>' +
-        '<div class="rnote">' + esc(note) + '</div>' + qs + ach +
+        '<div class="rnote">' + esc(note) + '</div>' + coin + qs + ach +
         '<div class="btns">' + (b.canSubmit ? '<button class="btn primary" id="submit">' + tr('submit') + '</button>' : '') +
         '<button class="btn" id="replay">' + tr('replay') + '</button><button class="btn" id="close">' + tr('close') + '</button></div>';
       document.getElementById('close').onclick = closeBattle;

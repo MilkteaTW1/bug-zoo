@@ -17,14 +17,16 @@ const BOT = {
 };
 
 /**
- * Trophies with evolution applied. `creatures` is the dex's creature table: its `captures` count
+ * Trophies with evolution applied. `creatures` is the dex's creature table: a creature's `bond` (affection)
  * decides the form. Without it every monster stays in its base form.
  */
 function boostTrophies(trophies, creatures = null) {
   return trophies.map((tr) => {
-    const captures = creatures && creatures[tr.id] ? creatures[tr.id].captures || 0 : 0;
-    const stage = stageOf(captures);
-    return { ...tr, power: Math.round(tr.power * evolutionMult(stage)), stage, captures };
+    const c = creatures && creatures[tr.id];
+    const bond = c ? c.bond || 0 : 0;
+    const captures = c ? c.captures || 0 : 0;
+    const stage = stageOf(bond);
+    return { ...tr, power: Math.round(tr.power * evolutionMult(stage)), stage, bond, captures };
   });
 }
 

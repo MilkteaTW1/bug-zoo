@@ -72,3 +72,26 @@ test('a nickname shows up in the zoo, and a companion arrives as an event', () =
   assert.ok(events.gifts[0].companion);
   assert.strictEqual(diffStates(null, after).gifts.length, 0, 'the first state never announces anything');
 });
+
+test('the shop: coins from fights, buying, feeding and evolving, all through the extension backend', () => {
+  const dex = store.load();
+  dex.coins = 400;
+  store.save(dex);
+  assert.strictEqual(buildState().shop.coins, 400);
+  assert.strictEqual(fight.buy('nothing').ok, false);
+  assert.strictEqual(fight.buy('cake').ok, true);
+  assert.strictEqual(fight.buy('cushion').ok, true);
+  assert.strictEqual(fight.buy('cushion').reason, 'owned');
+  const s = buildState();
+  assert.strictEqual(s.shop.foods.find((f) => f.id === 'cake').have, 1);
+  assert.ok(s.shop.furniture.find((f) => f.id === 'cushion').owned);
+  assert.strictEqual(s.shop.comfort, 10);
+  assert.ok(s.text['shop.title'] && s.text.shopTab);
+
+  const target = fight.feedTargets()[0];
+  const r = fight.feed(target.id, 'cake');
+  assert.ok(r.ok && r.evolved >= 1, 'a golden cake is enough to evolve a base-form monster');
+  const c = buildState().caught.find((x) => x.id === target.id);
+  assert.ok(c.bond >= 100 && c.stage === 2 && c.hearts >= 5);
+  assert.strictEqual(fight.feed(target.id, 'cake').reason, 'noFood');
+});

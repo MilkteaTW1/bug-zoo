@@ -13,6 +13,7 @@
   const tr = (k) => text[k] || '';
 
   const mons = new Map();
+  let justDragged = false; // a drag ends with a click event that must not poke the monster
   let last = performance.now();
   let penOn = false;
   const MAX_WILD = 14;
@@ -54,7 +55,42 @@
     const name = document.createElement('div');
     name.className = 'name';
     el.append(body, name);
-    el.addEventListener('click', () => poke(c.id));
+    el.addEventListener('click', () => {
+      if (justDragged) { justDragged = false; return; }
+      poke(c.id);
+    });
+    // Caught monsters can be picked up with the mouse and put down anywhere in the zoo.
+    el.addEventListener('pointerdown', (e) => {
+      const m = mons.get(c.id);
+      if (!m || m.wild || e.button !== 0) return;
+      const start = { x: e.clientX, y: e.clientY, mx: m.x, my: m.y, moved: false };
+      const move = (ev) => {
+        const dx = ev.clientX - start.x;
+        const dy = ev.clientY - start.y;
+        if (!start.moved && Math.hypot(dx, dy) < 4) return;
+        if (!start.moved) { start.moved = true; m.drag = true; m.el.classList.add('held'); m.el.classList.remove('sleep'); }
+        const { w, h } = size();
+        m.x = Math.min(Math.max(0, start.mx + dx), Math.max(0, w - (m.el.offsetWidth || 60)));
+        m.y = Math.min(Math.max(0, start.my + dy), Math.max(0, h - (m.el.offsetHeight || 50)));
+        m.el.style.transform = 'translate(' + m.x.toFixed(1) + 'px, ' + m.y.toFixed(1) + 'px)';
+      };
+      const up = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        window.removeEventListener('pointercancel', up);
+        if (!start.moved) return;
+        justDragged = true;
+        setTimeout(() => { justDragged = false; }, 0);
+        m.drag = false;
+        m.el.classList.remove('held');
+        m.state = 'idle'; // stay where it was put down for a few seconds, then wander again
+        m.timer = rand(4, 7);
+        m.bob = 0;
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+      window.addEventListener('pointercancel', up);
+    });
     // Caught monsters can be given a nickname.
     el.addEventListener('dblclick', () => { if (!wild) vscode.postMessage({ type: 'nick', id: c.id }); });
     zoo.appendChild(el);
@@ -78,6 +114,7 @@
     if (!wild && c.stage) s += ' ' + '★'.repeat(c.stage);
     if (!wild && c.shinies) s += ' <span class="shiny" title="' + esc(tr('shiny')) + '">✨</span>';
     if (!wild && c.companion) s += ' <span title="' + esc(tr('companion')) + '">🤝</span>';
+    if (!wild && c.hearts) s += '<div class="meta hearts" title="' + esc(tr('affection') + ' ' + c.bond) + '">' + '♥'.repeat(Math.min(c.hearts, 5)) + (c.hearts > 5 ? '+' : '') + '</div>';
     if (!wild && c.power) s += '<div class="meta">⚔ ' + tr('power') + ' ' + c.power + '</div>';
     if (wild) {
       s += '<div class="meta">' + esc(c.type) + (c.since ? ' · ' + shortDate(c.since) : '') + '</div>';
@@ -95,6 +132,7 @@
     if (wild && c.sample) parts.push(c.sample);
     if (!wild) parts.push(tr('caught') + ' x' + c.captures, tr('evo') + ' ' + (c.stage + 1));
     if (!wild && c.shinies) parts.push('✨ x' + c.shinies);
+    if (!wild) parts.push(tr('affection') + ' ' + c.bond);
     if (!wild) parts.push(tr('nickHint'));
     return parts.join(' · ');
   }
@@ -165,9 +203,10 @@
     text = state.text || text;
     bar.innerHTML = '<span title="' + esc(tr('species') + ' ' + state.kinds + '/' + state.kindsTotal) + '">' + tr('caught') + ' ' +
       state.caughtCount + ' / ' + tr('seen') + ' ' + state.seen + ' · ' + tr('species') + ' ' + state.kinds + '/' + state.kindsTotal + '</span><span title="' +
-      esc(tr('streakTip').replace('{n}', state.streakEvery)) + '">' + (state.streak ? '🔥 ' + (state.streak % state.streakEvery) + '/' + state.streakEvery + ' ' : '') +
+      esc(tr('streakTip').replace('{n}', state.streakEvery)) + '">' + '🪙 ' + state.shop.coins + ' ' + (state.streak ? '🔥 ' + (state.streak % state.streakEvery) + '/' + state.streakEvery + ' ' : '') +
       (state.wild.length ? tr('wild') + ' ' + state.wild.length : '') + '</span>';
     pen.dataset.label = tr('pen');
+    pen.innerHTML = state.shop.furniture.filter((f) => f.owned).map((f) => '<span class="deco" title="' + esc(f.name) + '">' + f.icon + '</span>').join('');
     empty.innerHTML = tr('empty');
 
     const fresh = new Set(((events && events.brandNew) || []).concat((events && events.spawned) || []).map((c) => c.id));
@@ -189,6 +228,7 @@
     const dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     for (const m of mons.values()) {
+      if (m.drag) continue; // being held: the mouse moves it
       m.timer -= dt;
       if (m.state === 'walk') {
         const dx = m.tx - m.x;
