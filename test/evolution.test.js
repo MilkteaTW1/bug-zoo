@@ -22,7 +22,8 @@ function freshStore() {
 }
 
 const bug = (type = 'TypeError', msg = 'x is undefined') => ({ ...makeCreature(type, msg), sample: msg });
-const at = (ms) => new Date(Date.UTC(2026, 0, 1) + ms);
+// Local noon, so no test lands in the 0-5 am night-owl window whatever time zone the machine is in.
+const at = (ms) => new Date(new Date(2026, 0, 1, 12, 0, 0).getTime() + ms);
 
 // --- evolution ---------------------------------------------------------------------------------
 
