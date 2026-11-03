@@ -12,6 +12,7 @@ module.exports = {
     prefix: ['阴森', '毛球', '毒舌', '摇晃', '忧郁', '电击', '阴暗', '小不点', '碎屑', '诅咒', '故障', '笔尖'],
     suffix: ['小怪', '蝙蝠', '啃咬虫', '飞蛾', '蟾蜍', '鬼火', '甲虫', '小鬼', '爬虫', '蜗牛', '精灵', '螨虫'],
   },
+  species: ['史莱姆', '飞蛾', '甲虫', '幽灵', '螃蟹', '猫头鹰', '蜗牛', '青蛙', '蝙蝠', '鱼', '章鱼', '蛇', '蜘蛛', '猫', '狗', '兔子', '蘑菇', '仙人掌', '机器人', '龙', '狐狸', '企鹅', '乌龟', '蜜蜂', '虫', '水母', '捣蛋鬼', '小恶魔', '石像', '鬼火', '老鼠', '乌鸦', '海豹', '鱿鱼', '蜥蜴', '鼹鼠', '蚂蚁', '萤火虫', '云', '岩石', '方块', '像素', '彗星', '提灯', '钥匙', '齿轮', '蛋', '小鸟', '熊', '刺猬'],
   help: `bugzoo - 把你的错误变成可收集的怪物
 
 用法：
@@ -23,6 +24,7 @@ module.exports = {
                               （开启自动捕获后就不用打这个）
   bugzoo dex                  你的图鉴与等着被捕获的 bug
   bugzoo team                 你最强的捕获与它们的进化状况
+  bugzoo nick <怪物> [昵称]   给已捕捉的怪物取昵称
   bugzoo achievements         你的成就
   bugzoo battle [--card f.svg]
                               列出天梯、好友与练习对手，输入编号就开打；
@@ -125,6 +127,25 @@ module.exports = {
     'ach.tower-3.desc': '攻下高塔第 3 层。',
     'ach.tower-12.name': '塔顶',
     'ach.tower-12.desc': '攻下高塔全部 12 层。',
+    'gift.tag': '[伙伴]',
+    'gift.line': '连续 {n} 个命令都没出错!{type} 的 {name} 成为你的伙伴加入动物园。',
+    'ach.companion.name': '新朋友',
+    'ach.companion.desc': '连续 5 个命令没出错,获得一只伙伴。',
+    'ach.companions-10.name': '挚友',
+    'ach.companions-10.desc': '获得 10 只伙伴。',
+    'ach.species-10.name': '物种观察员',
+    'ach.species-10.desc': '捕捉 10 种不同物种。',
+    'ach.species-25.name': '野外图鉴',
+    'ach.species-25.desc': '捕捉 25 种不同物种。',
+    'ach.species-50.name': '完整图鉴',
+    'ach.species-50.desc': '捕捉全部 50 种物种。',
+    'ach.holiday.name': '节日 bug',
+    'ach.holiday.desc': '在元旦、情人节、万圣节或圣诞节捕捉一只 bug。',
+    'dex.species': '物种:{n}/{total}',
+    'nick.usage': '给怪物取昵称:bugzoo nick <怪物> <昵称>(不填昵称就是清除)',
+    'nick.unknown': '没有叫“{name}”的已捕捉怪物。',
+    'nick.set': '{name} 现在叫做 {nick}。',
+    'nick.cleared': '{name} 的昵称已清除。',
     'tower.title': '高塔 - 第 {n} 层（共 {total} 层）',
     'tower.foe': '{name} [{element}] 战力 {power}',
     'tower.hint': '挑战：bugzoo tower fight   更换出战成员：bugzoo team',
@@ -322,6 +343,30 @@ module.exports = {
     'vs.achievements': '成就',
     'vs.achUnlocked': '{date} 解锁',
     'vs.achLocked': '未解锁',
+    'vs.species': '物种',
+    'vs.shiny': '闪光:10 分钟内修好',
+    'vs.companion': '伙伴',
+    'vs.nickHint': '双击可改昵称',
+    'vs.streakTip': '连续 {n} 个命令不出错就能获得伙伴',
+    'vs.nickTitle': '昵称',
+    'vs.nickPrompt': '给 {name} 取昵称(留空就是清除)',
+    'vs.nickSet': '{name} 现在叫做 {nick}。',
+    'vs.nickCleared': '{name} 的昵称已清除。',
+    'vs.statusGift': '伙伴:{creature}',
+    'vs.notifyGift': '有一只伙伴加入了你的动物园:{creature}',
+    'vs.team': '队伍',
+    'vs.tower': '爬塔',
+    'vs.questsTab': '任务',
+    'vs.questTotal': '目前完成任务:{n}。完美日:{p}。',
+    'vs.questDone': '任务完成',
+    'vs.towerDone': '你已通关所有楼层!',
+    'vs.towerFloor': '第 {n} / {total} 层',
+    'vs.towerWin': '第 {n} 层通过!',
+    'vs.towerLose': '第 {n} 层挡住了你。换个队伍再试一次。',
+    'vs.teamHint': '按出战顺序点选最多 3 只。相克:语法 > 逻辑、环境;逻辑 > 环境、网络;环境 > 网络、崩溃;网络 > 语法、崩溃;崩溃 > 语法、逻辑。',
+    'vs.teamAuto': '自动(最强)',
+    'vs.super': '效果拔群!',
+    'vs.weak': '效果不太好',
     'vs.fight': '对战',
     'vs.you': '你',
     'vs.challenge': '可以挑战这位玩家',

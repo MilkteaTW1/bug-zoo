@@ -23,7 +23,7 @@ function freshStore() {
 
 const bug = (type = 'TypeError', msg = 'x is undefined') => ({ ...makeCreature(type, msg), sample: msg });
 // Local noon, so no test lands in the 0-5 am night-owl window whatever time zone the machine is in.
-const at = (ms) => new Date(new Date(2026, 0, 1, 12, 0, 0).getTime() + ms);
+const at = (ms) => new Date(new Date(2026, 2, 4, 12, 0, 0).getTime() + ms);
 
 // --- evolution ---------------------------------------------------------------------------------
 
@@ -141,7 +141,7 @@ test('team and achievement commands reflect evolution and unlocks', () => {
   assert.match(team, /Evolved, next form after 7 more catch/);
 
   const ach = strip(spawnSync(process.execPath, [BIN, 'achievements'], { env, encoding: 'utf8' }).stdout);
-  assert.match(ach, /Achievements: \d+\/21/);
+  assert.match(ach, /Achievements: \d+\/27/);
   assert.match(ach, /\[x\] First catch/);
   assert.match(ach, /\[x\] Old acquaintance/);
   assert.match(ach, /\[ \] Ascended/);

@@ -1,7 +1,9 @@
 'use strict';
 
 const path = require('node:path');
-const { store, power, remote, i18n, creature, achievements } = require('./engine');
+const {
+  store, power, remote, i18n, creature, achievements, quests, tower, battle, element, species, companion,
+} = require('./engine');
 
 /**
  * Turn the dex file into what the zoo view draws.
@@ -52,7 +54,9 @@ function buildState(folders) {
   for (const t of dex.trophies) if (!best[t.id] || t.power > best[t.id]) best[t.id] = t.power;
   const caughtPower = (c) => (best[c.id] ? Math.round(best[c.id] * power.evolutionMult(power.stageOf(c.captures || 0))) : undefined);
   const pack = (c) => ({
-    id: c.id, name: creature.localName(c.id, i18n.getLang()) || c.name, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
+    id: c.id, name: c.nick || creature.localName(c.id, i18n.getLang()) || c.name, nick: c.nick || '',
+    species: creature.speciesName(c, i18n.getLang()), element: element.elementOf(c.type),
+    shinies: c.shinies || 0, companion: !!c.companion, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
     count: c.count, captures: c.captures, stage: power.stageOf(c.captures || 0),
     power: wildIds.has(c.id) ? (pendingInfo[c.id] ? pendingInfo[c.id].power : undefined) : caughtPower(c),
     since: since[c.id] || null,
@@ -62,8 +66,31 @@ function buildState(folders) {
   const all = Object.values(dex.creatures);
   const wild = all.filter((c) => wildIds.has(c.id)).map(pack);
   const caught = all.filter((c) => (c.captures || 0) > 0 && !wildIds.has(c.id)).map(pack);
+  const questList = quests.status(dex).map((q) => ({
+    id: q.id, name: i18n.t(`quest.${q.metric}`, { n: q.goal }), have: q.have, goal: q.goal, done: q.done,
+  }));
+  const floor = dex.tower.cleared + 1;
+  const foe = floor <= tower.FLOORS ? tower.foeFor(floor).team : [];
+  const rows = battle.roster(dex.trophies, dex.creatures);
+  const fighting = new Set(battle.lineup(dex.trophies, dex.creatures, dex.team).map((r) => r.id));
   return {
     wild, caught,
+    kinds: new Set(all.filter((c) => c.captures > 0 && typeof c.species === 'number').map((c) => c.species)).size,
+    kindsTotal: species.COUNT,
+    streak: (dex.stats && dex.stats.streak) || 0,
+    streakEvery: companion.EVERY,
+    quests: { list: questList, date: dex.daily ? dex.daily.date : '', total: dex.quests.total, perfect: dex.quests.perfect },
+    tower: {
+      cleared: dex.tower.cleared, total: tower.FLOORS, floor: floor <= tower.FLOORS ? floor : 0,
+      foe: foe.map((m) => ({ name: m.name, element: m.element, power: m.power })),
+    },
+    team: {
+      auto: !(dex.team && dex.team.length),
+      rows: rows.slice(0, 12).map((r) => ({
+        id: r.id, name: r.nick || creature.localName(r.id, i18n.getLang()) || r.name, type: r.type, element: r.element || element.elementOf(r.type),
+        power: r.power, stage: r.stage || 0, fighting: fighting.has(r.id), pick: (dex.team || []).indexOf(r.id) + 1,
+      })),
+    },
     seen: all.length,
     caughtCount: all.filter((c) => (c.captures || 0) > 0).length,
     lang: i18n.getLang(),
@@ -77,6 +104,7 @@ function buildState(folders) {
     text: {
       ...i18n.bundle('vs.'),
       ...Object.fromEntries(Object.entries(i18n.bundle('rarity.')).map(([k, v]) => [`rarity.${k}`, v])),
+      ...Object.fromEntries(Object.entries(i18n.bundle('element.')).map(([k, v]) => [`element.${k}`, v])),
     },
   };
 }
@@ -89,6 +117,8 @@ function diffStates(prev, next) {
     spawned: next.wild.filter((c) => !wasWild.has(c.id)),
     caught: next.caught.filter((c) => wasWild.has(c.id)),
     brandNew: next.wild.filter((c) => !had.has(c.id)),
+    // A companion arrives already caught, so it shows up in `caught` without ever having been wild.
+    gifts: prev ? next.caught.filter((c) => c.companion && !had.has(c.id)) : [],
   };
 }
 

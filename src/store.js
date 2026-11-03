@@ -7,6 +7,7 @@ const { resolve } = require('./capture');
 const { computePower, MIN_RUNS_FOR_RATE, stageOf } = require('./power');
 const achievements = require('./achievements');
 const quests = require('./quests');
+const companion = require('./companion');
 
 const MAX_TROPHIES = 200;
 const FAIL_COUNT_INTERVAL_MS = 60 * 1000;
@@ -120,7 +121,7 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
     if (shiny) e.shinies = (e.shinies || 0) + 1;
     trophies.push({
       id: e.id, name: e.name, type: e.type, rarity: e.rarity, art: e.art,
-      power: p.power, factors: p.factors,
+      power: p.power, factors: p.factors, ...(e.nick ? { nick: e.nick } : {}),
       project: (ctx && ctx.project) || path.basename(process.cwd()), at: stamp, ...(shiny ? { shiny: true } : {}),
     });
   }
@@ -147,13 +148,17 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
     questsDone.push(...quests.note(dex, 'clean', 1, now));
   }
 
+  // Every command, healthy or not, moves the no-error streak; five in a row bring a companion.
+  const gift = companion.note(dex, failed, now);
+
   const unlocked = achievements.evaluate(dex, stamp);
 
-  if (failed || prev || run) save(dex);
+  // A healthy run only touches the file once the player has one (a fresh install writes nothing until its first bug).
+  if (failed || prev || run || fs.existsSync(dexPath().file)) save(dex);
 
   return {
     outcome: result.outcome, encounters, captured, escaped, trophies,
-    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked, quests: questsDone,
+    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked, quests: questsDone, gift,
   };
 }
 

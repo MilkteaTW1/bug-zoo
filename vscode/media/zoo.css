@@ -72,7 +72,9 @@ body {
 }
 
 /* ---- ladder / friends panel and battle arena ---- */
-.ladder h3 .tabs { display: flex; gap: 12px; }
+.ladder h3 .tabs { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.ladder .row.pick { cursor: pointer; }
+.mon .shiny { filter: drop-shadow(0 0 3px #e8b923); }
 .ladder .tab { cursor: pointer; font-weight: 600; opacity: .55; }
 .ladder .tab.on { opacity: 1; border-bottom: 1px solid currentColor; }
 .ladder .row { grid-template-columns: 22px 1fr auto auto; }

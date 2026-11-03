@@ -13,6 +13,7 @@
 
   let data = null;
   let achs = [];
+  let S = null; // the latest state: quests, tower and team come from it
   let tab = 'ladder';
   let collapsed = false;
   let notice = '';
@@ -51,6 +52,37 @@
       (on ? esc(fill(tr('achUnlocked'), { date: localDate(x.at) })) : esc(tr('achLocked'))) + '</span></div>';
   }
 
+  // ---- quests, tower and team -----------------------------------------------------------------------
+  const elName = (e) => tr('element.' + e) || e;
+
+  function questsBody() {
+    if (!S) return '';
+    const q = S.quests;
+    return q.list.map((x) => '<div class="ach-row' + (x.done ? ' on' : '') + '"><span class="ic">' + (x.done ? '✅' : '⬜') + '</span><span class="nm">' +
+      esc(x.name) + '</span><span class="when">' + x.have + '/' + x.goal + '</span></div>').join('') +
+      '<div class="note">' + esc(fill(tr('questTotal'), { n: q.total, p: q.perfect })) + '</div>';
+  }
+
+  function towerBody() {
+    if (!S) return '';
+    const t = S.tower;
+    if (!t.floor) return '<div class="note">' + esc(tr('towerDone')) + '</div>';
+    const foes = t.foe.map((m) => '<div class="row"><span class="rk">·</span><span class="nm">' + esc(m.name) + ' <i>' + esc(elName(m.element)) +
+      '</i></span><span class="pw">⚔ ' + m.power + '</span><span class="act"></span></div>').join('');
+    return '<div class="note">' + esc(fill(tr('towerFloor'), { n: t.floor, total: t.total })) + '</div>' + foes +
+      '<div class="btns"><button class="btn primary" id="tower">⚔ ' + tr('fight') + '</button></div>';
+  }
+
+  function teamBody() {
+    if (!S) return '';
+    if (!S.team.rows.length) return '<div class="note">' + esc(tr('noTeam')) + '</div>';
+    const rows = S.team.rows.map((m) => '<div class="row pick' + (m.fighting ? ' me' : '') + '" data-id="' + esc(m.id) + '"><span class="rk">' +
+      (m.pick || (m.fighting ? '⚔' : '')) + '</span><span class="nm">' + esc(m.name) + (m.stage ? ' ' + '★'.repeat(m.stage) : '') + ' <i>' +
+      esc(elName(m.element)) + '</i></span><span class="pw">⚔ ' + m.power + '</span><span class="act"></span></div>').join('');
+    return '<div class="note">' + esc(tr('teamHint')) + '</div>' + rows +
+      '<div class="btns"><button class="btn" id="auto"' + (S.team.auto ? ' disabled' : '') + '>' + tr('teamAuto') + '</button></div>';
+  }
+
   function renderPanel() {
     panel.hidden = false;
     const d = data || { rows: [], me: null, offline: true };
@@ -59,6 +91,12 @@
     let body;
     if (tab === 'achievements') {
       body = achs.map(achRow).join('');
+    } else if (tab === 'quests') {
+      body = questsBody();
+    } else if (tab === 'tower') {
+      body = towerBody();
+    } else if (tab === 'team') {
+      body = teamBody();
     } else if (tab === 'ladder') {
       body = d.rows.filter((r) => r.section === 'ladder').slice(0, 50).map((r) => row(r, canFight)).join('');
     } else {
@@ -66,16 +104,21 @@
         '<div class="btns"><button class="btn" id="add">' + tr('addFriend') + '</button><button class="btn" id="copy">' + tr('copyCode') + '</button></div>';
     }
     const notes = [];
-    if (tab !== 'achievements') {
+    if (tab === 'ladder' || tab === 'friends') {
       if (!canFight) notes.push(tr('noTeam'));
       if (tab === 'ladder' && !d.rows.some((r) => r.section === 'ladder')) notes.push(tr('noladder'));
       else if (d.offline) notes.push(tr('offline'));
     }
     if (notice) notes.push(notice);
-    panel.innerHTML = '<h3><span class="tabs"><b class="tab' + (tab === 'ladder' ? ' on' : '') + '" data-tab="ladder">🏆 ' + tr('ladder') +
-      '</b><b class="tab' + (tab === 'friends' ? ' on' : '') + '" data-tab="friends">👥 ' + tr('friends') + '</b><b class="tab' + (tab === 'achievements' ? ' on' : '') + '" data-tab="achievements">🏅 ' + tr('achievements') + ' ' +
-      achs.filter((x) => x.at).length + '/' + achs.length + '</b></span><span class="fold">' +
-      (collapsed ? '▸' : '▾') + '</span></h3><div class="rows">' + body + '</div>' +
+    const tabs = [
+      ['ladder', '🏆', tr('ladder')], ['friends', '👥', tr('friends')], ['team', '🛡', tr('team')], ['tower', '🗼', tr('tower')],
+      ['quests', '📋', tr('questsTab') + (S ? ' ' + S.quests.list.filter((q) => q.done).length + '/' + S.quests.list.length : '')],
+      ['achievements', '🏅', tr('achievements') + ' ' + achs.filter((x) => x.at).length + '/' + achs.length],
+    ];
+    // Every tab shows its icon; only the open one spells its name out, so six tabs fit a narrow sidebar.
+    panel.innerHTML = '<h3><span class="tabs">' + tabs.map(([id, ic, name]) =>
+      '<b class="tab' + (tab === id ? ' on' : '') + '" data-tab="' + id + '" title="' + esc(name) + '">' + ic + (tab === id ? ' ' + esc(name) : '') + '</b>').join('') +
+      '</span><span class="fold">' + (collapsed ? '▸' : '▾') + '</span></h3><div class="rows">' + body + '</div>' +
       (notes.length ? '<div class="note">' + notes.map(esc).join(' · ') + '</div>' : '');
     bz.relayout(panel.offsetHeight);
   }
@@ -90,6 +133,16 @@
     if (f) { notice = ''; vscode.postMessage({ type: 'fight', section: f.dataset.section, name: f.dataset.name }); return; }
     const rm = t.closest('.rm');
     if (rm) { vscode.postMessage({ type: 'removeFriend', name: rm.dataset.name }); return; }
+    const pick = t.closest('.pick');
+    if (pick && S) {
+      const cur = S.team.rows.filter((m) => m.pick).sort((a, c) => a.pick - c.pick).map((m) => m.id);
+      const at = cur.indexOf(pick.dataset.id);
+      if (at >= 0) cur.splice(at, 1); else cur.push(pick.dataset.id);
+      vscode.postMessage({ type: 'setTeam', ids: cur.slice(-3) });
+      return;
+    }
+    if (t.closest('#auto')) { vscode.postMessage({ type: 'setTeam', ids: [] }); return; }
+    if (t.closest('#tower')) { notice = ''; vscode.postMessage({ type: 'tower' }); return; }
     if (t.closest('#add')) vscode.postMessage({ type: 'addFriend' });
     if (t.closest('#copy')) vscode.postMessage({ type: 'copyCode' });
   });
@@ -102,6 +155,7 @@
   function card(m, side, i) {
     return '<div class="bcard" id="c-' + side + '-' + i + '" style="--tone:' + (TONE[m.rarity] || TONE.common) + '">' +
       '<pre>' + esc((m.art || []).join('\n')) + '</pre><div class="cn">' + esc(m.name) + (m.stage ? ' ' + '★'.repeat(m.stage) : '') + '</div>' +
+      (m.element ? '<div class="cp">' + esc(tr('element.' + m.element) || m.element) + '</div>' : '') +
       '<div class="hp"><i id="h-' + side + '-' + i + '"></i></div><div class="cp">⚔ ' + m.power + '</div></div>';
   }
 
@@ -124,7 +178,7 @@
 
   function playBattle(b) {
     if (!b || b.error) {
-      notice = b && b.error === 'noTeam' ? tr('noTeam') : tr('gone');
+      notice = b && b.error === 'noTeam' ? tr('noTeam') : b && b.error === 'towerDone' ? tr('towerDone') : tr('gone');
       renderPanel();
       return;
     }
@@ -147,13 +201,16 @@
     function finish() {
       clearInterval(timer);
       document.getElementById('skip').hidden = true;
-      const note = b.outcome === 'promote' ? fill(tr('promote'), { name: b.foe.name })
+      const note = b.outcome === 'towerWin' ? fill(tr('towerWin'), { n: b.floor })
+        : b.outcome === 'towerLose' ? fill(tr('towerLose'), { n: b.floor })
+        : b.outcome === 'promote' ? fill(tr('promote'), { name: b.foe.name })
         : b.outcome === 'outOfReach' ? fill(tr('outOfReach'), { reach: b.reach })
           : (tr(b.outcome === 'practice' ? 'practiceNote' : b.outcome) || '');
       const ach = (b.earned || []).map((a) => '<div class="ach">🏅 ' + tr('achievement') + ': ' + esc(a.name) + '<br><small>' + esc(a.desc) + '</small></div>').join('');
+      const qs = (b.quests || []).map((q) => '<div class="ach">📋 ' + tr('questDone') + ': ' + esc(q) + '</div>').join('');
       document.getElementById('foot').innerHTML =
         '<div class="res ' + (b.won ? 'win' : 'lose') + '">' + (b.won ? '🏆 ' + tr('win') : '💔 ' + tr('lose')) + '</div>' +
-        '<div class="rnote">' + esc(note) + '</div>' + ach +
+        '<div class="rnote">' + esc(note) + '</div>' + qs + ach +
         '<div class="btns">' + (b.canSubmit ? '<button class="btn primary" id="submit">' + tr('submit') + '</button>' : '') +
         '<button class="btn" id="replay">' + tr('replay') + '</button><button class="btn" id="close">' + tr('close') + '</button></div>';
       document.getElementById('close').onclick = closeBattle;
@@ -178,7 +235,8 @@
       const bar = document.getElementById('h-' + def + '-' + di);
       if (bar) bar.style.width = Math.round((ev.hp / maxHp(team[def][di])) * 100) + '%';
       if (ev.faint && dc) { dc.classList.add('dead'); front[def] += 1; }
-      document.getElementById('log').textContent = ev.att + ' ' + tr('hits') + ' ' + ev.def + ' · -' + ev.dmg + (ev.crit ? ' ' + tr('crit') : '');
+      document.getElementById('log').textContent = ev.att + ' ' + tr('hits') + ' ' + ev.def + ' · -' + ev.dmg + (ev.crit ? ' ' + tr('crit') : '') +
+        (ev.mult > 1 ? ' · ' + tr('super') : ev.mult < 1 ? ' · ' + tr('weak') : '');
       k += 1;
     }
 
@@ -191,6 +249,6 @@
     if (!msg) return;
     if (msg.type === 'ladder') { data = msg.ladder; renderPanel(); }
     if (msg.type === 'battle') playBattle(msg.battle);
-    if (msg.type === 'state') { achs = (msg.state && msg.state.achievements) || []; renderPanel(); }
+    if (msg.type === 'state') { S = msg.state; achs = (S && S.achievements) || []; renderPanel(); }
   });
 })();

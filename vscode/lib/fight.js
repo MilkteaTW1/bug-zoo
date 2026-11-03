@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  store, remote, ladder, battle, friends, opponents, accept, achievements, score, creature, i18n,
+  store, remote, ladder, battle, friends, opponents, accept, achievements, score, creature, i18n, quests, tower,
 } = require('./engine');
 
 const { cleanName } = score;
@@ -19,13 +19,13 @@ function setLang(dex) {
 function wireTeam(team, dex) {
   const art = new Map(dex.trophies.map((tr) => [tr.name, tr.art]));
   return team.map((m) => ({
-    name: m.name, type: m.type, rarity: m.rarity, power: m.power, stage: m.stage || 0,
+    name: m.name, type: m.type, rarity: m.rarity, power: m.power, stage: m.stage || 0, element: m.element,
     art: art.get(m.name) || creature.artFor(`${m.name}:${m.type || ''}`),
   }));
 }
 
 function myself(dex) {
-  const team = battle.topTeam(dex.trophies, dex.creatures);
+  const team = battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team);
   const name = cleanName((dex.profile && dex.profile.name) || '');
   return { name: name || 'You', team, score: score.summarize(dex).score, named: !!name };
 }
@@ -84,7 +84,7 @@ function sharePayload(dex, name) {
   const s = score.summarize(dex);
   return {
     v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: battle.topTeam(dex.trophies, dex.creatures), updated: new Date().toISOString(),
+    team: battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team), updated: new Date().toISOString(),
   };
 }
 
@@ -105,8 +105,10 @@ function fight(section, name) {
   const practice = row.section === 'practice';
 
   let earned = [];
+  let questsDone = [];
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
+    questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
     earned = achievements.evaluate(dex);
     store.save(dex);
   }
@@ -131,8 +133,47 @@ function fight(section, name) {
     foe: { name: foe.name, team: wireTeam(foe.team, dex) },
     log: result.log, winner: result.winner, won, outcome, rank: row.rank || null, reach: ladder.REACH,
     earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
+    quests: questsDone.map(questName),
     canSubmit: !!pendingSubmit,
   };
+}
+
+const questName = (id) => {
+  const q = quests.POOL.find((x) => x.id === id);
+  return q ? i18n.t(`quest.${q.metric}`, { n: q.goal }) : id;
+};
+
+/** Take on the next tower floor with the current lineup. Returns the same replay shape as fight(). */
+function towerFight() {
+  const dex = store.load();
+  setLang(dex);
+  if (dex.tower.cleared >= tower.FLOORS) return { error: 'towerDone' };
+  const me = myself(dex);
+  if (me.team.length === 0) return { error: 'noTeam' };
+  const floor = dex.tower.cleared + 1;
+  const foe = tower.foeFor(floor);
+  const result = battle.duel({ name: me.name, team: me.team }, foe);
+  const won = result.winner === me.name && result.loser !== me.name;
+  const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
+  if (won) dex.tower.cleared = floor;
+  const earned = achievements.evaluate(dex);
+  store.save(dex);
+  return {
+    me: { name: me.name, team: wireTeam(me.team, dex) },
+    foe: { name: foe.name, team: wireTeam(foe.team, dex) },
+    log: result.log, winner: result.winner, won, outcome: won ? 'towerWin' : 'towerLose', floor,
+    earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
+    quests: questsDone.map(questName),
+    canSubmit: false,
+  };
+}
+
+/** The monsters the player picked to fight, in order (empty goes back to the strongest). */
+function setTeam(ids) {
+  const dex = store.load();
+  const known = new Set(battle.roster(dex.trophies, dex.creatures).map((r) => r.id));
+  dex.team = (Array.isArray(ids) ? ids : []).filter((id, i, a) => known.has(id) && a.indexOf(id) === i).slice(0, battle.TEAM_SIZE);
+  store.save(dex);
 }
 
 /** The pre-filled GitHub issue that asks the ladder to replay this win. Null when nothing is pending. */
@@ -192,4 +233,4 @@ function myCode() {
   return friends.encodeCode(me.name, me.team);
 }
 
-module.exports = { loadArena, fight, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };
+module.exports = { loadArena, fight, towerFight, setTeam, questName, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };

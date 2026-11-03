@@ -55,6 +55,8 @@
     name.className = 'name';
     el.append(body, name);
     el.addEventListener('click', () => poke(c.id));
+    // Caught monsters can be given a nickname.
+    el.addEventListener('dblclick', () => { if (!wild) vscode.postMessage({ type: 'nick', id: c.id }); });
     zoo.appendChild(el);
     return el;
   }
@@ -74,6 +76,8 @@
   function label(c, wild) {
     let s = '<b>' + esc(c.name) + '</b>';
     if (!wild && c.stage) s += ' ' + '★'.repeat(c.stage);
+    if (!wild && c.shinies) s += ' <span class="shiny" title="' + esc(tr('shiny')) + '">✨</span>';
+    if (!wild && c.companion) s += ' <span title="' + esc(tr('companion')) + '">🤝</span>';
     if (!wild && c.power) s += '<div class="meta">⚔ ' + tr('power') + ' ' + c.power + '</div>';
     if (wild) {
       s += '<div class="meta">' + esc(c.type) + (c.since ? ' · ' + shortDate(c.since) : '') + '</div>';
@@ -84,10 +88,14 @@
 
   function tip(c, wild) {
     const parts = [tr('creature').replace('{name}', c.name).replace('{type}', c.type), tr('rarity.' + c.rarity) || c.rarity];
+    if (c.species) parts.push(c.species);
+    if (c.element) parts.push(tr('element.' + c.element) || c.element);
     if (wild && c.since) parts.push(tr('since') + ' ' + fullDate(c.since));
     if (c.power) parts.push(tr('power') + ' ' + c.power);
     if (wild && c.sample) parts.push(c.sample);
     if (!wild) parts.push(tr('caught') + ' x' + c.captures, tr('evo') + ' ' + (c.stage + 1));
+    if (!wild && c.shinies) parts.push('✨ x' + c.shinies);
+    if (!wild) parts.push(tr('nickHint'));
     return parts.join(' · ');
   }
 
@@ -155,7 +163,9 @@
 
   function render(state, events) {
     text = state.text || text;
-    bar.innerHTML = '<span>' + tr('caught') + ' ' + state.caughtCount + ' / ' + tr('seen') + ' ' + state.seen + '</span><span>' +
+    bar.innerHTML = '<span title="' + esc(tr('species') + ' ' + state.kinds + '/' + state.kindsTotal) + '">' + tr('caught') + ' ' +
+      state.caughtCount + ' / ' + tr('seen') + ' ' + state.seen + ' · ' + tr('species') + ' ' + state.kinds + '/' + state.kindsTotal + '</span><span title="' +
+      esc(tr('streakTip').replace('{n}', state.streakEvery)) + '">' + (state.streak ? '🔥 ' + (state.streak % state.streakEvery) + '/' + state.streakEvery + ' ' : '') +
       (state.wild.length ? tr('wild') + ' ' + state.wild.length : '') + '</span>';
     pen.dataset.label = tr('pen');
     empty.innerHTML = tr('empty');

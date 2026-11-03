@@ -5,7 +5,7 @@ const vscode = require('vscode');
 const { buildState, diffStates, say, creatureName } = require('./lib/state');
 const fight = require('./lib/fight');
 const { recordCommand, MAX_OUTPUT } = require('./lib/capture');
-const { store, i18n } = require('./lib/engine');
+const { store, i18n, nick } = require('./lib/engine');
 
 const views = new Set(); // every live webview (sidebar + editor tabs)
 let lastState = null;
@@ -91,6 +91,35 @@ async function onWebviewMessage(view, msg) {
     vscode.window.showInformationMessage(say('codeCopied'));
   } else if (msg.type === 'refreshArena') {
     refreshLadder();
+  } else if (msg.type === 'tower') {
+    post(view, { type: 'battle', battle: fight.towerFight() });
+    pushState(false);
+    refreshLadder();
+  } else if (msg.type === 'setTeam') {
+    fight.setTeam(msg.ids);
+    pushState(false);
+    refreshLadder();
+  } else if (msg.type === 'nick') {
+    await renameMonster(msg.id);
+  }
+}
+
+/** Ask for a nickname for a caught monster (empty clears it). */
+async function renameMonster(id) {
+  const dex = store.load();
+  const c = dex.creatures[id];
+  if (!c || !(c.captures > 0)) return;
+  const value = await vscode.window.showInputBox({
+    title: say('nickTitle'),
+    prompt: say('nickPrompt', { name: c.name }),
+    value: c.nick || '',
+  });
+  if (value === undefined) return; // cancelled
+  const fresh = store.load();
+  if (nick.set(fresh, id, value)) {
+    store.save(fresh);
+    pushState(false);
+    vscode.window.showInformationMessage(say(nick.clean(value) ? 'nickSet' : 'nickCleared', { name: c.name, nick: nick.clean(value) }));
   }
 }
 
@@ -106,6 +135,10 @@ function announce(events) {
   for (const c of events.caught) {
     vscode.window.setStatusBarMessage(say('statusCaught', { creature: creatureName(c) }), 6000);
     vscode.window.showInformationMessage(say('notifyCaught', { creature: creatureName(c) }));
+  }
+  for (const c of events.gifts || []) {
+    vscode.window.setStatusBarMessage(say('statusGift', { creature: creatureName(c) }), 6000);
+    vscode.window.showInformationMessage(say('notifyGift', { creature: creatureName(c) }));
   }
   for (const c of events.spawned) {
     vscode.window.setStatusBarMessage(say('statusSpawned', { creature: creatureName(c) }), 6000);
