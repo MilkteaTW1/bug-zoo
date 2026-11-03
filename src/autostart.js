@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const W = require('./wrappers');
+const sea = require('./sea');
 
 const REGISTER = path.resolve(__dirname, 'register.js');
 const BIN = path.resolve(__dirname, '..', 'bin', 'bugzoo.js');
@@ -132,6 +133,7 @@ function status() {
 function enable() {
   const steps = [];
   const warnings = [];
+  if (sea.isSea()) return { ok: false, error: sea.NEEDS_NPM, steps, warnings };
   try {
     if (process.platform === 'win32') {
       winSetNodeOptions(addToken(winGetNodeOptions()));
