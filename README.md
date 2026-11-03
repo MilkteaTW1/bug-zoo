@@ -76,9 +76,9 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 
 **Install:** search for **Bug Zoo** in the VS Code Extensions view, or [get it from the Marketplace](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode).
 
-[![Watch the 56-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
+[![Watch the 44-second promo video](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.en.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.en.mp4)
 
-*Click to watch the 56-second promo video: the catch loop, then what's new in v0.5 (50 species, the shop, evolution, teams and the Tower), in VS Code and in the terminal.*
+*Click to watch the 44-second promo video: the catch loop, the shop, evolution and teams, then what's new in v0.6 (you pick who fights each round, one-click sharing, bulk buying), in VS Code and in the terminal.*
 
 **A crash spawns a monster. Fix it, and it is caught.**
 
@@ -442,9 +442,9 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 
 **安裝:**在 VS Code 擴充套件面板搜尋 **Bug Zoo**,或[到 Marketplace 安裝](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode)。
 
-[![觀看 56 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
+[![觀看 44 秒宣傳影片](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/promo-poster.zh.jpg)](https://github.com/MilkteaTW1/bug-zoo/blob/main/vscode/docs/bug-zoo-promo.zh.mp4)
 
-*點圖觀看 56 秒宣傳影片：先看抓怪流程，再看 v0.5 的新內容（50 種怪物、商店、進化、組隊與高塔），VS Code 和終端機都有拍到。*
+*點圖觀看 44 秒宣傳影片：抓怪流程、商店、進化與組隊，再看 v0.6 的新內容（每回合自己選誰出戰、一鍵分享、批次買賣），VS Code 和終端機都有拍到。*
 
 **當機就生出怪物，修好它就能捕獲。**
 

@@ -70,10 +70,9 @@
   const ZH = /[?&]zh/.test(location.search);
   const S = ZH ? {
     run: '在終端機跑一個會當機的指令…', wild: '野生 bug 出現了!', fix: '修好 bug…', caught: '捕獲成功!怪物進入你的圍欄',
-    ladder: '榜單在面板最底部', star: '星號 = 打得到的對手,按「Fight」!', win: '贏了就把戰績提交到榜單',
-    friends: '好友分頁:用代碼、連結或榜單名稱加好友', fightFriend: '隨時都能跟好友對戰', share: '用代碼分享你的隊伍',
-    submit: '正在開啟預填好的 GitHub issue…<small>在那邊按「Submit new issue」就能把勝利送上榜單。</small>',
-    addQ: '加好友:貼上好友代碼 (BZ1…)、連結、檔案路徑,或榜單上的玩家名稱', added: '已加入 ByteBaker。',
+    ladder: '好友與練習對手在面板下方', star: '按「Fight」開打', win: '每回合自己選誰出戰!',
+    friends: '好友分頁:用代碼或連結加好友', fightFriend: '隨時都能跟好友對戰', share: '用代碼分享你的隊伍',
+    addQ: '加好友:貼上好友代碼 (BZ1…)、連結或檔案路徑', added: '已加入好友。',
     copied: '好友代碼已複製。<small>傳給朋友,他貼到「加好友」就行。</small>',
     shopIntro: '商店分頁:打怪賺金幣,買食物和家具', buyFood: '買一份披薩', buyFurn: '家具讓食物效果更好,還會擺進動物園', feedIt: '餵給怪物:好感度夠了就進化',
     feedQ: '選一隻來吃', evolvedToast: (n) => '<b>' + n + '</b> 進化了!戰鬥力 ×1.5', dragIt: '已捕捉的怪物可以用滑鼠拖著走',
@@ -82,10 +81,9 @@
     caughtToast: (n, t) => '捕獲 <b>' + n + '</b>(' + t + ')!已加入你的動物園。',
   } : {
     run: 'Run something that crashes…', wild: 'A wild bug appears!', fix: 'Fix the bug…', caught: 'Caught! It moves into your pen',
-    ladder: 'The ladder lives at the bottom of the panel', star: 'Star = within reach. Press Fight!', win: 'Win it, then submit your result to the ladder',
-    friends: 'Friends tab: add rivals by code, link or ladder name', fightFriend: 'Fight your friend any time', share: 'Share your own team with a code',
-    submit: 'Opening a pre-filled GitHub issue…<small>Press “Submit new issue” there to send your win to the ladder.</small>',
-    addQ: 'Add a friend: paste a friend code (BZ1…), a link, a file path, or a player name from the ladder', added: 'Added ByteBaker.',
+    ladder: 'Friends and practice sit below the zoo', star: 'Press Fight', win: 'You pick who fights every round!',
+    friends: 'Friends tab: add rivals by code or link', fightFriend: 'Fight your friend any time', share: 'Share your own team with a code',
+    addQ: 'Add a friend: paste a friend code (BZ1…), a link or a file path', added: 'Added a friend.',
     copied: 'Friend code copied.<small>Send it to a friend; they paste it into “Add friend”.</small>',
     shopIntro: 'Shop tab: earn coins by playing, buy food and furniture', buyFood: 'Buy a pizza', buyFurn: 'Furniture makes treats sweeter and decorates the zoo', feedIt: 'Feed a monster: enough affection and it evolves',
     feedQ: 'Pick who gets the treat', evolvedToast: (n) => '<b>' + n + '</b> evolved! Power x1.5', dragIt: 'Caught monsters can be dragged with the mouse',
@@ -154,20 +152,22 @@
   }
 
   // What the extension would answer when the sidebar asks for something.
-  let arena = D.arenaA;
+  let arena = D.arenaA; let step = 0;
   window.addEventListener('message', async (e) => {
     const m = e.data && e.data.__bz && e.data.msg;
     if (!m) return;
     if (m.type === 'ready') {
       window.__sidebarReady = true;
     } else if (m.type === 'fight') {
-      const b = m.section === 'ladder' ? D.battleLadder : (m.section === 'friend' ? D.battleFriend : D.battlePractice);
-      send({ type: 'battle', battle: b });
-    } else if (m.type === 'submit') {
-      toast(S.submit);
+      step = 0;
+      send({ type: 'battle', battle: D.steer.start });
+    } else if (m.type === 'pick') {
+      send({ type: 'round', round: D.steer.rounds[Math.min(step++, D.steer.rounds.length - 1)] });
+    } else if (m.type === 'share') {
+      toast(S.copied);
     } else if (m.type === 'addFriend') {
-      await quickInput(S.addQ, 'ByteBaker');
-      arena = D.arenaB; send({ type: 'ladder', ladder: arena });
+      await quickInput(S.addQ, 'BZ1…');
+      send({ type: 'ladder', ladder: D.arenaB });
       toast(S.added);
     } else if (m.type === 'copyCode') {
       toast(S.copied);
@@ -210,13 +210,17 @@
       await waitReady();
       paintCode(FIXED, 2); term = ''; paintTerm();
       send({ type: 'state', state: D.states.S2, events: null }); send({ type: 'ladder', ladder: D.arenaA });
-      caption(S.ladder, 3000); await sleep(3200);
-      caption(S.star, 3000);
-      await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes(D.target)).querySelector('.fight'));
-      await sleep(7600);
-      caption(S.win, 3000);
-      await clickEl('#submit'); await sleep(3600);
-      await clickEl('#close'); await sleep(1200);
+      caption(S.ladder, 2200); await sleep(2400);
+      caption(S.star, 1800);
+      await clickEl((doc) => doc.querySelector('.row .fight'));
+      await sleep(2200);
+      caption(S.win, 6000);
+      for (const idx of D.steer.picks) {
+        await clickEl('#c-me-' + idx);
+        await sleep(2600);
+      }
+      await sleep(1500);
+      await clickEl('#close'); await sleep(900);
     },
     async friends() {
       await waitReady();
@@ -227,10 +231,7 @@
       await clickEl('.tab[data-tab="friends"]'); await sleep(1200);
       await clickEl('#add'); await sleep(2400);
       caption(S.fightFriend, 2600);
-      await clickEl((doc) => Array.from(doc.querySelectorAll('.row')).find((r) => r.textContent.includes('ByteBaker')).querySelector('.fight'));
-      await sleep(1500);
-      await clickEl('#skip'); await sleep(1600);
-      await clickEl('#close'); await sleep(900);
+      await sleep(1200);
       caption(S.share, 2600);
       await clickEl('#copy'); await sleep(3200);
     },

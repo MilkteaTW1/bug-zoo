@@ -152,25 +152,6 @@ TEXT = {
     "zh-TW": {"fix": "# 修好 lib/db.js：建立 users 資料表", "ask": "要跟誰對戰？（輸入編號，q 離開）"},
 }
 
-# A small made-up ladder so the demo never depends on the network.
-LADDER = [
-    ("bugslayer", "Heisenbug", "legendary", 160, 3),
-    ("dev-dana", "Nullwisp", "rare", 110, 2),
-    ("rookie", "Crumbmite", "common", 10, 1),
-]
-
-
-def write_ladder(root):
-    import json
-    scores = root / "scores"
-    scores.mkdir(parents=True)
-    for name, mon, rarity, power, caught in LADDER:
-        data = {"v": 2, "name": name, "caught": {rarity: caught}, "repeats": 0, "seen": caught,
-                "team": [{"name": mon, "type": "Error", "rarity": rarity, "power": power}]}
-        (scores / f"{name}.json").write_text(json.dumps(data))
-    (root / "ladder.json").write_text(json.dumps({"v": 1, "order": [l[0] for l in LADDER], "processed": []}))
-
-
 def build(lang, out):
     work = Path(tempfile.mkdtemp(prefix="bugzoo-gif-"))
     project = work / "my-app"
@@ -179,10 +160,8 @@ def build(lang, out):
     (project / "lib" / "api.js").write_text(API)
     (project / "lib" / "db.js").write_text(DB_BAD)
 
-    ladder_dir = work / "ladder"
-    write_ladder(ladder_dir)
     env = {**os.environ, "BUGZOO_HOME": str(work / "home"), "BUGZOO_LANG": lang, "BUGZOO_FORCE": "1",
-           "BUGZOO_LADDER_DIR": str(ladder_dir), "NODE_OPTIONS": f'--require "{REGISTER}"'}
+           "NODE_OPTIONS": f'--require "{REGISTER}"'}
     node = shutil.which("node") or "node"
     subprocess.run([node, str(BIN), "setup", "--lang", lang, "--name", "MilkteaTW1"], env=env,
                    stdout=subprocess.DEVNULL, check=True)
@@ -244,7 +223,7 @@ def build(lang, out):
     scene("node app.js", [node, "app.js"], note=TEXT[lang]["fix"])
     scene("bugzoo team", [node, str(BIN), "team"], hold=1900)
     scene("bugzoo shop", [node, str(BIN), "shop"], hold=2800)
-    scene("bugzoo battle", [node, str(BIN), "battle"], hold=3600, answer="3")
+    scene("bugzoo brag power", [node, str(BIN), "brag", "power"], hold=3400)
 
     # one shared palette keeps the GIF small and the colours stable
     sample = frames[:: max(1, len(frames) // 12)]
