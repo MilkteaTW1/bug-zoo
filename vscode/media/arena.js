@@ -12,6 +12,7 @@
   const fill = (s, vars) => s.replace(/\{(\w+)\}/g, (_m, k) => (vars[k] === undefined ? '' : vars[k]));
 
   let data = null;
+  let achs = [];
   let tab = 'ladder';
   let collapsed = false;
   let notice = '';
@@ -36,25 +37,44 @@
       '</span><span class="act">' + fightBtn + rm + '</span></div>';
   }
 
+  // ---- achievements ----------------------------------------------------------------------------------
+  // Unlock times are ISO instants; show them as the player's own local date.
+  const localDate = (iso) => {
+    const t = new Date(iso);
+    return isNaN(t) ? '' : t.toLocaleDateString();
+  };
+
+  function achRow(x) {
+    const on = !!x.at;
+    return '<div class="ach-row' + (on ? ' on' : '') + '" title="' + esc(x.desc) + '"><span class="ic">' + (on ? '🏅' : '🔒') +
+      '</span><span class="nm">' + esc(x.name) + '<small>' + esc(x.desc) + '</small></span><span class="when">' +
+      (on ? esc(fill(tr('achUnlocked'), { date: localDate(x.at) })) : esc(tr('achLocked'))) + '</span></div>';
+  }
+
   function renderPanel() {
-    if (!data) { panel.hidden = true; bz.relayout(0); return; }
     panel.hidden = false;
+    const d = data || { rows: [], me: null, offline: true };
     panel.classList.toggle('collapsed', collapsed);
-    const canFight = !!(data.me && data.me.canFight);
+    const canFight = !!(d.me && d.me.canFight);
     let body;
-    if (tab === 'ladder') {
-      body = data.rows.filter((r) => r.section === 'ladder').slice(0, 50).map((r) => row(r, canFight)).join('');
+    if (tab === 'achievements') {
+      body = achs.map(achRow).join('');
+    } else if (tab === 'ladder') {
+      body = d.rows.filter((r) => r.section === 'ladder').slice(0, 50).map((r) => row(r, canFight)).join('');
     } else {
-      body = data.rows.filter((r) => r.section === 'friend' || r.section === 'practice').map((r) => row(r, canFight)).join('') +
+      body = d.rows.filter((r) => r.section === 'friend' || r.section === 'practice').map((r) => row(r, canFight)).join('') +
         '<div class="btns"><button class="btn" id="add">' + tr('addFriend') + '</button><button class="btn" id="copy">' + tr('copyCode') + '</button></div>';
     }
     const notes = [];
-    if (!canFight) notes.push(tr('noTeam'));
-    if (tab === 'ladder' && !data.rows.some((r) => r.section === 'ladder')) notes.push(tr('noladder'));
-    else if (data.offline) notes.push(tr('offline'));
+    if (tab !== 'achievements') {
+      if (!canFight) notes.push(tr('noTeam'));
+      if (tab === 'ladder' && !d.rows.some((r) => r.section === 'ladder')) notes.push(tr('noladder'));
+      else if (d.offline) notes.push(tr('offline'));
+    }
     if (notice) notes.push(notice);
     panel.innerHTML = '<h3><span class="tabs"><b class="tab' + (tab === 'ladder' ? ' on' : '') + '" data-tab="ladder">🏆 ' + tr('ladder') +
-      '</b><b class="tab' + (tab === 'friends' ? ' on' : '') + '" data-tab="friends">👥 ' + tr('friends') + '</b></span><span class="fold">' +
+      '</b><b class="tab' + (tab === 'friends' ? ' on' : '') + '" data-tab="friends">👥 ' + tr('friends') + '</b><b class="tab' + (tab === 'achievements' ? ' on' : '') + '" data-tab="achievements">🏅 ' + tr('achievements') + ' ' +
+      achs.filter((x) => x.at).length + '/' + achs.length + '</b></span><span class="fold">' +
       (collapsed ? '▸' : '▾') + '</span></h3><div class="rows">' + body + '</div>' +
       (notes.length ? '<div class="note">' + notes.map(esc).join(' · ') + '</div>' : '');
     bz.relayout(panel.offsetHeight);
@@ -171,6 +191,6 @@
     if (!msg) return;
     if (msg.type === 'ladder') { data = msg.ladder; renderPanel(); }
     if (msg.type === 'battle') playBattle(msg.battle);
-    if (msg.type === 'state' && data) renderPanel();
+    if (msg.type === 'state') { achs = (msg.state && msg.state.achievements) || []; renderPanel(); }
   });
 })();

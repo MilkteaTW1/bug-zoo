@@ -8,6 +8,9 @@ const { spawn } = require('node:child_process');
 const { summarize, cleanName, POINTS } = require('../src/score');
 const { scanProject } = require('../src/scan');
 const battle = require('../src/battle');
+const { elementOf } = require('../src/element');
+const quests = require('../src/quests');
+const tower = require('../src/tower');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -271,7 +274,7 @@ function sharePayload(dex, name) {
   const s = summarize(dex);
   return {
     v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: battle.topTeam(dex.trophies, dex.creatures), updated: new Date().toISOString(),
+    team: myTeam(dex), updated: new Date().toISOString(),
   };
 }
 
@@ -329,7 +332,10 @@ function ownLabeler(dex) {
   return (n) => names.get(n) || n;
 }
 
-const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} (${m.power})`).join(', ');
+const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} [${t(`element.${elementOf(m.type)}`)}] (${m.power})`).join(', ');
+
+/** The monsters that fight for the player: the ones they picked with `bugzoo team set`, else the strongest. */
+const myTeam = (dex) => battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team);
 
 function listWords() {
   return {
@@ -416,7 +422,7 @@ async function showLadder(args) {
 async function cmdLadderJoin() {
   const dex = store.load();
   const name = cleanName((dex.profile && dex.profile.name) || '');
-  if (battle.topTeam(dex.trophies, dex.creatures).length === 0) {
+  if (myTeam(dex).length === 0) {
     console.error(t('ladder.join.needCatch'));
     return 2;
   }
@@ -448,10 +454,81 @@ async function cmdLadderJoin() {
   return 0;
 }
 
+/** `bugzoo tower` shows the next floor and its enemies; `tower fight` takes it on with your current lineup. */
+function cmdTower(args) {
+  const dex = store.load();
+  const total = tower.FLOORS;
+  if (dex.tower.cleared >= total) {
+    console.log(t('tower.done'));
+    return 0;
+  }
+  const floor = dex.tower.cleared + 1;
+  const foe = tower.foeFor(floor);
+  const mine = myTeam(dex);
+  const labelOf = ownLabeler(dex);
+  const showFoe = (m) => t('tower.foe', { name: m.name, element: t(`element.${m.element}`), power: m.power });
+
+  if (args[0] !== 'fight') {
+    console.log(t('tower.title', { n: floor, total }));
+    for (const m of foe.team) console.log(`  ${showFoe(m)}`);
+    console.log(`
+${t('tower.progress', { n: dex.tower.cleared, total })}`);
+    console.log(t('tower.hint'));
+    return 0;
+  }
+  if (mine.length === 0) {
+    console.error(t('battle.noTrophy'));
+    return 2;
+  }
+  const me = { name: t('battle.you'), team: mine };
+  console.log(`\n${me.name}: ${showTeam(me, labelOf)}`);
+  console.log(`${foe.name}: ${showTeam(foe, (n) => n)}\n`);
+  const result = battle.duel(me, foe);
+  for (const ev of result.log) console.log(`  ${render.battleLine(ev, labelOf)}`);
+  const won = result.winner === me.name;
+  console.log(`\n${t(won ? 'tower.win' : 'tower.lose', { n: floor })}`);
+  const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
+  if (won) dex.tower.cleared = floor;
+  const earned = achievements.evaluate(dex);
+  store.save(dex);
+  for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
+  for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
+  return 0;
+}
+
+/** `bugzoo team` lists your monsters; `team set 1 4 2` picks who fights; `team auto` goes back to the strongest. */
+function cmdTeam(args) {
+  const dex = store.load();
+  const [sub, ...nums] = args;
+  if (sub === 'auto') {
+    dex.team = [];
+    store.save(dex);
+    console.log(t('team.autoOk'));
+    return 0;
+  }
+  if (sub === 'set') {
+    const rows = battle.roster(dex.trophies, dex.creatures);
+    const picks = nums.map((n) => Number.parseInt(n, 10));
+    const ok = picks.length >= 1 && picks.length <= battle.TEAM_SIZE && new Set(picks).size === picks.length &&
+      picks.every((n) => Number.isInteger(n) && n >= 1 && n <= rows.length);
+    if (!ok) {
+      console.error(t('team.setBad'));
+      return 2;
+    }
+    dex.team = picks.map((n) => rows[n - 1].id);
+    store.save(dex);
+    const names = battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team).map((m) => `${m.name} [${t(`element.${m.element}`)}]`);
+    console.log(t('team.setOk', { list: names.join(', ') }));
+    return 0;
+  }
+  console.log(render.teamList(dex.trophies, dex.creatures, dex.team));
+  return 0;
+}
+
 async function cmdBattle(args) {
   const { flags, positional } = parseFlags(args);
   const dex = store.load();
-  const mine = battle.topTeam(dex.trophies, dex.creatures);
+  const mine = myTeam(dex);
   if (mine.length === 0) {
     console.error(t('battle.noTrophy'));
     return 2;
@@ -511,8 +588,10 @@ async function cmdBattle(args) {
   const practice = row && row.section === 'practice';
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
+    const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
     const earned = achievements.evaluate(dex);
     store.save(dex);
+    for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
     for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   }
 
@@ -574,7 +653,7 @@ async function cmdFriend(args) {
   }
 
   if (sub === 'code') {
-    const team = battle.topTeam(dex.trophies, dex.creatures);
+    const team = myTeam(dex);
     if (team.length === 0) {
       console.error(t('friend.needTeam'));
       return 2;
@@ -657,9 +736,17 @@ async function main() {
     case 'dex':
       console.log(render.dexList(store.load()));
       break;
-    case 'team': {
+    case 'team':
+      process.exit(cmdTeam(rest));
+      break;
+    case 'tower':
+      process.exit(cmdTower(rest));
+      break;
+    case 'quests':
+    case 'quest': {
       const dex = store.load();
-      console.log(render.teamList(dex.trophies, dex.creatures));
+      if (quests.roll(dex)) store.save(dex);
+      console.log(render.questList(dex));
       break;
     }
     case 'achievements':

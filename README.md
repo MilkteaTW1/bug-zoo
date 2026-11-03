@@ -98,8 +98,10 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 |---|---|
 | `bugzoo run <command…>` | Run a command; if it fails a bug appears; fix it and re-run to catch it |
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
-| `bugzoo team` | Your strongest catches: power breakdown, form and the next evolution |
-| `bugzoo achievements` | Your 13 achievements |
+| `bugzoo team` | Your monsters, numbered, with element, power, form and who fights. `team set 3 1 2` picks your fighters, `team auto` goes back to the strongest |
+| `bugzoo quests` | Today's three quests and your progress |
+| `bugzoo tower` | The solo Tower: the next floor and its enemies. `tower fight` takes it on with your lineup |
+| `bugzoo achievements` | Your 21 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
@@ -132,6 +134,31 @@ bugzoo rank              # your score and title
 ![A battle result card](docs/battle.en.svg)
 
 *A sample `bugzoo battle --card`. Fights are deterministic, so the same two teams always give the same card.*
+
+## Elements and your lineup
+
+Every monster has one of five elements, worked out from its error type (a `SyntaxError` is Syntax, a `TypeError` Logic, `ENOENT` Environment, `ECONNREFUSED` Network, `SIGSEGV` Crash; any other type gets one from its name). They form a ring: each beats the next two for x1.4 damage and takes x0.7 from the two before it.
+
+| Element | Beats |
+|---|---|
+| Syntax | Logic, Environment |
+| Logic | Environment, Network |
+| Environment | Network, Crash |
+| Network | Syntax, Crash |
+| Crash | Syntax, Logic |
+
+You choose who fights: `bugzoo team` lists your monsters with numbers, `bugzoo team set 3 1 2` sends those three, `bugzoo team auto` goes back to the three strongest. Battle lines show every opponent's elements, and a friend's or ladder player's monsters get theirs from their error type too, so nobody can claim a different one. Fights are still deterministic, but the same two teams now fight differently than in versions before this one.
+
+## The Tower (solo)
+
+No friends yet? Climb the Tower: twelve floors, the same enemies for everybody (one monster on floors 1-2, two on floors 3-5, three from floor 6). `bugzoo tower` shows the next floor, its enemies, their elements and power; `bugzoo tower fight` sends your current lineup. A fight is deterministic, so a floor you lost needs a *different* lineup, not another try: read the enemy elements, then pick counters with `bugzoo team set`. Clearing floors 3 and 12 unlocks achievements.
+
+## Daily quests, shiny catches and clean runs
+
+- **Quests:** every day brings three small goals (catch a bug, meet a new kind, get clean runs of commands you fixed, fight or win a battle). `bugzoo quests` shows them; finishing one is announced right after the run or fight that did it. Everyone gets the same three on the same date.
+- **Shiny catch:** fix a bug within 10 minutes of it appearing and the catch is shiny. It is a badge only; it never changes power.
+- **Clean runs:** a command you once fixed keeps counting every time it runs clean, which feeds the quests and the *Steady hands* achievement. Commands that never failed are not tracked, so healthy builds cost nothing.
+- Quests, shiny catches and clean runs never change power or the ladder.
 
 ## Catching a bug
 
@@ -227,7 +254,7 @@ Meeting the same bug again and again is not wasted: its form changes.
 
 The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how many catches are left until the next one.
 
-`bugzoo achievements` lists 13 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
+`bugzoo achievements` lists 21 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
 ## Battles and the ladder
 
@@ -430,8 +457,10 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 |---|---|
 | `bugzoo run <指令…>` | 執行指令，失敗時出現 bug；修好後重跑就能捕捉 |
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
-| `bugzoo team` | 你最強的捕獲：戰鬥力明細、型態與下一次進化 |
-| `bugzoo achievements` | 你的 13 個成就 |
+| `bugzoo team` | 你的怪物清單(有編號)：屬性、戰鬥力、型態與誰會出戰。`team set 3 1 2` 自選出戰成員,`team auto` 改回自動挑最強 |
+| `bugzoo quests` | 今天的三個任務與進度 |
+| `bugzoo tower` | 單人高塔:下一層與敵人的資料。`tower fight` 用你的出戰名單挑戰 |
+| `bugzoo achievements` | 你的 21 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
@@ -464,6 +493,31 @@ bugzoo rank              # 你的分數與稱號
 ![戰鬥結果卡](docs/battle.zh-TW.svg)
 
 *`bugzoo battle --card` 的範例。戰鬥是固定的，所以同樣兩支隊伍永遠產生同一張卡。*
+
+## 屬性與出戰名單
+
+每隻怪物都有五種屬性之一,由它的錯誤類型決定(`SyntaxError` 是語法、`TypeError` 是邏輯、`ENOENT` 是環境、`ECONNREFUSED` 是網路、`SIGSEGV` 是崩潰;沒列在表裡的類型會依名稱分到其中一種)。五種屬性連成一圈:每種剋制後面兩種,打出 x1.4 傷害,被前面兩種打則只有 x0.7。
+
+| 屬性 | 剋制 |
+|---|---|
+| 語法 | 邏輯、環境 |
+| 邏輯 | 環境、網路 |
+| 環境 | 網路、崩潰 |
+| 網路 | 語法、崩潰 |
+| 崩潰 | 語法、邏輯 |
+
+誰出戰由你決定:`bugzoo team` 列出帶編號的怪物,`bugzoo team set 3 1 2` 派這三隻,`bugzoo team auto` 改回最強的三隻。對戰時會顯示對手的屬性;朋友或天梯玩家送來的新怪物,也會依錯誤類型自動帶上屬性,沒有人能自己宣稱不同的屬性。對戰結果仍然是確定性的,但同樣兩支隊伍在這個版本之後的打法,會跟舊版不同。
+
+## 高塔(單人)
+
+還沒有朋友?去爬高塔:十二層,每個人遇到的敵人都一樣(第 1-2 層一隻、第 3-5 層兩隻、第 6 層起三隻)。`bugzoo tower` 會顯示下一層、敵人、屬性與戰鬥力;`bugzoo tower fight` 用你目前的出戰名單挑戰。對戰是確定性的,輸掉的樓層不能重打同一組,要換一組:看敵人的屬性,再用 `bugzoo team set` 選出能剋制牠們的怪物。攻下第 3 層和第 12 層會解鎖成就。
+
+## 每日任務、閃光捕捉與乾淨執行
+
+- **任務:**每天有三個小目標(抓一隻 bug、遇見新種類、讓修好過的指令乾淨執行、打或贏一場對戰)。`bugzoo quests` 可以查看;完成時會在那次執行或對戰結束後立刻通知。同一天所有人拿到的任務相同。
+- **閃光捕捉:**bug 出現後 10 分鐘內修好,這次捕捉就是閃光。只是徽章,不影響戰鬥力。
+- **乾淨執行:**修好過的指令之後每次乾淨執行都會計數,算進任務和「穩穩的」成就。從沒失敗過的指令不會被追蹤,所以健康的建置不會有任何負擔。
+- 任務、閃光與乾淨執行都不會改變戰鬥力和天梯。
 
 ## 捕捉規則
 
@@ -559,7 +613,7 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及距離下一次進化還差幾次。
 
-`bugzoo achievements` 列出 13 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
+`bugzoo achievements` 列出 21 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
 ## 對戰與天梯
 

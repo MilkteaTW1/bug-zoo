@@ -3,6 +3,7 @@
 const { hash } = require('./parse');
 const { RARITIES, cleanName } = require('./score');
 const { maxEvolvedPower, stageOf, evolutionMult } = require('./power');
+const { elementOf, multiplier } = require('./element');
 
 const TEAM_SIZE = 3;
 
@@ -27,11 +28,36 @@ function boostTrophies(trophies, creatures = null) {
   });
 }
 
-function topTeam(trophies, creatures = null, n = TEAM_SIZE) {
-  return boostTrophies(trophies, creatures)
-    .sort((a, b) => b.power - a.power)
-    .slice(0, n)
-    .map(({ name, type, rarity, power, stage }) => ({ name, type, rarity, power, stage }));
+/** Your monsters, one row per kind (its best catch), strongest first. `bugzoo team set` numbers refer to this list. */
+function roster(trophies, creatures = null) {
+  const best = new Map();
+  for (const tr of boostTrophies(trophies, creatures)) {
+    if (!best.has(tr.id) || tr.power > best.get(tr.id).power) best.set(tr.id, tr);
+  }
+  return [...best.values()].sort((a, b) => b.power - a.power);
+}
+
+/**
+ * Who fights: the monsters you picked (ids, in order) first, then the strongest of the rest. With nothing picked
+ * this is simply the three strongest, as before. Returns the full rows (with ids) for display.
+ */
+function lineup(trophies, creatures = null, chosen = [], n = TEAM_SIZE) {
+  const rows = roster(trophies, creatures);
+  const picked = [];
+  for (const id of chosen || []) {
+    const row = rows.find((r) => r.id === id);
+    if (row && !picked.includes(row) && picked.length < n) picked.push(row);
+  }
+  if (picked.length > 0) {
+    for (const row of rows) if (picked.length < n && !picked.includes(row)) picked.push(row);
+    return picked;
+  }
+  return boostTrophies(trophies, creatures).sort((a, b) => b.power - a.power).slice(0, n);
+}
+
+function topTeam(trophies, creatures = null, n = TEAM_SIZE, chosen = []) {
+  return lineup(trophies, creatures, chosen, n)
+    .map(({ name, type, rarity, power, stage }) => ({ name, type, rarity, power, stage, element: elementOf(type) }));
 }
 
 /** Untrusted team from a shared file: clean strings, clamp power to what the rarity can reach. */
@@ -44,7 +70,8 @@ function validateTeam(arr) {
     const type = cleanName(m.type || '');
     if (!name || !type || !Number.isInteger(m.power) || m.power < 1) return null;
     const stage = Number.isInteger(m.stage) ? Math.min(Math.max(m.stage, 0), 2) : 0;
-    team.push({ name, type, rarity: m.rarity, power: Math.min(m.power, maxEvolvedPower(m.rarity)), stage });
+    // The element is always worked out from the type here; one sent by someone else is ignored.
+    team.push({ name, type, rarity: m.rarity, power: Math.min(m.power, maxEvolvedPower(m.rarity)), stage, element: elementOf(type) });
   }
   return team;
 }
@@ -83,9 +110,10 @@ function duel(s1, s2) {
     const att = turnA ? ta[ia] : tb[ib];
     const def = turnA ? tb[ib] : ta[ia];
     const crit = rand() < 0.1;
-    const dmg = Math.max(1, Math.round(att.power * (0.75 + rand() * 0.5) * (crit ? 1.5 : 1)));
+    const mult = multiplier(elementOf(att.type), elementOf(def.type));
+    const dmg = Math.max(1, Math.round(att.power * (0.75 + rand() * 0.5) * (crit ? 1.5 : 1) * mult));
     def.hp -= dmg;
-    log.push({ att: att.name, def: def.name, dmg, crit, faint: def.hp <= 0, hp: Math.max(0, def.hp) });
+    log.push({ att: att.name, def: def.name, dmg, crit, mult, faint: def.hp <= 0, hp: Math.max(0, def.hp) });
     if (def.hp <= 0) {
       if (turnA) ib += 1;
       else ia += 1;
@@ -99,4 +127,4 @@ function duel(s1, s2) {
   return { winner: winner.name, loser: loser.name, log };
 }
 
-module.exports = { TEAM_SIZE, BOT, boostTrophies, topTeam, validateTeam, duel, rng };
+module.exports = { TEAM_SIZE, BOT, boostTrophies, roster, lineup, topTeam, validateTeam, duel, rng };

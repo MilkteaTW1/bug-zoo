@@ -79,6 +79,11 @@ body {
 .ladder .row .nm i { opacity: .6; font-style: normal; font-size: 10px; }
 .ladder .row .reach { color: #e8b923; margin-left: 4px; }
 .ladder .row .act { display: flex; gap: 4px; min-width: 0; }
+.ach-row { display: grid; grid-template-columns: 20px 1fr auto; gap: 6px; padding: 3px 4px; align-items: start; opacity: .5; }
+.ach-row.on { opacity: 1; }
+.ach-row .nm { display: flex; flex-direction: column; }
+.ach-row .nm small { opacity: .7; font-size: 10px; }
+.ach-row .when { opacity: .7; font-size: 10px; white-space: nowrap; }
 .ladder .btns { display: flex; gap: 6px; flex-wrap: wrap; padding: 6px 4px 2px; }
 .btn {
   font: inherit; font-size: 11px; padding: 1px 8px; cursor: pointer; border-radius: 3px;

@@ -26,7 +26,7 @@ test('a friend code round-trips name and team', () => {
   const code = friends.encodeCode('alice', t);
   assert.ok(code.startsWith('BZ1.'));
   assert.ok(code.length < 400, `code is chat-sized (${code.length})`);
-  assert.deepEqual(friends.decodeCode(code), { name: 'alice', team: t.map((x) => ({ ...x, stage: 0 })) });
+  assert.deepEqual(friends.decodeCode(code), { name: 'alice', team: t.map((x) => ({ ...x, stage: 0, element: 'logic' })) });
 });
 
 test('garbage and tampered codes are rejected', () => {

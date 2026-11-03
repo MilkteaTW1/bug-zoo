@@ -22,7 +22,8 @@ function freshStore() {
 }
 
 const bug = (type = 'TypeError', msg = 'x is undefined') => ({ ...makeCreature(type, msg), sample: msg });
-const at = (ms) => new Date(Date.UTC(2026, 0, 1) + ms);
+// Local noon, so no test lands in the 0-5 am night-owl window whatever time zone the machine is in.
+const at = (ms) => new Date(new Date(2026, 0, 1, 12, 0, 0).getTime() + ms);
 
 // --- evolution ---------------------------------------------------------------------------------
 
@@ -69,7 +70,7 @@ test('first catch, persistence and escapes unlock as they happen, each once', ()
   const store = freshStore();
   store.applyRun('c', [bug()], null, at(0));
   const first = store.applyRun('c', [], null, at(1000));
-  assert.deepEqual(first.achievements, ['first-catch']);
+  assert.deepEqual(first.achievements, ['first-catch', 'quick-fix']); // fixed one second after it appeared: also a shiny catch
 
   // a different bug appears after a failure: the first one escapes
   store.applyRun('d', [bug('RangeError', 'bad')], null, at(2000));
@@ -140,7 +141,7 @@ test('team and achievement commands reflect evolution and unlocks', () => {
   assert.match(team, /Evolved, next form after 7 more catch/);
 
   const ach = strip(spawnSync(process.execPath, [BIN, 'achievements'], { env, encoding: 'utf8' }).stdout);
-  assert.match(ach, /Achievements: \d+\/13/);
+  assert.match(ach, /Achievements: \d+\/21/);
   assert.match(ach, /\[x\] First catch/);
   assert.match(ach, /\[x\] Old acquaintance/);
   assert.match(ach, /\[ \] Ascended/);

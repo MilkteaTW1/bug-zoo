@@ -3,7 +3,9 @@
 const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, localName } = require('./creature');
 const { t, getLang, pad } = require('./i18n');
 const { EVOLUTION, stageOf, evolutionMult } = require('./power');
-const { boostTrophies } = require('./battle');
+const { roster, lineup } = require('./battle');
+const { ORDER: ELEMENTS, elementOf, strongAgainst } = require('./element');
+const quests = require('./quests');
 const { IDS: ACHIEVEMENT_IDS } = require('./achievements');
 
 const RESET = '\x1b[0m';
@@ -77,18 +79,33 @@ function evolutionLine(captures) {
   return next ? `${form}, ${t('evo.next', { n: next.at - captures })}` : `${form}, ${t('evo.max')}`;
 }
 
-/** `creatures` (the dex table) lets evolution show; without it everything is base form. */
-function teamList(trophies, creatures = null) {
-  if (trophies.length === 0) return t('team.empty');
-  const sorted = boostTrophies(trophies, creatures).sort((a, b) => b.power - a.power).slice(0, 8);
-  const out = [`${BOLD}${t('team.title')}${RESET}`, ''];
-  sorted.forEach((tr, i) => {
-    const color = RARITY_COLOR[tr.rarity];
-    out.push(`${i < 3 ? '*' : ' '} ${color}${pad(shownName(tr) + stars(tr.stage), 16)}${RESET} ${pad(tr.type, 20)} ` +
-      `${t('team.power')} ${String(tr.power).padStart(4)}  ${DIM}${tr.project}${RESET}`);
-    out.push(`    ${DIM}${factorLine(tr.factors)}${RESET}`);
-    if (creatures) out.push(`    ${DIM}${evolutionLine(tr.captures)}${RESET}`);
+const elementName = (type) => t(`element.${elementOf(type)}`);
+
+/** The ring of elements, one line each: who it beats. */
+function elementChart() {
+  return ELEMENTS.map((a) => {
+    const [b, c] = strongAgainst(a);
+    return t('team.chartRow', { a: t(`element.${a}`), b: t(`element.${b}`), c: t(`element.${c}`) });
   });
+}
+
+/**
+ * Your monsters, numbered (the numbers are what `bugzoo team set` takes), with * on the ones that fight.
+ * `creatures` (the dex table) lets evolution show; without it everything is base form.
+ */
+function teamList(trophies, creatures = null, chosen = []) {
+  if (trophies.length === 0) return t('team.empty');
+  const rows = roster(trophies, creatures).slice(0, 12);
+  const fighting = new Set(lineup(trophies, creatures, chosen).map((r) => r.id));
+  const out = [`${BOLD}${t('team.title')}${RESET}`, ''];
+  rows.forEach((tr, i) => {
+    const color = RARITY_COLOR[tr.rarity];
+    out.push(`${fighting.has(tr.id) ? '*' : ' '} ${String(i + 1).padStart(2)}. ${color}${pad(shownName(tr) + stars(tr.stage), 16)}${RESET} ` +
+      `${pad(tr.type, 20)} ${pad(`[${elementName(tr.type)}]`, 10)} ${t('team.power')} ${String(tr.power).padStart(4)}  ${DIM}${tr.project}${RESET}`);
+    out.push(`      ${DIM}${factorLine(tr.factors)}${RESET}`);
+    if (creatures) out.push(`      ${DIM}${evolutionLine(tr.captures)}${RESET}`);
+  });
+  out.push('', `${DIM}${t('team.chartTitle')}${RESET}`, ...elementChart().map((l) => `  ${l}`), '', `${DIM}${t('team.hint')}${RESET}`);
   return out.join('\n');
 }
 
@@ -97,14 +114,41 @@ function achievementLines(ids = []) {
   return ids.map((id) => `${GREEN}${BOLD}${t('ach.tag')}${RESET}${GREEN} ${t(`ach.${id}.name`)} - ${t(`ach.${id}.desc`)}${RESET}`);
 }
 
+const questName = (id) => {
+  const q = quests.POOL.find((x) => x.id === id);
+  return q ? t(`quest.${q.metric}`, { n: q.goal }) : id;
+};
+
+/** Lines announcing quests finished just now. */
+function questLines(ids = []) {
+  return ids.map((id) => `${GREEN}${BOLD}${t('quest.tag')}${RESET}${GREEN} ${t('quest.complete', { name: questName(id) })}${RESET}`);
+}
+
+/** `bugzoo quests`: today's three goals with progress, and the running totals. */
+function questList(dex, now = new Date()) {
+  const list = quests.status(dex, now);
+  const out = [`${BOLD}${t('quest.title', { date: dex.daily.date })}${RESET}`, ''];
+  for (const q of list) {
+    const mark = q.done ? `${GREEN}[x]${RESET}` : `${DIM}[ ]${RESET}`;
+    out.push(`${mark} ${q.done ? DIM : BOLD}${questName(q.id)}${RESET}  ${DIM}${q.have}/${q.goal}${q.done ? ` (${t('quest.done')})` : ''}${RESET}`);
+  }
+  if (list.every((q) => q.done)) out.push('', `${GREEN}${t('quest.all')}${RESET}`);
+  out.push('', `${DIM}${t('quest.total', { n: dex.quests.total, p: dex.quests.perfect })}${RESET}`);
+  return out.join('\n');
+}
+
 /** Evolutions and achievements that came with a run. */
 function extras(result) {
   const lines = [];
+  for (const tr of result.trophies || []) {
+    if (tr.shiny) lines.push(`${YELLOW}${BOLD}${t('shiny.tag')}${RESET}${YELLOW} ${t('shiny.line', { name: shownName(tr) })}${RESET}`);
+  }
   for (const { entry, stage } of result.evolved || []) {
     lines.push(`${YELLOW}${BOLD}${t('evo.tag')}${RESET}${YELLOW} ${t('evo.line', {
       name: shownName(entry), stage: t(`evo.stage${stage}`), mult: evolutionMult(stage),
     })}${RESET}`);
   }
+  lines.push(...questLines(result.quests));
   lines.push(...achievementLines(result.achievements));
   return lines;
 }
@@ -126,7 +170,8 @@ const sortEntries = (entries) => entries.sort((a, b) => (b.captures > 0) - (a.ca
   RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity) || b.count - a.count);
 
 function status(e) {
-  return e.captures > 0 ? `${GREEN}${t('dex.caught', { n: e.captures })}${RESET}` : `${DIM}${t('dex.wild')}${RESET}`;
+  const shiny = e.shinies > 0 ? ` ${YELLOW}${t('dex.shiny', { n: e.shinies })}${RESET}` : '';
+  return e.captures > 0 ? `${GREEN}${t('dex.caught', { n: e.captures })}${RESET}${shiny}` : `${DIM}${t('dex.wild')}${RESET}`;
 }
 
 function dexList(dex) {
@@ -152,6 +197,8 @@ function esc(s) {
 function battleLine(ev, labelOf = (n) => n) {
   let s = t('battle.hit', { att: labelOf(ev.att), def: labelOf(ev.def), dmg: ev.dmg });
   if (ev.crit) s += t('battle.crit');
+  if (ev.mult > 1) s += t('battle.super');
+  else if (ev.mult < 1) s += t('battle.weak');
   s += ev.faint ? t('battle.faint', { def: labelOf(ev.def) }) : t('battle.left', { hp: ev.hp });
   return s;
 }
@@ -233,5 +280,5 @@ function battleCard({ me, foe, winner, hits, labelOf = (n) => n, artOf = () => [
 
 module.exports = {
   encounter, outcomeBanner, extras, achievementLines, achievementList, dexList, exportSvg, battleCard, teamList,
-  factorLine, battleLine, shownName, label,
+  factorLine, battleLine, shownName, label, elementName, questList, questLines,
 };
