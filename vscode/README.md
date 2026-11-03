@@ -24,6 +24,14 @@ It uses the same engine as the [`bug-zoo` CLI](https://github.com/MilkteaTW1/bug
 
 ![Adding a friend, fighting them and copying your friend code](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.gif)
 
+**Earn coins, shop for food and furniture, and feed your monsters until they evolve.**
+
+![Shop: buying a pizza and a cushion, then feeding a monster that evolves](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/shop.gif)
+
+**Build a team of three, climb the Tower, and track quests and achievements.**
+
+![Team picker, the Tower, quests and achievements](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/solo.gif)
+
 ## How it works
 
 1. Run a command in the integrated terminal (`node app.js`, `pytest`, `npm test`, ...).
@@ -92,3 +100,11 @@ The zoo, the ladder panel and the notifications use the same language files as t
 ![挑戰天梯玩家並提交勝利](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
 
 ![加好友、對戰、複製好友代碼](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.zh.gif)
+
+**打怪賺金幣，買食物和家具，餵到怪物進化。**
+
+![商店：買披薩和靠墊，餵食後怪物進化](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/shop.zh.gif)
+
+**組三隻的隊伍、爬高塔，看任務與成就。**
+
+![隊伍、高塔、任務與成就](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/solo.zh.gif)

@@ -92,6 +92,14 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 
 ![Adding a friend, fighting them and copying your friend code](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.gif)
 
+**Earn coins, shop for food and furniture, and feed your monsters until they evolve.**
+
+![Shop: buying a pizza and a cushion, then feeding a monster that evolves](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/shop.gif)
+
+**Build a team of three, climb the Tower, and track quests and achievements.**
+
+![Team picker, the Tower, quests and achievements](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/solo.gif)
+
 ## Commands
 
 | Command | What it does |
@@ -466,6 +474,14 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 **加好友、隨時開戰、用代碼分享你的隊伍。**
 
 ![加好友、對戰、複製好友代碼](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/friends.zh.gif)
+
+**打怪賺金幣，買食物和家具，餵到怪物進化。**
+
+![商店：買披薩和靠墊，餵食後怪物進化](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/shop.zh.gif)
+
+**組三隻的隊伍、爬高塔，看任務與成就。**
+
+![隊伍、高塔、任務與成就](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/solo.zh.gif)
 
 ## 指令表
 

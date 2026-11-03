@@ -45,15 +45,15 @@ function seedPlayer() {
   const dex = store.load();
   dex.profile = { name: 'devfan', lang: process.env.BZ_LANG === 'zh' ? 'zh-TW' : 'en' };
   const seeds = [
-    ['KeyError', "'user_id'", 4, { frames: 6, blast: 6, loc: 9000, failRate: 0.6 }],
-    ['ENOENT', "no such file 'config.json'", 11, { frames: 4, blast: 5, loc: 9000, failRate: 0.5 }],
-    ['ValueError', 'invalid literal for int()', 3, { frames: 5, blast: 3, loc: 9000, failRate: 0.4 }],
-    ['RangeError', 'Invalid array length', 1, { frames: 7, blast: 4, loc: 9000, failRate: 0.5 }],
-    ['SIGSEGV', 'segmentation fault', 1, { frames: 3, blast: 2, loc: 9000, failRate: 0.3 }],
+    ['KeyError', "'user_id'", 4, { frames: 6, blast: 6, loc: 9000, failRate: 0.6 }, 22],
+    ['ENOENT', "no such file 'config.json'", 11, { frames: 4, blast: 5, loc: 9000, failRate: 0.5 }, 55],
+    ['ValueError', 'invalid literal for int()', 3, { frames: 5, blast: 3, loc: 9000, failRate: 0.4 }, 8],
+    ['RangeError', 'Invalid array length', 1, { frames: 7, blast: 4, loc: 9000, failRate: 0.5 }, 0],
+    ['SIGSEGV', 'segmentation fault', 1, { frames: 3, blast: 2, loc: 9000, failRate: 0.3 }, 0],
   ];
-  for (const [type, msg, captures, ctx] of seeds) {
+  for (const [type, msg, captures, ctx, bond] of seeds) {
     const c = creature.makeCreature(type, msg);
-    dex.creatures[c.id] = { ...c, firstSeen: NOW.toISOString(), lastSeen: NOW.toISOString(), count: captures + 1, captures, escapes: 0, sample: msg };
+    dex.creatures[c.id] = { ...c, firstSeen: NOW.toISOString(), lastSeen: NOW.toISOString(), count: captures + 1, captures, bond, escapes: 0, sample: msg };
     const p = power.computePower({ rarity: c.rarity, ...ctx });
     for (let i = 0; i < 1; i++) {
       dex.trophies.push({
@@ -74,6 +74,38 @@ const CRASH = [
   `    at greet (${PROJECT}/app.js:3:35)`,
   `    at Object.<anonymous> (${PROJECT}/app.js:6:1)`,
 ].join('\n');
+
+/** States for the shop GIF: before, after each purchase, and after feeding a monster that then evolves. */
+function shopStory(folders) {
+  const dex = store.load();
+  dex.coins = 150;
+  dex.inventory = {};
+  dex.furniture = [];
+  store.save(dex);
+  const hungry = Object.values(dex.creatures).find((c) => c.type === 'KeyError');
+  const P0 = buildState(folders);
+  fight.buy('pizza');
+  const P1 = buildState(folders);
+  fight.buy('cushion');
+  const P2 = buildState(folders);
+  fight.buy('plant');
+  const P3 = buildState(folders);
+  const fed = fight.feed(hungry.id, 'pizza');
+  const P4 = buildState(folders);
+  return { P0, P1, P2, P3, P4, fed, hungry: fed.name };
+}
+
+/** The team picker and the tower for the tour GIF. */
+function soloStory(folders) {
+  const T0 = buildState(folders);
+  const ids = T0.team.rows.map((r) => r.id);
+  fight.setTeam([ids[1], ids[0]]);
+  const T1 = buildState(folders);
+  fight.setTeam([]);
+  const tower = fight.towerFight();
+  const T2 = buildState(folders);
+  return { T0, T1, T2, tower };
+}
 
 async function build() {
   writeLadder();
@@ -96,7 +128,12 @@ async function build() {
   const battleFriend = fight.fight('friend', 'ByteBaker');
   const battlePractice = fight.fight('practice', 'Legacy Codebase');
 
+  // The shop and the solo tabs. Seeded coins, so the demo can afford a pizza and two pieces of furniture.
+  const shopData = shopStory(folders);
+  const soloData = soloStory(folders);
+
   return {
+    shop: shopData, solo: soloData,
     crash: CRASH,
     states: { S0, S1, S2 },
     events: { spawn: diffStates(S0, S1), caught: diffStates(S1, S2) },

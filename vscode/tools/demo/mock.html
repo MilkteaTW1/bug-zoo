@@ -75,6 +75,9 @@
     submit: '正在開啟預填好的 GitHub issue…<small>在那邊按「Submit new issue」就能把勝利送上榜單。</small>',
     addQ: '加好友:貼上好友代碼 (BZ1…)、連結、檔案路徑,或榜單上的玩家名稱', added: '已加入 ByteBaker。',
     copied: '好友代碼已複製。<small>傳給朋友,他貼到「加好友」就行。</small>',
+    shopIntro: '商店分頁:打怪賺金幣,買食物和家具', buyFood: '買一份披薩', buyFurn: '家具讓食物效果更好,還會擺進動物園', feedIt: '餵給怪物:好感度夠了就進化',
+    feedQ: '選一隻來吃', evolvedToast: (n) => '<b>' + n + '</b> 進化了!戰鬥力 ×1.5', dragIt: '已捕捉的怪物可以用滑鼠拖著走',
+    teamIt: '隊伍分頁:依出戰順序點選最多 3 隻', towerIt: '爬塔:單人挑戰十二層', quests: '任務與成就分頁',
     wildToast: (n, t) => '野生的 <b>' + n + '</b>(' + t + ')出現了!修好 bug 後重跑指令就能捕獲。',
     caughtToast: (n, t) => '捕獲 <b>' + n + '</b>(' + t + ')!已加入你的動物園。',
   } : {
@@ -84,6 +87,9 @@
     submit: 'Opening a pre-filled GitHub issue…<small>Press “Submit new issue” there to send your win to the ladder.</small>',
     addQ: 'Add a friend: paste a friend code (BZ1…), a link, a file path, or a player name from the ladder', added: 'Added ByteBaker.',
     copied: 'Friend code copied.<small>Send it to a friend; they paste it into “Add friend”.</small>',
+    shopIntro: 'Shop tab: earn coins by playing, buy food and furniture', buyFood: 'Buy a pizza', buyFurn: 'Furniture makes treats sweeter and decorates the zoo', feedIt: 'Feed a monster: enough affection and it evolves',
+    feedQ: 'Pick who gets the treat', evolvedToast: (n) => '<b>' + n + '</b> evolved! Power x1.5', dragIt: 'Caught monsters can be dragged with the mouse',
+    teamIt: 'Team tab: click up to 3 monsters in fighting order', towerIt: 'The Tower: a solo climb of twelve floors', quests: 'Quests and achievements tabs',
     wildToast: (n, t) => 'A wild <b>' + n + '</b> the ' + t + ' appeared! Fix the bug and re-run the command to catch it.',
     caughtToast: (n, t) => 'Caught <b>' + n + '</b> the ' + t + '! It joined your zoo.',
   };
@@ -165,6 +171,18 @@
       toast(S.added);
     } else if (m.type === 'copyCode') {
       toast(S.copied);
+    } else if (m.type === 'buy') {
+      const next = { pizza: D.shop.P1, cushion: D.shop.P2, plant: D.shop.P3 }[m.id];
+      if (next) send({ type: 'state', state: next, events: null });
+    } else if (m.type === 'feed') {
+      await quickInput(S.feedQ, D.shop.hungry);
+      send({ type: 'state', state: D.shop.P4, events: null });
+      toast(S.evolvedToast(D.shop.hungry));
+    } else if (m.type === 'setTeam') {
+      send({ type: 'state', state: D.solo.T1, events: null });
+    } else if (m.type === 'tower') {
+      send({ type: 'battle', battle: D.solo.tower });
+      send({ type: 'state', state: D.solo.T2, events: null });
     }
   });
 
@@ -216,6 +234,60 @@
       caption(S.share, 2600);
       await clickEl('#copy'); await sleep(3200);
     },
+  };
+
+  scenarios.shop = async function () {
+    await waitReady();
+    paintCode(FIXED, 2); term = ''; paintTerm();
+    send({ type: 'state', state: D.shop.P0, events: null }); send({ type: 'ladder', ladder: D.arenaA });
+    await sleep(1500);
+    caption(S.shopIntro, 3000);
+    await clickEl('.tab[data-tab="shop"]'); await sleep(2000);
+    caption(S.buyFood, 2400);
+    await clickEl('.buy[data-id="pizza"]'); await sleep(1600);
+    caption(S.buyFurn, 2800);
+    await clickEl('.buy[data-id="cushion"]'); await sleep(1100);
+    await clickEl('.buy[data-id="plant"]'); await sleep(1800);
+    caption(S.feedIt, 3000);
+    await clickEl('.feed[data-food="pizza"]'); await sleep(3600);
+    caption(S.dragIt, 3000);
+    await dragMonster(); await sleep(2400);
+  };
+
+  // Pick a caught monster up with the mouse (pointer events, as a real drag) and put it down elsewhere.
+  async function dragMonster() {
+    const doc = zoo.contentDocument; const win = zoo.contentWindow;
+    const el = doc.querySelector('.mon.caught');
+    const r = el.getBoundingClientRect(); const o = frameOffset();
+    const sx = r.left + r.width / 2; const sy = r.top + r.height / 2;
+    await moveTo(o.x + sx, o.y + sy);
+    const ev = (type, x, y) => new win.PointerEvent(type, { bubbles: true, button: 0, clientX: x, clientY: y, pointerId: 1 });
+    el.dispatchEvent(ev('pointerdown', sx, sy));
+    const tx = 150; const ty = 110;
+    for (let i = 1; i <= 24; i++) {
+      const x = sx + (tx - sx) * i / 24; const y = sy + (ty - sy) * i / 24;
+      win.dispatchEvent(ev('pointermove', x, y));
+      cursor.style.left = (o.x + x) + 'px'; cursor.style.top = (o.y + y) + 'px';
+      await sleep(45);
+    }
+    win.dispatchEvent(ev('pointerup', tx, ty));
+  }
+
+  scenarios.solo = async function () {
+    await waitReady();
+    paintCode(FIXED, 2); term = ''; paintTerm();
+    send({ type: 'state', state: D.solo.T0, events: null }); send({ type: 'ladder', ladder: D.arenaA });
+    await sleep(1500);
+    caption(S.teamIt, 3000);
+    await clickEl('.tab[data-tab="team"]'); await sleep(1800);
+    await clickEl((doc) => doc.querySelectorAll('.row.pick')[1]); await sleep(1800);
+    caption(S.towerIt, 3000);
+    await clickEl('.tab[data-tab="tower"]'); await sleep(2000);
+    await clickEl('#tower'); await sleep(7600);
+    await clickEl('#close'); await sleep(900);
+    caption(S.quests, 2800);
+    await clickEl('.tab[data-tab="quests"]'); await sleep(2200);
+    await clickEl('.tab[data-tab="achievements"]'); await sleep(2800);
   };
 
   window.runScenario = async (name) => { await scenarios[name](); window.__done = true; };
