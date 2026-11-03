@@ -2,11 +2,25 @@
 
 Turn your error messages into collectible monsters.
 
-```bash
-npm install -g bug-zoo && bugzoo setup
-```
+## Get it in 2 minutes
 
-Or install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode). 或安裝 VS Code 擴充套件。
+You do not need to know how to code to try it. Pick the line that fits you:
+
+| You have | Do this |
+|---|---|
+| **VS Code** | Press Ctrl+Shift+X, search **Bug Zoo**, click **Install**. Done. |
+| **Nothing installed** | Download one file, no Node.js needed. Steps right below. |
+| **Node.js** | Try it: `npx bug-zoo run node app.js`. Keep it: `npm install -g bug-zoo` |
+
+**Download one file, step by step**
+
+1. Open the [latest release](https://github.com/MilkteaTW1/bug-zoo/releases/latest) and download the file for your computer: **Windows** `bugzoo-win-x64.exe` · **Mac (Apple chip)** `bugzoo-macos-arm64` · **Linux** `bugzoo-linux-x64`.
+2. Open a terminal in the folder where you saved it. **Windows:** open the folder, click its address bar, type `cmd`, press Enter. **Mac / Linux:** open Terminal and type `cd ~/Downloads`.
+3. Run it on any program that crashes. **Windows:** `.\bugzoo-win-x64.exe run python app.py` · **Mac / Linux:** run `chmod +x bugzoo-macos-arm64` once, then `./bugzoo-macos-arm64 run python app.py`.
+
+A monster appears when the program fails. Fix your code, run the same command again, and it is caught. (`python app.py` can be any command: `node app.js`, `npm test`, `go run .` ...)
+
+**If Windows or macOS shows a warning, that is expected.** The file is not code-signed (that costs money), so Windows says *Windows protected your PC*: click **More info**, then **Run anyway**. On a Mac, open *System Settings > Privacy & Security* and click **Open Anyway**. The `.sha256` file next to each download lets you check that the file is untouched.
 
 [![Tests](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml/badge.svg)](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/bug-zoo)](https://www.npmjs.com/package/bug-zoo) [![license](https://img.shields.io/npm/l/bug-zoo)](LICENSE)
 
@@ -321,6 +335,26 @@ MIT
 # Bug Zoo（繁體中文）
 
 把你的錯誤訊息變成可收集的怪物。
+
+## 兩分鐘拿到它
+
+不用會寫程式也能試玩。挑一個符合你的:
+
+| 你有 | 這樣做 |
+|---|---|
+| **VS Code** | 按 Ctrl+Shift+X,搜尋 **Bug Zoo**,按**安裝**。完成。 |
+| **什麼都沒裝** | 下載一個檔案,不需要 Node.js。步驟在下面。 |
+| **Node.js** | 先試玩:`npx bug-zoo run node app.js`。長期使用:`npm install -g bug-zoo` |
+
+**下載一個檔案,一步一步來**
+
+1. 打開[最新版本](https://github.com/MilkteaTW1/bug-zoo/releases/latest),下載你電腦對應的檔案:**Windows** `bugzoo-win-x64.exe` · **Mac(蘋果晶片)** `bugzoo-macos-arm64` · **Linux** `bugzoo-linux-x64`。
+2. 在存放檔案的資料夾打開終端機。**Windows:**打開資料夾,點網址列,輸入 `cmd` 後按 Enter。**Mac / Linux:**打開「終端機」,輸入 `cd ~/Downloads`。
+3. 拿一個會當機的程式來跑。**Windows:**`.\bugzoo-win-x64.exe run python app.py` · **Mac / Linux:**先執行一次 `chmod +x bugzoo-macos-arm64`,再執行 `./bugzoo-macos-arm64 run python app.py`。
+
+程式失敗時就會出現怪物。修好程式、重跑同一條指令,牠就被抓到了。(`python app.py` 可以換成任何指令:`node app.js`、`npm test`、`go run .` ...)
+
+**Windows 或 macOS 跳出警告是正常的。**檔案沒有程式碼簽章(簽章要花錢),所以 Windows 會顯示「Windows 已保護您的電腦」:按**其他資訊**,再按**仍要執行**。Mac 請到「系統設定 > 隱私權與安全性」,按**強制打開**。每個下載旁邊的 `.sha256` 檔可以用來確認檔案沒被改過。
 
 [![Tests](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml/badge.svg)](https://github.com/MilkteaTW1/bug-zoo/actions/workflows/test.yml) [![npm](https://img.shields.io/npm/v/bug-zoo)](https://www.npmjs.com/package/bug-zoo) [![license](https://img.shields.io/npm/l/bug-zoo)](LICENSE)
 
