@@ -390,6 +390,30 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.achievements': '업적', // EN: 'Achievements'
     'vs.achUnlocked': '{date} 달성', // EN: 'unlocked {date}'
     'vs.achLocked': '잠김', // EN: 'locked'
+    'vs.species': '종',
+    'vs.shiny': '빛남: 10분 안에 해결',
+    'vs.companion': '동료',
+    'vs.nickHint': '더블클릭으로 이름 바꾸기',
+    'vs.streakTip': '에러 없이 명령 {n}개를 연속 실행하면 동료를 얻습니다',
+    'vs.nickTitle': '별명',
+    'vs.nickPrompt': '{name}의 별명 (비우면 삭제)',
+    'vs.nickSet': '{name}의 별명은 이제 {nick}입니다.',
+    'vs.nickCleared': '{name}의 별명이 삭제되었습니다.',
+    'vs.statusGift': '동료: {creature}',
+    'vs.notifyGift': '동료가 동물원에 합류했습니다: {creature}',
+    'vs.team': '팀',
+    'vs.tower': '탑',
+    'vs.questsTab': '퀘스트',
+    'vs.questTotal': '완료한 퀘스트: {n}. 완벽한 날: {p}.',
+    'vs.questDone': '퀘스트 완료',
+    'vs.towerDone': '탑의 모든 층을 클리어했습니다!',
+    'vs.towerFloor': '{total}층 중 {n}층',
+    'vs.towerWin': '{n}층 클리어!',
+    'vs.towerLose': '{n}층이 버팁니다. 팀을 바꿔 다시 도전하세요.',
+    'vs.teamHint': '싸우는 순서대로 최대 3마리를 클릭하세요. 문법 > 논리, 환경; 논리 > 환경, 네트워크; 환경 > 네트워크, 크래시; 네트워크 > 문법, 크래시; 크래시 > 문법, 논리.',
+    'vs.teamAuto': '자동 (가장 강한 순)',
+    'vs.super': '효과가 굉장했다!',
+    'vs.weak': '효과가 별로였다',
     'vs.fight': '대전', // EN: 'Fight'
     'vs.you': '나', // EN: 'you'
     'vs.challenge': '이 플레이어에게 도전할 수 있습니다', // EN: 'You can challenge this player'

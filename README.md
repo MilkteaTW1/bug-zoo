@@ -101,7 +101,8 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo team` | Your monsters, numbered, with element, power, form and who fights. `team set 3 1 2` picks your fighters, `team auto` goes back to the strongest |
 | `bugzoo quests` | Today's three quests and your progress |
 | `bugzoo tower` | The solo Tower: the next floor and its enemies. `tower fight` takes it on with your lineup |
-| `bugzoo achievements` | Your 21 achievements |
+| `bugzoo nick <monster> [name]` | Give a caught monster a nickname |
+| `bugzoo achievements` | Your 27 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
@@ -159,6 +160,13 @@ No friends yet? Climb the Tower: twelve floors, the same enemies for everybody (
 - **Shiny catch:** fix a bug within 10 minutes of it appearing and the catch is shiny. It is a badge only; it never changes power.
 - **Clean runs:** a command you once fixed keeps counting every time it runs clean, which feeds the quests and the *Steady hands* achievement. Commands that never failed are not tracked, so healthy builds cost nothing.
 - Quests, shiny catches and clean runs never change power or the ladder.
+
+## Species, companions and nicknames
+
+- **50 species.** Every new monster is one of 50 species (Slime, Moth, Owl, Dragon, Golem, Hedgehog...), each with its own face. The species shows next to the name, and `bugzoo dex` ends with how many you have caught (`Species: 12/50`). Catching 10, 25 and all 50 unlocks achievements. Monsters you already caught keep their old look.
+- **Companions.** Run 5 commands in a row without an error and a random companion joins your zoo already caught, ready to fight. A day hands out at most 3, and any error resets the count, so it rewards clean work, not spam.
+- **Nicknames.** `bugzoo nick <monster> <nickname>` renames a caught monster (no nickname clears it). In VS Code, double-click it.
+- **Holidays.** Catch a bug on New Year's Day, Valentine's Day, Halloween or Christmas (your own calendar) for the Holiday bug achievement.
 
 ## Catching a bug
 
@@ -254,7 +262,7 @@ Meeting the same bug again and again is not wasted: its form changes.
 
 The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how many catches are left until the next one.
 
-`bugzoo achievements` lists 21 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
+`bugzoo achievements` lists 27 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
 ## Battles and the ladder
 
@@ -460,7 +468,8 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo team` | 你的怪物清單(有編號)：屬性、戰鬥力、型態與誰會出戰。`team set 3 1 2` 自選出戰成員,`team auto` 改回自動挑最強 |
 | `bugzoo quests` | 今天的三個任務與進度 |
 | `bugzoo tower` | 單人高塔:下一層與敵人的資料。`tower fight` 用你的出戰名單挑戰 |
-| `bugzoo achievements` | 你的 21 個成就 |
+| `bugzoo nick <怪物> [暱稱]` | 幫已捕捉的怪物取暱稱 |
+| `bugzoo achievements` | 你的 27 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
@@ -518,6 +527,13 @@ bugzoo rank              # 你的分數與稱號
 - **閃光捕捉:**bug 出現後 10 分鐘內修好,這次捕捉就是閃光。只是徽章,不影響戰鬥力。
 - **乾淨執行:**修好過的指令之後每次乾淨執行都會計數,算進任務和「穩穩的」成就。從沒失敗過的指令不會被追蹤,所以健康的建置不會有任何負擔。
 - 任務、閃光與乾淨執行都不會改變戰鬥力和天梯。
+
+## 物種、夥伴與暱稱
+
+- **50 種物種。**每隻新怪物都是 50 個物種之一(史萊姆、飛蛾、貓頭鷹、龍、石像、刺蝟……),各有自己的長相。物種會顯示在名字旁,`bugzoo dex` 最後會列出你抓到幾種(`物種:12/50`)。抓到 10 種、25 種和全部 50 種都有成就。已經抓到的怪物外觀不變。
+- **夥伴。**連續執行 5 個指令都沒出錯,就會有一隻隨機夥伴直接加入動物園(已經是捕捉狀態,能上場)。每天最多 3 隻,任何一次出錯都會讓計數歸零,獎勵的是乾淨工作,不是洗次數。
+- **暱稱。**`bugzoo nick <怪物> <暱稱>` 幫已捕捉的怪物改名(不填暱稱就是清除)。在 VS Code 裡雙擊怪物即可。
+- **節日。**在元旦、情人節、萬聖節或聖誕節(依你自己的日曆)抓到 bug,可解鎖「節日 bug」成就。
 
 ## 捕捉規則
 
@@ -613,7 +629,7 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及距離下一次進化還差幾次。
 
-`bugzoo achievements` 列出 21 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
+`bugzoo achievements` 列出 27 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
 ## 對戰與天梯
 

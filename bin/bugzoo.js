@@ -11,6 +11,7 @@ const battle = require('../src/battle');
 const { elementOf } = require('../src/element');
 const quests = require('../src/quests');
 const tower = require('../src/tower');
+const nickLib = require('../src/nick');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -469,11 +470,8 @@ function cmdNick(args) {
     console.log(t('nick.unknown', { name: who }));
     return 1;
   }
-  // Keep only printable characters that cannot break the terminal, a table or the SVG card.
-  const nick = Array.from(rest.join(' ')).filter((ch) => ch >= ' ' && ch.charCodeAt(0) !== 127 && !'<>&"'.includes(ch)).join('').trim().slice(0, 16);
-  if (nick) hit.nick = nick;
-  else delete hit.nick;
-  for (const tr of dex.trophies) if (tr.id === hit.id) { if (nick) tr.nick = nick; else delete tr.nick; }
+  const nick = nickLib.clean(rest.join(' '));
+  nickLib.set(dex, hit.id, nick);
   store.save(dex);
   console.log(t(nick ? 'nick.set' : 'nick.cleared', { name: hit.name, nick }));
   return 0;
