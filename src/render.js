@@ -3,7 +3,8 @@
 const { RARITY_COLOR, RARITY_HEX, RARITY_ORDER, localName } = require('./creature');
 const { t, getLang, pad } = require('./i18n');
 const { EVOLUTION, stageOf, evolutionMult } = require('./power');
-const { boostTrophies } = require('./battle');
+const { roster, lineup } = require('./battle');
+const { ORDER: ELEMENTS, elementOf, strongAgainst } = require('./element');
 const { IDS: ACHIEVEMENT_IDS } = require('./achievements');
 
 const RESET = '\x1b[0m';
@@ -77,18 +78,33 @@ function evolutionLine(captures) {
   return next ? `${form}, ${t('evo.next', { n: next.at - captures })}` : `${form}, ${t('evo.max')}`;
 }
 
-/** `creatures` (the dex table) lets evolution show; without it everything is base form. */
-function teamList(trophies, creatures = null) {
-  if (trophies.length === 0) return t('team.empty');
-  const sorted = boostTrophies(trophies, creatures).sort((a, b) => b.power - a.power).slice(0, 8);
-  const out = [`${BOLD}${t('team.title')}${RESET}`, ''];
-  sorted.forEach((tr, i) => {
-    const color = RARITY_COLOR[tr.rarity];
-    out.push(`${i < 3 ? '*' : ' '} ${color}${pad(shownName(tr) + stars(tr.stage), 16)}${RESET} ${pad(tr.type, 20)} ` +
-      `${t('team.power')} ${String(tr.power).padStart(4)}  ${DIM}${tr.project}${RESET}`);
-    out.push(`    ${DIM}${factorLine(tr.factors)}${RESET}`);
-    if (creatures) out.push(`    ${DIM}${evolutionLine(tr.captures)}${RESET}`);
+const elementName = (type) => t(`element.${elementOf(type)}`);
+
+/** The ring of elements, one line each: who it beats. */
+function elementChart() {
+  return ELEMENTS.map((a) => {
+    const [b, c] = strongAgainst(a);
+    return t('team.chartRow', { a: t(`element.${a}`), b: t(`element.${b}`), c: t(`element.${c}`) });
   });
+}
+
+/**
+ * Your monsters, numbered (the numbers are what `bugzoo team set` takes), with * on the ones that fight.
+ * `creatures` (the dex table) lets evolution show; without it everything is base form.
+ */
+function teamList(trophies, creatures = null, chosen = []) {
+  if (trophies.length === 0) return t('team.empty');
+  const rows = roster(trophies, creatures).slice(0, 12);
+  const fighting = new Set(lineup(trophies, creatures, chosen).map((r) => r.id));
+  const out = [`${BOLD}${t('team.title')}${RESET}`, ''];
+  rows.forEach((tr, i) => {
+    const color = RARITY_COLOR[tr.rarity];
+    out.push(`${fighting.has(tr.id) ? '*' : ' '} ${String(i + 1).padStart(2)}. ${color}${pad(shownName(tr) + stars(tr.stage), 16)}${RESET} ` +
+      `${pad(tr.type, 20)} ${pad(`[${elementName(tr.type)}]`, 10)} ${t('team.power')} ${String(tr.power).padStart(4)}  ${DIM}${tr.project}${RESET}`);
+    out.push(`      ${DIM}${factorLine(tr.factors)}${RESET}`);
+    if (creatures) out.push(`      ${DIM}${evolutionLine(tr.captures)}${RESET}`);
+  });
+  out.push('', `${DIM}${t('team.chartTitle')}${RESET}`, ...elementChart().map((l) => `  ${l}`), '', `${DIM}${t('team.hint')}${RESET}`);
   return out.join('\n');
 }
 
@@ -152,6 +168,8 @@ function esc(s) {
 function battleLine(ev, labelOf = (n) => n) {
   let s = t('battle.hit', { att: labelOf(ev.att), def: labelOf(ev.def), dmg: ev.dmg });
   if (ev.crit) s += t('battle.crit');
+  if (ev.mult > 1) s += t('battle.super');
+  else if (ev.mult < 1) s += t('battle.weak');
   s += ev.faint ? t('battle.faint', { def: labelOf(ev.def) }) : t('battle.left', { hp: ev.hp });
   return s;
 }
@@ -233,5 +251,5 @@ function battleCard({ me, foe, winner, hits, labelOf = (n) => n, artOf = () => [
 
 module.exports = {
   encounter, outcomeBanner, extras, achievementLines, achievementList, dexList, exportSvg, battleCard, teamList,
-  factorLine, battleLine, shownName, label,
+  factorLine, battleLine, shownName, label, elementName,
 };

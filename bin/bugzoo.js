@@ -8,6 +8,7 @@ const { spawn } = require('node:child_process');
 const { summarize, cleanName, POINTS } = require('../src/score');
 const { scanProject } = require('../src/scan');
 const battle = require('../src/battle');
+const { elementOf } = require('../src/element');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -271,7 +272,7 @@ function sharePayload(dex, name) {
   const s = summarize(dex);
   return {
     v: 2, name, caught: s.caught, repeats: s.repeats, seen: s.seen, score: s.score,
-    team: battle.topTeam(dex.trophies, dex.creatures), updated: new Date().toISOString(),
+    team: myTeam(dex), updated: new Date().toISOString(),
   };
 }
 
@@ -329,7 +330,10 @@ function ownLabeler(dex) {
   return (n) => names.get(n) || n;
 }
 
-const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} (${m.power})`).join(', ');
+const showTeam = (s, labelOf) => s.team.map((m) => `${labelOf(m.name)} [${t(`element.${elementOf(m.type)}`)}] (${m.power})`).join(', ');
+
+/** The monsters that fight for the player: the ones they picked with `bugzoo team set`, else the strongest. */
+const myTeam = (dex) => battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team);
 
 function listWords() {
   return {
@@ -416,7 +420,7 @@ async function showLadder(args) {
 async function cmdLadderJoin() {
   const dex = store.load();
   const name = cleanName((dex.profile && dex.profile.name) || '');
-  if (battle.topTeam(dex.trophies, dex.creatures).length === 0) {
+  if (myTeam(dex).length === 0) {
     console.error(t('ladder.join.needCatch'));
     return 2;
   }
@@ -448,10 +452,39 @@ async function cmdLadderJoin() {
   return 0;
 }
 
+/** `bugzoo team` lists your monsters; `team set 1 4 2` picks who fights; `team auto` goes back to the strongest. */
+function cmdTeam(args) {
+  const dex = store.load();
+  const [sub, ...nums] = args;
+  if (sub === 'auto') {
+    dex.team = [];
+    store.save(dex);
+    console.log(t('team.autoOk'));
+    return 0;
+  }
+  if (sub === 'set') {
+    const rows = battle.roster(dex.trophies, dex.creatures);
+    const picks = nums.map((n) => Number.parseInt(n, 10));
+    const ok = picks.length >= 1 && picks.length <= battle.TEAM_SIZE && new Set(picks).size === picks.length &&
+      picks.every((n) => Number.isInteger(n) && n >= 1 && n <= rows.length);
+    if (!ok) {
+      console.error(t('team.setBad'));
+      return 2;
+    }
+    dex.team = picks.map((n) => rows[n - 1].id);
+    store.save(dex);
+    const names = battle.topTeam(dex.trophies, dex.creatures, battle.TEAM_SIZE, dex.team).map((m) => `${m.name} [${t(`element.${m.element}`)}]`);
+    console.log(t('team.setOk', { list: names.join(', ') }));
+    return 0;
+  }
+  console.log(render.teamList(dex.trophies, dex.creatures, dex.team));
+  return 0;
+}
+
 async function cmdBattle(args) {
   const { flags, positional } = parseFlags(args);
   const dex = store.load();
-  const mine = battle.topTeam(dex.trophies, dex.creatures);
+  const mine = myTeam(dex);
   if (mine.length === 0) {
     console.error(t('battle.noTrophy'));
     return 2;
@@ -574,7 +607,7 @@ async function cmdFriend(args) {
   }
 
   if (sub === 'code') {
-    const team = battle.topTeam(dex.trophies, dex.creatures);
+    const team = myTeam(dex);
     if (team.length === 0) {
       console.error(t('friend.needTeam'));
       return 2;
@@ -657,11 +690,9 @@ async function main() {
     case 'dex':
       console.log(render.dexList(store.load()));
       break;
-    case 'team': {
-      const dex = store.load();
-      console.log(render.teamList(dex.trophies, dex.creatures));
+    case 'team':
+      process.exit(cmdTeam(rest));
       break;
-    }
     case 'achievements':
     case 'badges': {
       const dex = store.load();

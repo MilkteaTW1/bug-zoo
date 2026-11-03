@@ -26,10 +26,11 @@ function load() {
     dex.battles = dex.battles || { wins: 0, losses: 0 };
     dex.friends = dex.friends || [];
     dex.achievements = dex.achievements || {};
+    dex.team = Array.isArray(dex.team) ? dex.team : []; // ids of the monsters the player picked to fight
     return dex;
   } catch {
     return {
-      creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {},
+      creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {}, team: [],
     };
   }
 }

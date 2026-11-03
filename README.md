@@ -75,7 +75,7 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 |---|---|
 | `bugzoo run <command…>` | Run a command; if it fails a bug appears; fix it and re-run to catch it |
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
-| `bugzoo team` | Your strongest catches: power breakdown, form and the next evolution |
+| `bugzoo team` | Your monsters, numbered, with element, power, form and who fights. `team set 3 1 2` picks your fighters, `team auto` goes back to the strongest |
 | `bugzoo achievements` | Your 13 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
@@ -109,6 +109,20 @@ bugzoo rank              # your score and title
 ![A battle result card](docs/battle.en.svg)
 
 *A sample `bugzoo battle --card`. Fights are deterministic, so the same two teams always give the same card.*
+
+## Elements and your lineup
+
+Every monster has one of five elements, worked out from its error type (a `SyntaxError` is Syntax, a `TypeError` Logic, `ENOENT` Environment, `ECONNREFUSED` Network, `SIGSEGV` Crash; any other type gets one from its name). They form a ring: each beats the next two for x1.4 damage and takes x0.7 from the two before it.
+
+| Element | Beats |
+|---|---|
+| Syntax | Logic, Environment |
+| Logic | Environment, Network |
+| Environment | Network, Crash |
+| Network | Syntax, Crash |
+| Crash | Syntax, Logic |
+
+You choose who fights: `bugzoo team` lists your monsters with numbers, `bugzoo team set 3 1 2` sends those three, `bugzoo team auto` goes back to the three strongest. Battle lines show every opponent's elements, and a friend's or ladder player's monsters get theirs from their error type too, so nobody can claim a different one. Fights are still deterministic, but the same two teams now fight differently than in versions before this one.
 
 ## Catching a bug
 
@@ -378,7 +392,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 |---|---|
 | `bugzoo run <指令…>` | 執行指令，失敗時出現 bug；修好後重跑就能捕捉 |
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
-| `bugzoo team` | 你最強的捕獲：戰鬥力明細、型態與下一次進化 |
+| `bugzoo team` | 你的怪物清單(有編號)：屬性、戰鬥力、型態與誰會出戰。`team set 3 1 2` 自選出戰成員,`team auto` 改回自動挑最強 |
 | `bugzoo achievements` | 你的 13 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
@@ -412,6 +426,20 @@ bugzoo rank              # 你的分數與稱號
 ![戰鬥結果卡](docs/battle.zh-TW.svg)
 
 *`bugzoo battle --card` 的範例。戰鬥是固定的，所以同樣兩支隊伍永遠產生同一張卡。*
+
+## 屬性與出戰名單
+
+每隻怪物都有五種屬性之一,由它的錯誤類型決定(`SyntaxError` 是語法、`TypeError` 是邏輯、`ENOENT` 是環境、`ECONNREFUSED` 是網路、`SIGSEGV` 是崩潰;沒列在表裡的類型會依名稱分到其中一種)。五種屬性連成一圈:每種剋制後面兩種,打出 x1.4 傷害,被前面兩種打則只有 x0.7。
+
+| 屬性 | 剋制 |
+|---|---|
+| 語法 | 邏輯、環境 |
+| 邏輯 | 環境、網路 |
+| 環境 | 網路、崩潰 |
+| 網路 | 語法、崩潰 |
+| 崩潰 | 語法、邏輯 |
+
+誰出戰由你決定:`bugzoo team` 列出帶編號的怪物,`bugzoo team set 3 1 2` 派這三隻,`bugzoo team auto` 改回最強的三隻。對戰時會顯示對手的屬性;朋友或天梯玩家送來的新怪物,也會依錯誤類型自動帶上屬性,沒有人能自己宣稱不同的屬性。對戰結果仍然是確定性的,但同樣兩支隊伍在這個版本之後的打法,會跟舊版不同。
 
 ## 捕捉規則
 
