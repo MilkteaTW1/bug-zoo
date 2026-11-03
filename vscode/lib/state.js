@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('node:path');
-const { store, power, remote, i18n, creature } = require('./engine');
+const { store, power, remote, i18n, creature, achievements } = require('./engine');
 
 /**
  * Turn the dex file into what the zoo view draws.
@@ -67,6 +67,12 @@ function buildState(folders) {
     seen: all.length,
     caughtCount: all.filter((c) => (c.captures || 0) > 0).length,
     lang: i18n.getLang(),
+    achievements: achievements.DEFS.map((d) => ({
+      id: d.id,
+      name: i18n.t(`ach.${d.id}.name`),
+      desc: i18n.t(`ach.${d.id}.desc`),
+      at: (dex.achievements && dex.achievements[d.id]) || null,
+    })),
     // Every on-screen text of the zoo and ladder views, in the player's language (rarity words keep their `rarity.` prefix).
     text: {
       ...i18n.bundle('vs.'),
