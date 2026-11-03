@@ -10,6 +10,7 @@ const { scanProject } = require('../src/scan');
 const battle = require('../src/battle');
 const { elementOf } = require('../src/element');
 const quests = require('../src/quests');
+const tower = require('../src/tower');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -453,6 +454,48 @@ async function cmdLadderJoin() {
   return 0;
 }
 
+/** `bugzoo tower` shows the next floor and its enemies; `tower fight` takes it on with your current lineup. */
+function cmdTower(args) {
+  const dex = store.load();
+  const total = tower.FLOORS;
+  if (dex.tower.cleared >= total) {
+    console.log(t('tower.done'));
+    return 0;
+  }
+  const floor = dex.tower.cleared + 1;
+  const foe = tower.foeFor(floor);
+  const mine = myTeam(dex);
+  const labelOf = ownLabeler(dex);
+  const showFoe = (m) => t('tower.foe', { name: m.name, element: t(`element.${m.element}`), power: m.power });
+
+  if (args[0] !== 'fight') {
+    console.log(t('tower.title', { n: floor, total }));
+    for (const m of foe.team) console.log(`  ${showFoe(m)}`);
+    console.log(`
+${t('tower.progress', { n: dex.tower.cleared, total })}`);
+    console.log(t('tower.hint'));
+    return 0;
+  }
+  if (mine.length === 0) {
+    console.error(t('battle.noTrophy'));
+    return 2;
+  }
+  const me = { name: t('battle.you'), team: mine };
+  console.log(`\n${me.name}: ${showTeam(me, labelOf)}`);
+  console.log(`${foe.name}: ${showTeam(foe, (n) => n)}\n`);
+  const result = battle.duel(me, foe);
+  for (const ev of result.log) console.log(`  ${render.battleLine(ev, labelOf)}`);
+  const won = result.winner === me.name;
+  console.log(`\n${t(won ? 'tower.win' : 'tower.lose', { n: floor })}`);
+  const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
+  if (won) dex.tower.cleared = floor;
+  const earned = achievements.evaluate(dex);
+  store.save(dex);
+  for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
+  for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
+  return 0;
+}
+
 /** `bugzoo team` lists your monsters; `team set 1 4 2` picks who fights; `team auto` goes back to the strongest. */
 function cmdTeam(args) {
   const dex = store.load();
@@ -695,6 +738,9 @@ async function main() {
       break;
     case 'team':
       process.exit(cmdTeam(rest));
+      break;
+    case 'tower':
+      process.exit(cmdTower(rest));
       break;
     case 'quests':
     case 'quest': {

@@ -77,7 +77,8 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo dex` | Your collection and the bugs waiting to be caught |
 | `bugzoo team` | Your monsters, numbered, with element, power, form and who fights. `team set 3 1 2` picks your fighters, `team auto` goes back to the strongest |
 | `bugzoo quests` | Today's three quests and your progress |
-| `bugzoo achievements` | Your 19 achievements |
+| `bugzoo tower` | The solo Tower: the next floor and its enemies. `tower fight` takes it on with your lineup |
+| `bugzoo achievements` | Your 21 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
@@ -124,6 +125,10 @@ Every monster has one of five elements, worked out from its error type (a `Synta
 | Crash | Syntax, Logic |
 
 You choose who fights: `bugzoo team` lists your monsters with numbers, `bugzoo team set 3 1 2` sends those three, `bugzoo team auto` goes back to the three strongest. Battle lines show every opponent's elements, and a friend's or ladder player's monsters get theirs from their error type too, so nobody can claim a different one. Fights are still deterministic, but the same two teams now fight differently than in versions before this one.
+
+## The Tower (solo)
+
+No friends yet? Climb the Tower: twelve floors, the same enemies for everybody (one monster on floors 1-2, two on floors 3-5, three from floor 6). `bugzoo tower` shows the next floor, its enemies, their elements and power; `bugzoo tower fight` sends your current lineup. A fight is deterministic, so a floor you lost needs a *different* lineup, not another try: read the enemy elements, then pick counters with `bugzoo team set`. Clearing floors 3 and 12 unlocks achievements.
 
 ## Daily quests, shiny catches and clean runs
 
@@ -226,7 +231,7 @@ Meeting the same bug again and again is not wasted: its form changes.
 
 The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how many catches are left until the next one.
 
-`bugzoo achievements` lists 19 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
+`bugzoo achievements` lists 21 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
 ## Battles and the ladder
 
@@ -402,7 +407,8 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo dex` | 你的圖鑑與等著被捕捉的 bug |
 | `bugzoo team` | 你的怪物清單(有編號)：屬性、戰鬥力、型態與誰會出戰。`team set 3 1 2` 自選出戰成員,`team auto` 改回自動挑最強 |
 | `bugzoo quests` | 今天的三個任務與進度 |
-| `bugzoo achievements` | 你的 19 個成就 |
+| `bugzoo tower` | 單人高塔:下一層與敵人的資料。`tower fight` 用你的出戰名單挑戰 |
+| `bugzoo achievements` | 你的 21 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
@@ -449,6 +455,10 @@ bugzoo rank              # 你的分數與稱號
 | 崩潰 | 語法、邏輯 |
 
 誰出戰由你決定:`bugzoo team` 列出帶編號的怪物,`bugzoo team set 3 1 2` 派這三隻,`bugzoo team auto` 改回最強的三隻。對戰時會顯示對手的屬性;朋友或天梯玩家送來的新怪物,也會依錯誤類型自動帶上屬性,沒有人能自己宣稱不同的屬性。對戰結果仍然是確定性的,但同樣兩支隊伍在這個版本之後的打法,會跟舊版不同。
+
+## 高塔(單人)
+
+還沒有朋友?去爬高塔:十二層,每個人遇到的敵人都一樣(第 1-2 層一隻、第 3-5 層兩隻、第 6 層起三隻)。`bugzoo tower` 會顯示下一層、敵人、屬性與戰鬥力;`bugzoo tower fight` 用你目前的出戰名單挑戰。對戰是確定性的,輸掉的樓層不能重打同一組,要換一組:看敵人的屬性,再用 `bugzoo team set` 選出能剋制牠們的怪物。攻下第 3 層和第 12 層會解鎖成就。
 
 ## 每日任務、閃光捕捉與乾淨執行
 
@@ -551,7 +561,7 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及距離下一次進化還差幾次。
 
-`bugzoo achievements` 列出 19 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
+`bugzoo achievements` 列出 21 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
 ## 對戰與天梯
 

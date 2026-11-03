@@ -140,7 +140,7 @@ test('team and achievement commands reflect evolution and unlocks', () => {
   assert.match(team, /Evolved, next form after 7 more catch/);
 
   const ach = strip(spawnSync(process.execPath, [BIN, 'achievements'], { env, encoding: 'utf8' }).stdout);
-  assert.match(ach, /Achievements: \d+\/19/);
+  assert.match(ach, /Achievements: \d+\/21/);
   assert.match(ach, /\[x\] First catch/);
   assert.match(ach, /\[x\] Old acquaintance/);
   assert.match(ach, /\[ \] Ascended/);

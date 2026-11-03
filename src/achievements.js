@@ -47,6 +47,7 @@ function context(dex) {
     clean: (dex.stats && dex.stats.clean) || 0,
     questsDone: (dex.quests && dex.quests.total) || 0,
     perfectDays: (dex.quests && dex.quests.perfect) || 0,
+    tower: (dex.tower && dex.tower.cleared) || 0,
   };
 }
 
@@ -70,6 +71,8 @@ const DEFS = [
   { id: 'steady', test: (c) => c.clean >= 25 },
   { id: 'quester', test: (c) => c.questsDone >= 10 },
   { id: 'perfect-day', test: (c) => c.perfectDays >= 1 },
+  { id: 'tower-3', test: (c) => c.tower >= 3 },
+  { id: 'tower-12', test: (c) => c.tower >= 12 },
 ];
 
 const IDS = DEFS.map((d) => d.id);
