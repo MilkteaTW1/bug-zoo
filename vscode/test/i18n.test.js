@@ -28,7 +28,9 @@ test('every text the views and the editor ask for exists in the language files',
     'captureOn', 'captureOff',
   ];
   assert.ok(asked.length > 40, 'found the texts the code asks for');
-  assert.deepStrictEqual([...new Set(asked)].filter((k) => !have.has(k)), []);
+  // The shop texts are shared with the CLI, so they live under `shop.` and reach the view next to the `vs.` ones.
+  const shared = (k) => k.startsWith('shop.') && i18n.LOCALES.en.messages[k] !== undefined;
+  assert.deepStrictEqual([...new Set(asked)].filter((k) => !have.has(k) && !shared(k)), []);
 });
 
 test('every language has all the extension texts (English fills any gap)', () => {

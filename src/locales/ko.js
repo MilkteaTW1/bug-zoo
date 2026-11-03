@@ -28,6 +28,9 @@ Usage:
   bugzoo dex                  Your collection and bugs waiting to be caught
   bugzoo team                 Your strongest catches, with their evolution
   bugzoo nick <몬스터> [별명]   잡은 몬스터에 별명 붙이기
+  bugzoo shop                 상점: 코인, 음식, 가구, 몬스터 호감도
+  bugzoo buy <아이템>        음식이나 가구 구매
+  bugzoo feed <몬스터> <음식>  몬스터 먹이기 (호감도로 진화)
   bugzoo achievements         Your achievements
   bugzoo battle [--card f.svg]
                               Show the ladder, your friends and a practice
@@ -187,6 +190,45 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.species-50.desc': '50개 종을 모두 잡으세요.',
     'ach.holiday.name': '명절 버그',
     'ach.holiday.desc': '새해, 발렌타인데이, 핼러윈, 크리스마스에 버그를 잡으세요.',
+    'coins.line': '+{n} 코인',
+    'shop.title': '상점: 코인 {coins}개',
+    'shop.food': '음식 (간식당 호감도)',
+    'shop.furniture': '가구 (하나당 모든 간식 효과 10% 증가)',
+    'shop.have': '가방: {n}',
+    'shop.gives': '호감도 +{n}',
+    'shop.owned': '보유',
+    'shop.comfort': '아늑함: 간식 효과 {n}% 증가',
+    'shop.bonds': '내 몬스터 (호감도가 형태를 결정)',
+    'shop.loves': '{food} 최애',
+    'shop.hint': '구매: bugzoo buy <아이템>   먹이기: bugzoo feed <몬스터> <음식>   호감도 30, 100에서 진화, 단계마다 전투력 x1.5',
+    'shop.unknown': '상점에서 팔지 않는 물건입니다.',
+    'shop.poor': '{name}을(를) 사기에 코인이 부족합니다 ({price} 필요, 보유 {coins}).',
+    'shop.ownedAlready': '{name}은(는) 이미 가지고 있습니다.',
+    'shop.bought': '{name}을(를) {price} 코인에 샀습니다. {coins} 코인 남음.',
+    'feed.usage': '몬스터에게 먹이기: bugzoo feed <몬스터> <음식>',
+    'feed.noFood': '가방에 {food}이(가) 없습니다. 먼저 사세요.',
+    'feed.notCaught': '잡은 몬스터에게만 먹일 수 있습니다.',
+    'feed.max': '{name}의 호감도는 이미 최대입니다.',
+    'feed.unknown': '상점에서 팔지 않는 물건입니다.',
+    'feed.loved': '{name}이(가) {food}을(를) 정말 좋아해요! 호감도 +{gain} ({bond}/{max}).',
+    'feed.ate': '{name}이(가) {food}을(를) 먹었습니다. 호감도 +{gain} ({bond}/{max}).',
+    'shop.item.snack': '버그 간식',
+    'shop.item.cookie': '쿠키',
+    'shop.item.pizza': '피자',
+    'shop.item.coffee': '커피',
+    'shop.item.cake': '황금 케이크',
+    'shop.item.cushion': '쿠션',
+    'shop.item.lamp': '램프',
+    'shop.item.plant': '화분',
+    'shop.item.books': '책장',
+    'shop.item.aquarium': '수족관',
+    'shop.item.arcade': '미니 오락기',
+    'ach.shopper.name': '아이쇼핑',
+    'ach.shopper.desc': '상점에서 무언가를 사세요.',
+    'ach.decorator.name': '인테리어 디자이너',
+    'ach.decorator.desc': '가구 3개를 가지세요.',
+    'ach.gourmet.name': '미식가',
+    'ach.gourmet.desc': '몬스터에게 20번 먹이세요.',
     'dex.species': '종: {n}/{total}',
     'nick.usage': '몬스터에 별명 붙이기: bugzoo nick <몬스터> <별명>   (별명을 비우면 삭제)',
     'nick.unknown': '"{name}"이라는 이름의 잡은 몬스터가 없습니다.',
@@ -263,7 +305,7 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'evo.stage0': '유충', // EN: 'base'
     'evo.stage1': '탈피', // EN: 'Evolved'
     'evo.stage2': '초월', // EN: 'Ascended'
-    'evo.next': '{n}번 더 잡으면 다음 형태로 진화', // EN: 'next form after {n} more catch(es)'
+    'evo.next': '호감도 {n} 더 모으면 다음 형태',
     'evo.max': '최종 진화 형태', // EN: 'final form'
     'ach.tag': '[업적]', // EN: '[ACHIEVEMENT]'
     'ach.title': '업적: {n}/{total}', // EN: 'Achievements: {n}/{total}'
@@ -280,9 +322,9 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'ach.legend.name': '레전더리 사냥꾼', // EN: 'Legend hunter'
     'ach.legend.desc': '레전더리 버그를 잡으세요.', // EN: 'Catch a legendary bug.'
     'ach.persistent.name': '오랜 친구', // EN: 'Old acquaintance'
-    'ach.persistent.desc': '같은 버그를 3번 잡고 진화하는 모습을 지켜보세요.', // EN: 'Catch the same bug 3 times and watch it evolve.'
+    'ach.persistent.desc': '호감도로 몬스터를 진화시키세요.',
     'ach.ascended.name': '초월', // EN: 'Ascended'
-    'ach.ascended.desc': '같은 버그를 10번 잡으세요.', // EN: 'Catch the same bug 10 times.'
+    'ach.ascended.desc': '몬스터를 최종 형태까지 키우세요.',
     'ach.big-game.name': '대왕 버그 사냥', // EN: 'Big game'
     'ach.big-game.desc': '전투력 100 이상인 버그를 잡으세요.', // EN: 'Catch a bug with 100 or more power.'
     'ach.streak-3.name': '3일 연속', // EN: 'Three days running'
@@ -390,6 +432,12 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.achievements': '업적', // EN: 'Achievements'
     'vs.achUnlocked': '{date} 달성', // EN: 'unlocked {date}'
     'vs.achLocked': '잠김', // EN: 'locked'
+    'vs.shopTab': '상점',
+    'vs.feedBtn': '먹이기',
+    'vs.feedTitle': '몬스터 먹이기',
+    'vs.feedPlaceholder': '간식을 줄 몬스터를 고르세요',
+    'vs.coinsEarned': '+{n} 코인',
+    'vs.affection': '호감도',
     'vs.species': '종',
     'vs.shiny': '빛남: 10분 안에 해결',
     'vs.companion': '동료',

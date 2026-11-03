@@ -102,7 +102,8 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo quests` | Today's three quests and your progress |
 | `bugzoo tower` | The solo Tower: the next floor and its enemies. `tower fight` takes it on with your lineup |
 | `bugzoo nick <monster> [name]` | Give a caught monster a nickname |
-| `bugzoo achievements` | Your 27 achievements |
+| `bugzoo shop` / `buy <item>` / `feed <monster> <food>` | Spend coins on food and furniture; affection makes monsters evolve |
+| `bugzoo achievements` | Your 30 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
 | `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
@@ -252,17 +253,24 @@ Base: common 10, uncommon 25, rare 60, legendary 150. Your top 3 trophies form y
 
 ## Evolution and achievements
 
-Meeting the same bug again and again is not wasted: its form changes.
+Every monster has three forms, and **affection** decides which one. You earn coins by playing, spend them in the shop on food and furniture, and feed your monsters. Each form is 1.5 times as strong as the one before.
 
-| Catches of the same bug | Form | Power |
+| Affection | Form | Power |
 |---|---|---|
-| 1-2 | base | x1.00 |
-| 3 | Evolved `*` | x1.15 |
-| 10 | Ascended `**` | x1.35 |
+| 0-29 | base | x1.00 |
+| 30 | Evolved `*` | x1.50 |
+| 100 | Ascended `**` | x2.25 |
 
-The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how many catches are left until the next one.
+The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a trophy's recorded power never changes. `bugzoo team` shows each monster's form and how much affection is left until the next one. Monsters you had before this system keep the form their catches had earned.
 
-`bugzoo achievements` lists 27 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
+## The shop (coins, food, furniture)
+
+- **Coins:** a catch pays by its power (at least 3), a shiny catch +5, a finished quest +15, a companion +10, a won fight +10 (3 for a loss, nothing for the practice dummy), and a cleared tower floor 10 + 5 per floor.
+- **Food:** `bugzoo shop` lists it, `bugzoo buy <item>` puts it in your bag, `bugzoo feed <monster> <food>` gives it to a monster you caught. A Bug Snack is +4 affection, a Cookie +10, a Pizza +24, a Coffee +40 and a Golden Cake +100. Every monster **loves** one food, and that one counts double (`bugzoo shop` shows which).
+- **Furniture:** six pieces, bought once, shown in your zoo in VS Code. Each one makes every treat 10% sweeter.
+- **VS Code:** the Shop tab buys and feeds (Feed asks which monster gets the treat), hearts show next to each monster, and you can drag caught monsters around the zoo with the mouse.
+
+`bugzoo achievements` lists 30 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
 ## Battles and the ladder
 
@@ -469,7 +477,8 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo quests` | 今天的三個任務與進度 |
 | `bugzoo tower` | 單人高塔:下一層與敵人的資料。`tower fight` 用你的出戰名單挑戰 |
 | `bugzoo nick <怪物> [暱稱]` | 幫已捕捉的怪物取暱稱 |
-| `bugzoo achievements` | 你的 27 個成就 |
+| `bugzoo shop` / `buy <物品>` / `feed <怪物> <食物>` | 用金幣買食物和家具；好感度讓怪物進化 |
+| `bugzoo achievements` | 你的 30 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
 | `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
@@ -619,17 +628,24 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 ## 進化與成就
 
-一直遇到同一個 bug 並不是白費：牠的型態會改變。
+每隻怪物有三個型態，由**好感度**決定。你玩遊戲賺金幣，在商店買食物和家具，再餵給怪物。每進化一階，戰鬥力是前一階的 1.5 倍。
 
-| 同一隻 bug 的捕捉次數 | 型態 | 戰鬥力 |
+| 好感度 | 型態 | 戰鬥力 |
 |---|---|---|
-| 1–2 次 | 一般 | ×1.00 |
-| 3 次 | 第二型態 `*` | ×1.15 |
-| 10 次 | 覺醒型態 `**` | ×1.35 |
+| 0–29 | 一般 | ×1.00 |
+| 30 | 第二型態 `*` | ×1.50 |
+| 100 | 覺醒型態 `**` | ×2.25 |
 
-加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及距離下一次進化還差幾次。
+加成在組隊時才套用（`battle`、`friend code`、`share`），戰利品當初記錄的戰鬥力不會改變。`bugzoo team` 會顯示每隻怪物的型態，以及離下一次進化還差多少好感度。在這個系統之前就有的怪物，會保留原本捕捉次數換來的型態。
 
-`bugzoo achievements` 列出 27 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
+## 商店（金幣、食物、家具）
+
+- **金幣：**抓到怪物依戰鬥力給金幣（至少 3），閃光捕捉 +5，完成任務 +15，夥伴 +10，贏一場對戰 +10（輸 3，練習假人不給），通過一層高塔 10 + 每層 5。
+- **食物：**`bugzoo shop` 列出商品，`bugzoo buy <物品>` 放進背包，`bugzoo feed <怪物> <食物>` 餵給已捕捉的怪物。蟲蟲點心 +4 好感、餅乾 +10、披薩 +24、咖啡 +40、黃金蛋糕 +100。每隻怪物都有一種**最愛**的食物，吃到加倍（`bugzoo shop` 會顯示）。
+- **家具：**共六件，每件只能買一次，會擺在 VS Code 的動物園裡。每件讓所有食物的效果多 10%。
+- **VS Code：**商店分頁可以購買與餵食（按餵食會問你要給哪一隻），好感度愛心顯示在怪物旁，已捕捉的怪物還可以用滑鼠拖著在動物園裡移動。
+
+`bugzoo achievements` 列出 30 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
 ## 對戰與天梯
 

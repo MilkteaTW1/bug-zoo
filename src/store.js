@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { resolve } = require('./capture');
-const { computePower, MIN_RUNS_FOR_RATE, stageOf } = require('./power');
+const { computePower, MIN_RUNS_FOR_RATE } = require('./power');
+const shop = require('./shop');
 const achievements = require('./achievements');
 const quests = require('./quests');
 const companion = require('./companion');
@@ -33,11 +34,15 @@ function load() {
     dex.stats = dex.stats || { clean: 0 };
     dex.quests = dex.quests || { total: 0, perfect: 0 };
     dex.tower = dex.tower || { cleared: 0 };
-    return dex;
+    // Monsters from before affection existed keep the form their catch count had earned them.
+    for (const c of Object.values(dex.creatures)) {
+      if (c.bond === undefined) c.bond = c.captures >= 10 ? 100 : c.captures >= 3 ? 30 : 0;
+    }
+    return shop.ensure(dex);
   } catch {
-    return {
+    return shop.ensure({
       creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {}, team: [], stats: { clean: 0 }, quests: { total: 0, perfect: 0 }, tower: { cleared: 0 },
-    };
+    });
   }
 }
 
@@ -108,12 +113,8 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   const escaped = pick(result.escaped);
 
   const trophies = [];
-  const evolved = [];
   for (const e of captured) {
-    const before = stageOf(e.captures);
     e.captures += 1;
-    const after = stageOf(e.captures);
-    if (after > before) evolved.push({ entry: e, stage: after });
     e.lastCaptured = stamp;
     const p = prevInfo[e.id] || fresh[e.id] || computePower({ rarity: e.rarity });
     // Fixed within ten minutes of the bug appearing: a shiny catch. Only a badge; it never changes power.
@@ -151,6 +152,10 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   // Every command, healthy or not, moves the no-error streak; five in a row bring a companion.
   const gift = companion.note(dex, failed, now);
 
+  // Coins for what this run earned: catches (by power), shiny catches, finished quests and a companion.
+  const coins = shop.earn(dex, trophies.reduce((n, t) => n + shop.forCatch(t.power) + (t.shiny ? shop.COINS.shiny : 0), 0) +
+    questsDone.length * shop.COINS.quest + (gift ? shop.COINS.gift : 0));
+
   const unlocked = achievements.evaluate(dex, stamp);
 
   // A healthy run only touches the file once the player has one (a fresh install writes nothing until its first bug).
@@ -158,7 +163,7 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
 
   return {
     outcome: result.outcome, encounters, captured, escaped, trophies,
-    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked, quests: questsDone, gift,
+    pending: pick(result.pending), powers: fresh, evolved: [], achievements: unlocked, quests: questsDone, gift, coins,
   };
 }
 

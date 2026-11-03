@@ -31,19 +31,20 @@ function maxPower(rarity) {
 }
 
 /**
- * Evolution: how many times the same creature has been caught decides its form.
- * The multiplier applies when a team is formed; a trophy's recorded power never changes.
+ * Evolution: a monster has three forms and its affection (bond, raised in the shop) decides which one.
+ * Each form is 1.5 times as strong as the one before. The multiplier applies when a team is formed;
+ * a trophy's recorded power never changes.
  */
 const EVOLUTION = [
   { at: 0, mult: 1 },
-  { at: 3, mult: 1.15 },
-  { at: 10, mult: 1.35 },
+  { at: 30, mult: 1.5 },
+  { at: 100, mult: 2.25 },
 ];
 
-function stageOf(captures) {
+function stageOf(bond) {
   let stage = 0;
   EVOLUTION.forEach((e, i) => {
-    if (captures >= e.at) stage = i;
+    if (bond >= e.at) stage = i;
   });
   return stage;
 }

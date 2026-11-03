@@ -26,6 +26,7 @@ module.exports = {
   element: load('element'),
   species: load('species'),
   companion: load('companion'),
+  shop: load('shop'),
   score: load('score'),
   creature: load('creature'),
   i18n: load('i18n'),

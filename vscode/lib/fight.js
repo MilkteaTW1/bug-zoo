@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  store, remote, ladder, battle, friends, opponents, accept, achievements, score, creature, i18n, quests, tower,
+  store, remote, ladder, battle, friends, opponents, accept, achievements, score, creature, i18n, quests, tower, shop, power,
 } = require('./engine');
 
 const { cleanName } = score;
@@ -106,9 +106,11 @@ function fight(section, name) {
 
   let earned = [];
   let questsDone = [];
+  let coins = 0;
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
     questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
+    coins = shop.rewardFight(dex, won, questsDone);
     earned = achievements.evaluate(dex);
     store.save(dex);
   }
@@ -133,7 +135,7 @@ function fight(section, name) {
     foe: { name: foe.name, team: wireTeam(foe.team, dex) },
     log: result.log, winner: result.winner, won, outcome, rank: row.rank || null, reach: ladder.REACH,
     earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
-    quests: questsDone.map(questName),
+    quests: questsDone.map(questName), coins,
     canSubmit: !!pendingSubmit,
   };
 }
@@ -156,6 +158,7 @@ function towerFight() {
   const won = result.winner === me.name && result.loser !== me.name;
   const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
   if (won) dex.tower.cleared = floor;
+  const coins = shop.rewardTower(dex, floor, won, questsDone);
   const earned = achievements.evaluate(dex);
   store.save(dex);
   return {
@@ -163,8 +166,47 @@ function towerFight() {
     foe: { name: foe.name, team: wireTeam(foe.team, dex) },
     log: result.log, winner: result.winner, won, outcome: won ? 'towerWin' : 'towerLose', floor,
     earned: earned.map((id) => ({ name: i18n.t(`ach.${id}.name`), desc: i18n.t(`ach.${id}.desc`) })),
-    quests: questsDone.map(questName),
+    quests: questsDone.map(questName), coins,
     canSubmit: false,
+  };
+}
+
+/** Buy a food or a piece of furniture. Returns { ok, reason?, name, price }. */
+function buy(id) {
+  const dex = store.load();
+  setLang(dex);
+  const r = shop.buy(dex, id);
+  const name = r.item ? i18n.t(`shop.item.${r.item.id}`) : id;
+  if (r.ok) {
+    achievements.evaluate(dex);
+    store.save(dex);
+  }
+  return { ok: r.ok, reason: r.reason, name, price: r.item ? r.item.price : 0, coins: dex.coins };
+}
+
+/** The caught monsters a treat can be given to, fondest first, for the picker. */
+function feedTargets() {
+  const dex = store.load();
+  setLang(dex);
+  return Object.values(dex.creatures).filter((c) => c.captures > 0)
+    .sort((a, b) => (b.bond || 0) - (a.bond || 0))
+    .map((c) => ({ id: c.id, name: c.nick || creature.localName(c.id, i18n.getLang()) || c.name, bond: c.bond || 0, max: shop.BOND_MAX }));
+}
+
+/** Give a food from the bag to a monster. Returns the outcome for a toast. */
+function feed(creatureId, foodId) {
+  const dex = store.load();
+  setLang(dex);
+  const r = shop.feed(dex, creatureId, foodId);
+  const c = dex.creatures[creatureId];
+  const name = c ? (c.nick || creature.localName(c.id, i18n.getLang()) || c.name) : '';
+  if (!r.ok) return { ok: false, reason: r.reason, name, food: i18n.t(`shop.item.${foodId}`) };
+  achievements.evaluate(dex);
+  store.save(dex);
+  return {
+    ok: true, name, food: i18n.t(`shop.item.${foodId}`), gain: r.gain, bond: r.bond, max: shop.BOND_MAX,
+    favorite: r.favorite, evolved: r.evolved, mult: r.evolved ? power.evolutionMult(r.evolved) : 0,
+    stage: r.evolved ? i18n.t(`evo.stage${r.evolved}`) : '',
   };
 }
 
@@ -233,4 +275,4 @@ function myCode() {
   return friends.encodeCode(me.name, me.team);
 }
 
-module.exports = { loadArena, fight, towerFight, setTeam, questName, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };
+module.exports = { loadArena, fight, towerFight, setTeam, questName, buy, feed, feedTargets, submissionUrl, needsName, saveName, addFriend, removeFriend, myCode };

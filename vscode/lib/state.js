@@ -2,7 +2,7 @@
 
 const path = require('node:path');
 const {
-  store, power, remote, i18n, creature, achievements, quests, tower, battle, element, species, companion,
+  store, power, remote, i18n, creature, achievements, quests, tower, battle, element, species, companion, shop,
 } = require('./engine');
 
 /**
@@ -26,6 +26,12 @@ function setLang(dex) {
 function say(key, vars) {
   setLang(store.load());
   return i18n.t(`vs.${key}`, vars);
+}
+
+/** A message by its full key (the shop and feeding texts are shared with the CLI and are not under `vs.`). */
+function sayKey(key, vars) {
+  setLang(store.load());
+  return i18n.t(key, vars);
 }
 
 /** "Wibblebat the TypeError" in the current language. */
@@ -52,12 +58,12 @@ function buildState(folders) {
   // A caught monster fights at its best trophy's power, scaled by its evolution form (as in battles).
   const best = {};
   for (const t of dex.trophies) if (!best[t.id] || t.power > best[t.id]) best[t.id] = t.power;
-  const caughtPower = (c) => (best[c.id] ? Math.round(best[c.id] * power.evolutionMult(power.stageOf(c.captures || 0))) : undefined);
+  const caughtPower = (c) => (best[c.id] ? Math.round(best[c.id] * power.evolutionMult(power.stageOf(c.bond || 0))) : undefined);
   const pack = (c) => ({
     id: c.id, name: c.nick || creature.localName(c.id, i18n.getLang()) || c.name, nick: c.nick || '',
     species: creature.speciesName(c, i18n.getLang()), element: element.elementOf(c.type),
     shinies: c.shinies || 0, companion: !!c.companion, type: c.type, rarity: c.rarity, art: c.art, hue: c.hue,
-    count: c.count, captures: c.captures, stage: power.stageOf(c.captures || 0),
+    count: c.count, captures: c.captures, stage: power.stageOf(c.bond || 0), bond: c.bond || 0, hearts: shop.hearts(c.bond),
     power: wildIds.has(c.id) ? (pendingInfo[c.id] ? pendingInfo[c.id].power : undefined) : caughtPower(c),
     since: since[c.id] || null,
     lastSeen: c.lastSeen || null,
@@ -77,6 +83,13 @@ function buildState(folders) {
     wild, caught,
     kinds: new Set(all.filter((c) => c.captures > 0 && typeof c.species === 'number').map((c) => c.species)).size,
     kindsTotal: species.COUNT,
+    shop: {
+      coins: dex.coins,
+      bondMax: shop.BOND_MAX,
+      comfort: Math.round((shop.comfort(dex) - 1) * 100),
+      foods: shop.FOODS.map((f) => ({ id: f.id, name: i18n.t(`shop.item.${f.id}`), price: f.price, bond: f.bond, have: dex.inventory[f.id] || 0 })),
+      furniture: shop.FURNITURE.map((f) => ({ id: f.id, name: i18n.t(`shop.item.${f.id}`), price: f.price, icon: f.icon, owned: dex.furniture.includes(f.id) })),
+    },
     streak: (dex.stats && dex.stats.streak) || 0,
     streakEvery: companion.EVERY,
     quests: { list: questList, date: dex.daily ? dex.daily.date : '', total: dex.quests.total, perfect: dex.quests.perfect },
@@ -105,6 +118,7 @@ function buildState(folders) {
       ...i18n.bundle('vs.'),
       ...Object.fromEntries(Object.entries(i18n.bundle('rarity.')).map(([k, v]) => [`rarity.${k}`, v])),
       ...Object.fromEntries(Object.entries(i18n.bundle('element.')).map(([k, v]) => [`element.${k}`, v])),
+      ...Object.fromEntries(Object.entries(i18n.bundle('shop.')).map(([k, v]) => [`shop.${k}`, v])),
     },
   };
 }
@@ -140,4 +154,4 @@ async function loadLadderRows() {
   return { rows, me, source: l.source, offline: l.source === 'cache' || l.source === 'none' };
 }
 
-module.exports = { buildState, diffStates, loadLadderRows, say, creatureName };
+module.exports = { buildState, diffStates, loadLadderRows, say, sayKey, creatureName };
