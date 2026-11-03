@@ -110,6 +110,7 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo quests` | Today's three quests and your progress |
 | `bugzoo tower` | The solo Tower: the next floor and its enemies. `tower fight` takes it on with your lineup |
 | `bugzoo nick <monster> [name]` | Give a caught monster a nickname |
+| `bugzoo brag [catches\|power\|tower]` | A short text to paste when you want to show off (VS Code: the share button) |
 | `bugzoo shop` / `buy <item>` / `feed <monster> <food>` | Spend coins on food and furniture; affection makes monsters evolve |
 | `bugzoo achievements` | Your 30 achievements |
 | `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
@@ -174,6 +175,7 @@ No friends yet? Climb the Tower: twelve floors, the same enemies for everybody (
 
 - **50 species.** Every new monster is one of 50 species (Slime, Moth, Owl, Dragon, Golem, Hedgehog...), each with its own face. The species shows next to the name, and `bugzoo dex` ends with how many you have caught (`Species: 12/50`). Catching 10, 25 and all 50 unlocks achievements. Monsters you already caught keep their old look.
 - **Companions.** Run 5 commands in a row without an error and a random companion joins your zoo already caught, ready to fight. A day hands out at most 3, and any error resets the count, so it rewards clean work, not spam.
+- **Focus bonus.** Thirty *active* minutes without an error earn another companion (two a day at most). Time only counts between two signs of real work less than five minutes apart, you need at least three different commands in the window, and in VS Code real edits as well. Walking away, or looping one command, earns nothing.
 - **Nicknames.** `bugzoo nick <monster> <nickname>` renames a caught monster (no nickname clears it). In VS Code, double-click it.
 - **Holidays.** Catch a bug on New Year's Day, Valentine's Day, Halloween or Christmas (your own calendar) for the Holiday bug achievement.
 
@@ -274,7 +276,7 @@ The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a
 ## The shop (coins, food, furniture)
 
 - **Coins:** a catch pays by its power (at least 3), a shiny catch +5, a finished quest +15, a companion +10, a won fight +10 (3 for a loss, nothing for the practice dummy), and a cleared tower floor 10 + 5 per floor.
-- **Food:** `bugzoo shop` lists it, `bugzoo buy <item>` puts it in your bag, `bugzoo feed <monster> <food>` gives it to a monster you caught. A Bug Snack is +4 affection, a Cookie +10, a Pizza +24, a Coffee +40 and a Golden Cake +100. Every monster **loves** one food, and that one counts double (`bugzoo shop` shows which).
+- **Food:** `bugzoo shop` lists it, `bugzoo buy <item>` puts it in your bag, `bugzoo feed <monster> <food>` gives it to a monster you caught. Add a count or `max` to either (`bugzoo buy pizza 5`, `bugzoo feed Wobblebat pizza max`); VS Code has x5 and Max buttons. A Bug Snack is +4 affection, a Cookie +10, a Pizza +24, a Coffee +40 and a Golden Cake +100. Every monster **loves** one food, and that one counts double (`bugzoo shop` shows which).
 - **Furniture:** six pieces, bought once, shown in your zoo in VS Code. Each one makes every treat 10% sweeter.
 - **VS Code:** the Shop tab buys and feeds (Feed asks which monster gets the treat), hearts show next to each monster, and you can drag caught monsters around the zoo with the mouse.
 
@@ -493,6 +495,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo quests` | 今天的三個任務與進度 |
 | `bugzoo tower` | 單人高塔:下一層與敵人的資料。`tower fight` 用你的出戰名單挑戰 |
 | `bugzoo nick <怪物> [暱稱]` | 幫已捕捉的怪物取暱稱 |
+| `bugzoo brag [catches\|power\|tower]` | 產生一段炫耀文字（VS Code：分享按鈕） |
 | `bugzoo shop` / `buy <物品>` / `feed <怪物> <食物>` | 用金幣買食物和家具；好感度讓怪物進化 |
 | `bugzoo achievements` | 你的 30 個成就 |
 | `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
@@ -557,6 +560,7 @@ bugzoo rank              # 你的分數與稱號
 
 - **50 種物種。**每隻新怪物都是 50 個物種之一(史萊姆、飛蛾、貓頭鷹、龍、石像、刺蝟……),各有自己的長相。物種會顯示在名字旁,`bugzoo dex` 最後會列出你抓到幾種(`物種:12/50`)。抓到 10 種、25 種和全部 50 種都有成就。已經抓到的怪物外觀不變。
 - **夥伴。**連續執行 5 個指令都沒出錯,就會有一隻隨機夥伴直接加入動物園(已經是捕捉狀態,能上場)。每天最多 3 隻,任何一次出錯都會讓計數歸零,獎勵的是乾淨工作,不是洗次數。
+- **專注獎勵。**連續 30 分鐘「有效工作」且沒出錯，再送一隻夥伴（每天最多 2 隻）。只有兩次工作跡象（指令或編輯）間隔小於 5 分鐘的時間才算，視窗內至少要有 3 種不同指令，VS Code 還要有真的編輯。離開座位或重複跑同一個指令都不算。
 - **暱稱。**`bugzoo nick <怪物> <暱稱>` 幫已捕捉的怪物改名(不填暱稱就是清除)。在 VS Code 裡雙擊怪物即可。
 - **節日。**在元旦、情人節、萬聖節或聖誕節(依你自己的日曆)抓到 bug,可解鎖「節日 bug」成就。
 
@@ -657,7 +661,7 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 ## 商店（金幣、食物、家具）
 
 - **金幣：**抓到怪物依戰鬥力給金幣（至少 3），閃光捕捉 +5，完成任務 +15，夥伴 +10，贏一場對戰 +10（輸 3，練習假人不給），通過一層高塔 10 + 每層 5。
-- **食物：**`bugzoo shop` 列出商品，`bugzoo buy <物品>` 放進背包，`bugzoo feed <怪物> <食物>` 餵給已捕捉的怪物。蟲蟲點心 +4 好感、餅乾 +10、披薩 +24、咖啡 +40、黃金蛋糕 +100。每隻怪物都有一種**最愛**的食物，吃到加倍（`bugzoo shop` 會顯示）。
+- **食物：**`bugzoo shop` 列出商品，`bugzoo buy <物品>` 放進背包，`bugzoo feed <怪物> <食物>` 餵給已捕捉的怪物。兩者都可以加數量或 `max`（`bugzoo buy pizza 5`、`bugzoo feed Wobblebat pizza max`），VS Code 有 ×5 和全部按鈕。蟲蟲點心 +4 好感、餅乾 +10、披薩 +24、咖啡 +40、黃金蛋糕 +100。每隻怪物都有一種**最愛**的食物，吃到加倍（`bugzoo shop` 會顯示）。
 - **家具：**共六件，每件只能買一次，會擺在 VS Code 的動物園裡。每件讓所有食物的效果多 10%。
 - **VS Code：**商店分頁可以購買與餵食（按餵食會問你要給哪一隻），好感度愛心顯示在怪物旁，已捕捉的怪物還可以用滑鼠拖著在動物園裡移動。
 

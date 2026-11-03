@@ -25,7 +25,7 @@ function recordCommand({ commandLine, exitCode, cwd, output }) {
   const argv = splitCommand(commandLine || '');
   if (argv.length === 0 || isBugzoo(argv)) return null;
   const text = parse.stripAnsi(String(output || '')).slice(-MAX_OUTPUT);
-  return session.settleRun({ argv, exit: exitCode, stderr: text, stdout: '', cwd: cwd || process.cwd() });
+  return session.settleRun({ argv, exit: exitCode, stderr: text, stdout: '', cwd: cwd || process.cwd(), source: 'vscode' });
 }
 
 module.exports = { splitCommand, recordCommand, MAX_OUTPUT };

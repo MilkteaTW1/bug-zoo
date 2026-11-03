@@ -82,7 +82,10 @@
     h += sh.foods.map((f) => '<div class="ach-row on"><span class="ic">🍖</span><span class="nm">' + esc(f.name) + '<small>' +
       esc(fill(tr('shop.gives'), { n: f.bond })) + (f.have ? ' · ' + esc(fill(tr('shop.have'), { n: f.have })) : '') + '</small></span><span class="when"><button class="btn buy" data-id="' +
       f.id + '"' + (sh.coins < f.price ? ' disabled' : '') + '>🪙 ' + f.price + '</button>' +
-      (f.have ? ' <button class="btn feed" data-food="' + f.id + '">' + esc(tr('feedBtn')) + '</button>' : '') + '</span></div>').join('');
+      ' <button class="btn buy" data-id="' + f.id + '" data-n="5"' + (sh.coins < f.price * 2 ? ' disabled' : '') + '>×5</button>' +
+      ' <button class="btn buy" data-id="' + f.id + '" data-n="max"' + (sh.coins < f.price * 2 ? ' disabled' : '') + '>' + esc(tr('maxBtn')) + '</button>' +
+      (f.have ? ' <button class="btn feed" data-food="' + f.id + '">' + esc(tr('feedBtn')) + '</button>' +
+        (f.have > 1 ? ' <button class="btn feed" data-food="' + f.id + '" data-n="max">' + esc(tr('feedBtn')) + ' ' + esc(tr('maxBtn')) + '</button>' : '') : '') + '</span></div>').join('');
     h += '<div class="note">' + esc(tr('shop.furniture')) + '</div>';
     h += sh.furniture.map((f) => '<div class="ach-row on"><span class="ic">' + f.icon + '</span><span class="nm">' + esc(f.name) + '</span><span class="when">' +
       (f.owned ? esc(tr('shop.owned')) : '<button class="btn buy" data-id="' + f.id + '"' + (sh.coins < f.price ? ' disabled' : '') + '>🪙 ' + f.price + '</button>') + '</span></div>').join('');
@@ -136,7 +139,7 @@
     // Every tab shows its icon; only the open one spells its name out, so six tabs fit a narrow sidebar.
     panel.innerHTML = '<h3><span class="tabs">' + tabs.map(([id, ic, name]) =>
       '<b class="tab' + (tab === id ? ' on' : '') + '" data-tab="' + id + '" title="' + esc(name) + '">' + ic + (tab === id ? ' ' + esc(name) : '') + '</b>').join('') +
-      '</span><span class="fold">' + (collapsed ? '▸' : '▾') + '</span></h3><div class="rows">' + body + '</div>' +
+      '</span><span class="share" title="' + esc(tr('shareBtn')) + '">📤</span><span class="fold">' + (collapsed ? '▸' : '▾') + '</span></h3><div class="rows">' + body + '</div>' +
       (notes.length ? '<div class="note">' + notes.map(esc).join(' · ') + '</div>' : '');
     bz.relayout(panel.offsetHeight);
   }
@@ -146,6 +149,7 @@
     if (!(t instanceof Element)) return;
     const tabEl = t.closest('.tab');
     if (tabEl) { tab = tabEl.dataset.tab; collapsed = false; renderPanel(); return; }
+    if (t.closest('.share')) { vscode.postMessage({ type: 'share' }); return; }
     if (t.closest('h3')) { collapsed = !collapsed; renderPanel(); return; }
     const f = t.closest('.fight');
     if (f) { notice = ''; vscode.postMessage({ type: 'fight', section: f.dataset.section, name: f.dataset.name }); return; }
@@ -160,9 +164,9 @@
       return;
     }
     const buy = t.closest('.buy');
-    if (buy) { vscode.postMessage({ type: 'buy', id: buy.dataset.id }); return; }
+    if (buy) { vscode.postMessage({ type: 'buy', id: buy.dataset.id, n: buy.dataset.n || 1 }); return; }
     const feedBtn = t.closest('.feed');
-    if (feedBtn) { vscode.postMessage({ type: 'feed', food: feedBtn.dataset.food }); return; }
+    if (feedBtn) { vscode.postMessage({ type: 'feed', food: feedBtn.dataset.food, n: feedBtn.dataset.n || 1 }); return; }
     if (t.closest('#auto')) { vscode.postMessage({ type: 'setTeam', ids: [] }); return; }
     if (t.closest('#tower')) { notice = ''; vscode.postMessage({ type: 'tower' }); return; }
     if (t.closest('#add')) vscode.postMessage({ type: 'addFriend' });

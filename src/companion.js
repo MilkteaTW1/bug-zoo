@@ -49,4 +49,4 @@ function grant(dex, seed, now) {
   return entry;
 }
 
-module.exports = { note, EVERY, DAILY_CAP };
+module.exports = { note, grant, EVERY, DAILY_CAP };

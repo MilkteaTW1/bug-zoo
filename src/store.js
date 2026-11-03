@@ -9,6 +9,7 @@ const shop = require('./shop');
 const achievements = require('./achievements');
 const quests = require('./quests');
 const companion = require('./companion');
+const focus = require('./focus');
 
 const MAX_TROPHIES = 200;
 const FAIL_COUNT_INTERVAL_MS = 60 * 1000;
@@ -59,7 +60,7 @@ function save(dex) {
  *   ctx       - { frames, blast, loc, project } from a project scan (failing runs only)
  * Returns { outcome, encounters, captured, escaped, pending, trophies, powers }.
  */
-function applyRun(key, creatures, ctx = null, now = new Date()) {
+function applyRun(key, creatures, ctx = null, now = new Date(), source = 'cli') {
   const dex = load();
   const stamp = now.toISOString();
   const failed = creatures.length > 0;
@@ -150,11 +151,14 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   }
 
   // Every command, healthy or not, moves the no-error streak; five in a row bring a companion.
-  const gift = companion.note(dex, failed, now);
+  const streakGift = companion.note(dex, failed, now);
+  // Thirty active minutes of clean work earn another one; see focus.js for what counts as active.
+  const focusGift = focus.touch(dex, { kind: 'cmd', failed, cmd: key, source }, now);
+  const gift = streakGift || focusGift;
 
   // Coins for what this run earned: catches (by power), shiny catches, finished quests and a companion.
   const coins = shop.earn(dex, trophies.reduce((n, t) => n + shop.forCatch(t.power) + (t.shiny ? shop.COINS.shiny : 0), 0) +
-    questsDone.length * shop.COINS.quest + (gift ? shop.COINS.gift : 0));
+    questsDone.length * shop.COINS.quest + ((streakGift ? 1 : 0) + (focusGift ? 1 : 0)) * shop.COINS.gift);
 
   const unlocked = achievements.evaluate(dex, stamp);
 
@@ -167,4 +171,13 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
   };
 }
 
-module.exports = { load, save, applyRun, dexPath };
+/** An edit in the editor: a sign of real work for the focus reward. Returns a companion if this one filled the window. */
+function noteEdit(now = new Date()) {
+  const dex = load();
+  const gift = focus.touch(dex, { kind: 'edit', source: 'vscode' }, now);
+  if (gift) shop.earn(dex, shop.COINS.gift);
+  save(dex);
+  return gift;
+}
+
+module.exports = { load, save, applyRun, noteEdit, dexPath };

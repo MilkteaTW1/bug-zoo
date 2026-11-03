@@ -29,6 +29,7 @@ Uso:
   bugzoo team                 Tus capturas más fuertes, con su evolución
   bugzoo nick <monstruo> [apodo]  Ponle un apodo a un monstruo capturado
   bugzoo shop                 La tienda: monedas, comida, muebles y el afecto de tus monstruos
+  bugzoo brag [catches|power|tower]  Un texto para presumir
   bugzoo buy <objeto>        Comprar comida o muebles
   bugzoo feed <monstruo> <comida>  Dar de comer (el afecto lo hace evolucionar)
   bugzoo achievements         Tus logros
@@ -165,13 +166,15 @@ Vencer a alguien hasta 3 puestos por encima de ti en la escalera le quita su sit
     'shop.poor': 'No tienes monedas para {name} (cuesta {price}, tienes {coins}).',
     'shop.ownedAlready': 'Ya tienes {name}.',
     'shop.bought': 'Compraste {name} por {price} monedas. Te quedan {coins}.',
-    'feed.usage': 'Dar de comer: bugzoo feed <monstruo> <comida>',
+    'shop.boughtMany': 'Compraste {count} x {name} por {price} monedas. Te quedan {coins}.',
+    'feed.usage': 'Dar de comer: bugzoo feed <monstruo> <comida> [cantidad|max]',
     'feed.noFood': 'No tienes {food} en la bolsa. Cómpralo primero.',
     'feed.notCaught': 'Solo puedes alimentar monstruos que hayas capturado.',
     'feed.max': '{name} ya no puede quererte más: afecto al máximo.',
     'feed.unknown': 'La tienda no vende eso.',
     'feed.loved': '¡{name} ADORA {food}! +{gain} de afecto ({bond}/{max}).',
     'feed.ate': '{name} se comió {food}. +{gain} de afecto ({bond}/{max}).',
+    'feed.many': '{name} comió {count} x {food}. +{gain} de afecto ({bond}/{max}).',
     'shop.item.snack': 'Snack de bug',
     'shop.item.cookie': 'Galleta',
     'shop.item.pizza': 'Pizza',
@@ -191,6 +194,10 @@ Vencer a alguien hasta 3 puestos por encima de ti en la escalera le quita su sit
     'ach.gourmet.desc': 'Da de comer a tus monstruos 20 veces.',
     'dex.species': 'Especies: {n}/{total}',
     'nick.usage': 'Ponle un apodo a un monstruo: bugzoo nick <monstruo> <apodo>   (sin apodo se borra)',
+    'brag.catches': 'He capturado {total} bugs en Bug Zoo: {kinds} tipos, {shiny} brillantes. Mejor captura: {best}.',
+    'brag.power': 'Mi equipo de Bug Zoo tiene {power} de poder: {team}.',
+    'brag.tower': 'Superé {floor} de {floors} pisos de la Torre de Bug Zoo.',
+    'brag.footer': 'Convierte tus errores en monstruos: npm i -g bug-zoo',
     'nick.unknown': 'Ningún monstruo capturado se llama «{name}».',
     'nick.set': '{name} ahora se llama {nick}.',
     'nick.cleared': '{name} perdió su apodo.',
@@ -391,6 +398,13 @@ Vencer a alguien hasta 3 puestos por encima de ti en la escalera le quita su sit
     'vs.achievements': 'Logros',
     'vs.achUnlocked': 'desbloqueado {date}',
     'vs.achLocked': 'bloqueado',
+    'vs.maxBtn': 'Máx',
+    'vs.shareBtn': 'Compartir',
+    'vs.sharePick': '¿Qué compartir?',
+    'vs.pickCatches': 'Mis capturas',
+    'vs.pickPower': 'Poder del equipo',
+    'vs.pickTower': 'Progreso en la Torre',
+    'vs.shareCopied': 'Copiado. Pégalo donde quieras.',
     'vs.shopTab': 'Tienda',
     'vs.feedBtn': 'Dar',
     'vs.feedTitle': 'Dar de comer',

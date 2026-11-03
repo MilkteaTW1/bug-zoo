@@ -26,9 +26,10 @@
     const { w, h } = size();
     const mw = m.el.offsetWidth || 60;
     const mh = m.el.offsetHeight || 50;
-    // Wild bugs stay above the pen; caught ones stay inside it.
-    const top = m.wild ? 28 : h * 0.54;
-    const bottom = m.wild && penOn ? h * 0.5 : h - 10;
+    // Wild bugs stay above the pen; caught ones stay inside it, unless the player dropped one up in the wild area.
+    const outside = m.wild || m.roam === 'wild';
+    const top = outside ? 28 : h * 0.54;
+    const bottom = outside && penOn ? h * 0.5 : h - 10;
     return {
       minX: 6,
       maxX: Math.max(6, w - mw - 6),
@@ -82,6 +83,8 @@
         justDragged = true;
         setTimeout(() => { justDragged = false; }, 0);
         m.drag = false;
+        // Where it was put down decides where it lives: the wild area above the pen, or the pen.
+        m.roam = penOn && m.y + (m.el.offsetHeight || 50) / 2 < size().h * 0.54 ? 'wild' : 'pen';
         m.el.classList.remove('held');
         m.state = 'idle'; // stay where it was put down for a few seconds, then wander again
         m.timer = rand(4, 7);

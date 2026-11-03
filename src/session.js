@@ -18,7 +18,7 @@ function commandKey(argv, cwd = process.cwd()) {
  * Record the outcome of one run and return the text to show the player ('' if nothing to show).
  * Shared by `bugzoo run` (wraps a child process) and the Node preload (runs inside the program).
  */
-function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = process.cwd() }) {
+function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = process.cwd(), source = 'cli' }) {
   const dex = store.load();
   i18n.setLang((dex.profile && dex.profile.lang) || i18n.detectLang());
 
@@ -35,7 +35,7 @@ function settleRun({ argv, exit, signal = null, stderr = '', stdout = '', cwd = 
     }
   }
 
-  const result = store.applyRun(commandKey(argv, cwd), creatures, ctx);
+  const result = store.applyRun(commandKey(argv, cwd), creatures, ctx, new Date(), source);
 
   const out = [];
   for (const { entry, isNew } of result.encounters) {
