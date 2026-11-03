@@ -28,10 +28,18 @@ Website: [inkacuity.com/projects/bug-zoo](https://inkacuity.com/projects/bug-zoo
 
 ## Install
 
+Pick the easiest one for you:
+
+- **In VS Code (one click):** search for **Bug Zoo** in the Extensions view. Nothing else to install.
+- **Try it without installing** (needs Node.js 18+): `npx bug-zoo run node app.js`. Works with any command, e.g. `npx bug-zoo run python main.py`.
+- **Install for good:**
+
 ```bash
 npm install -g bug-zoo
 bugzoo setup
 ```
+
+Setup is optional: the first run asks the same questions by itself.
 
 Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / 简体中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
 
@@ -331,10 +339,18 @@ MIT
 
 ## 安裝
 
+挑最簡單的一種:
+
+- **在 VS Code 裡(一鍵):**在擴充功能搜尋 **Bug Zoo**,不用再裝別的東西。
+- **先試玩、不安裝**(需要 Node.js 18 以上):`npx bug-zoo run node app.js`。任何指令都能用,例如 `npx bug-zoo run python main.py`。
+- **正式安裝:**
+
 ```bash
 npm install -g bug-zoo
 bugzoo setup
 ```
+
+`setup` 可以不做:第一次執行時會自己問同樣的問題。
 
 需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／简体中文／English）和排行榜用的玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
 
