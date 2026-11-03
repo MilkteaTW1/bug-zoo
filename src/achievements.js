@@ -6,6 +6,15 @@ const { stageOf } = require('./power');
  * Everything an achievement can look at, derived from the dex so achievements never need
  * their own counters. `id`s are stable: they key both the saved unlocks and the translations.
  */
+const localHour = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? 99 : d.getHours();
+};
+const isFridayEvening = (iso) => {
+  const d = new Date(iso);
+  return !Number.isNaN(d.getTime()) && d.getDay() === 5 && d.getHours() >= 16;
+};
+
 function context(dex) {
   const creatures = Object.values(dex.creatures || {});
   const caught = creatures.filter((c) => c.captures > 0);
@@ -32,6 +41,12 @@ function context(dex) {
     wins: (dex.battles && dex.battles.wins) || 0,
     friends: (dex.friends || []).length,
     escapes: creatures.reduce((n, c) => n + (c.escapes || 0), 0),
+    shinies: creatures.reduce((n, c) => n + (c.shinies || 0), 0),
+    nightOwl: trophies.some((t) => localHour(t.at) < 5),
+    fridayDeploy: trophies.some((t) => isFridayEvening(t.at)),
+    clean: (dex.stats && dex.stats.clean) || 0,
+    questsDone: (dex.quests && dex.quests.total) || 0,
+    perfectDays: (dex.quests && dex.quests.perfect) || 0,
   };
 }
 
@@ -49,6 +64,12 @@ const DEFS = [
   { id: 'first-win', test: (c) => c.wins >= 1 },
   { id: 'friendly', test: (c) => c.friends >= 1 },
   { id: 'slippery', test: (c) => c.escapes >= 1 },
+  { id: 'quick-fix', test: (c) => c.shinies >= 1 },
+  { id: 'night-owl', test: (c) => c.nightOwl },
+  { id: 'friday-deploy', test: (c) => c.fridayDeploy },
+  { id: 'steady', test: (c) => c.clean >= 25 },
+  { id: 'quester', test: (c) => c.questsDone >= 10 },
+  { id: 'perfect-day', test: (c) => c.perfectDays >= 1 },
 ];
 
 const IDS = DEFS.map((d) => d.id);

@@ -6,9 +6,11 @@ const path = require('node:path');
 const { resolve } = require('./capture');
 const { computePower, MIN_RUNS_FOR_RATE, stageOf } = require('./power');
 const achievements = require('./achievements');
+const quests = require('./quests');
 
 const MAX_TROPHIES = 200;
 const FAIL_COUNT_INTERVAL_MS = 60 * 1000;
+const SHINY_MS = 10 * 60 * 1000;
 
 function dexPath() {
   const dir = process.env.BUGZOO_HOME || path.join(os.homedir(), '.bugzoo');
@@ -27,10 +29,12 @@ function load() {
     dex.friends = dex.friends || [];
     dex.achievements = dex.achievements || {};
     dex.team = Array.isArray(dex.team) ? dex.team : []; // ids of the monsters the player picked to fight
+    dex.stats = dex.stats || { clean: 0 };
+    dex.quests = dex.quests || { total: 0, perfect: 0 };
     return dex;
   } catch {
     return {
-      creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {}, team: [],
+      creatures: {}, pending: {}, runs: {}, trophies: [], battles: { wins: 0, losses: 0 }, friends: [], achievements: {}, team: [], stats: { clean: 0 }, quests: { total: 0, perfect: 0 },
     };
   }
 }
@@ -110,10 +114,13 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
     if (after > before) evolved.push({ entry: e, stage: after });
     e.lastCaptured = stamp;
     const p = prevInfo[e.id] || fresh[e.id] || computePower({ rarity: e.rarity });
+    // Fixed within ten minutes of the bug appearing: a shiny catch. Only a badge; it never changes power.
+    const shiny = Boolean(prev && prev.since && now - new Date(prev.since) <= SHINY_MS);
+    if (shiny) e.shinies = (e.shinies || 0) + 1;
     trophies.push({
       id: e.id, name: e.name, type: e.type, rarity: e.rarity, art: e.art,
       power: p.power, factors: p.factors,
-      project: (ctx && ctx.project) || path.basename(process.cwd()), at: stamp,
+      project: (ctx && ctx.project) || path.basename(process.cwd()), at: stamp, ...(shiny ? { shiny: true } : {}),
     });
   }
   for (const e of escaped) e.escapes += 1;
@@ -129,13 +136,23 @@ function applyRun(key, creatures, ctx = null, now = new Date()) {
     delete dex.pending[key];
   }
 
+  // Daily quests. A clean run only counts for a command that failed before (those are the runs we record at all).
+  const questsDone = [];
+  if (captured.length > 0) questsDone.push(...quests.note(dex, 'catch', captured.length, now));
+  const fresh1 = encounters.filter((x) => x.isNew).length;
+  if (fresh1 > 0) questsDone.push(...quests.note(dex, 'seen', fresh1, now));
+  if (!failed && run) {
+    dex.stats.clean += 1;
+    questsDone.push(...quests.note(dex, 'clean', 1, now));
+  }
+
   const unlocked = achievements.evaluate(dex, stamp);
 
   if (failed || prev || run) save(dex);
 
   return {
     outcome: result.outcome, encounters, captured, escaped, trophies,
-    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked,
+    pending: pick(result.pending), powers: fresh, evolved, achievements: unlocked, quests: questsDone,
   };
 }
 

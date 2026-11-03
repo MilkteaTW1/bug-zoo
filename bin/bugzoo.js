@@ -9,6 +9,7 @@ const { summarize, cleanName, POINTS } = require('../src/score');
 const { scanProject } = require('../src/scan');
 const battle = require('../src/battle');
 const { elementOf } = require('../src/element');
+const quests = require('../src/quests');
 const hook = require('../src/hook');
 const ladder = require('../src/ladder');
 const leaderboard = require('../src/leaderboard');
@@ -544,8 +545,10 @@ async function cmdBattle(args) {
   const practice = row && row.section === 'practice';
   if (!practice) {
     dex.battles[won ? 'wins' : 'losses'] += 1;
+    const questsDone = [...quests.note(dex, 'fights'), ...(won ? quests.note(dex, 'wins') : [])];
     const earned = achievements.evaluate(dex);
     store.save(dex);
+    for (const line of render.questLines(questsDone)) console.log(`\n${line}`);
     for (const line of render.achievementLines(earned)) console.log(`\n${line}`);
   }
 
@@ -693,6 +696,13 @@ async function main() {
     case 'team':
       process.exit(cmdTeam(rest));
       break;
+    case 'quests':
+    case 'quest': {
+      const dex = store.load();
+      if (quests.roll(dex)) store.save(dex);
+      console.log(render.questList(dex));
+      break;
+    }
     case 'achievements':
     case 'badges': {
       const dex = store.load();

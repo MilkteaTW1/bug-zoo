@@ -5,6 +5,7 @@ const { t, getLang, pad } = require('./i18n');
 const { EVOLUTION, stageOf, evolutionMult } = require('./power');
 const { roster, lineup } = require('./battle');
 const { ORDER: ELEMENTS, elementOf, strongAgainst } = require('./element');
+const quests = require('./quests');
 const { IDS: ACHIEVEMENT_IDS } = require('./achievements');
 
 const RESET = '\x1b[0m';
@@ -113,14 +114,41 @@ function achievementLines(ids = []) {
   return ids.map((id) => `${GREEN}${BOLD}${t('ach.tag')}${RESET}${GREEN} ${t(`ach.${id}.name`)} - ${t(`ach.${id}.desc`)}${RESET}`);
 }
 
+const questName = (id) => {
+  const q = quests.POOL.find((x) => x.id === id);
+  return q ? t(`quest.${q.metric}`, { n: q.goal }) : id;
+};
+
+/** Lines announcing quests finished just now. */
+function questLines(ids = []) {
+  return ids.map((id) => `${GREEN}${BOLD}${t('quest.tag')}${RESET}${GREEN} ${t('quest.complete', { name: questName(id) })}${RESET}`);
+}
+
+/** `bugzoo quests`: today's three goals with progress, and the running totals. */
+function questList(dex, now = new Date()) {
+  const list = quests.status(dex, now);
+  const out = [`${BOLD}${t('quest.title', { date: dex.daily.date })}${RESET}`, ''];
+  for (const q of list) {
+    const mark = q.done ? `${GREEN}[x]${RESET}` : `${DIM}[ ]${RESET}`;
+    out.push(`${mark} ${q.done ? DIM : BOLD}${questName(q.id)}${RESET}  ${DIM}${q.have}/${q.goal}${q.done ? ` (${t('quest.done')})` : ''}${RESET}`);
+  }
+  if (list.every((q) => q.done)) out.push('', `${GREEN}${t('quest.all')}${RESET}`);
+  out.push('', `${DIM}${t('quest.total', { n: dex.quests.total, p: dex.quests.perfect })}${RESET}`);
+  return out.join('\n');
+}
+
 /** Evolutions and achievements that came with a run. */
 function extras(result) {
   const lines = [];
+  for (const tr of result.trophies || []) {
+    if (tr.shiny) lines.push(`${YELLOW}${BOLD}${t('shiny.tag')}${RESET}${YELLOW} ${t('shiny.line', { name: shownName(tr) })}${RESET}`);
+  }
   for (const { entry, stage } of result.evolved || []) {
     lines.push(`${YELLOW}${BOLD}${t('evo.tag')}${RESET}${YELLOW} ${t('evo.line', {
       name: shownName(entry), stage: t(`evo.stage${stage}`), mult: evolutionMult(stage),
     })}${RESET}`);
   }
+  lines.push(...questLines(result.quests));
   lines.push(...achievementLines(result.achievements));
   return lines;
 }
@@ -142,7 +170,8 @@ const sortEntries = (entries) => entries.sort((a, b) => (b.captures > 0) - (a.ca
   RARITY_ORDER.indexOf(b.rarity) - RARITY_ORDER.indexOf(a.rarity) || b.count - a.count);
 
 function status(e) {
-  return e.captures > 0 ? `${GREEN}${t('dex.caught', { n: e.captures })}${RESET}` : `${DIM}${t('dex.wild')}${RESET}`;
+  const shiny = e.shinies > 0 ? ` ${YELLOW}${t('dex.shiny', { n: e.shinies })}${RESET}` : '';
+  return e.captures > 0 ? `${GREEN}${t('dex.caught', { n: e.captures })}${RESET}${shiny}` : `${DIM}${t('dex.wild')}${RESET}`;
 }
 
 function dexList(dex) {
@@ -251,5 +280,5 @@ function battleCard({ me, foe, winner, hits, labelOf = (n) => n, artOf = () => [
 
 module.exports = {
   encounter, outcomeBanner, extras, achievementLines, achievementList, dexList, exportSvg, battleCard, teamList,
-  factorLine, battleLine, shownName, label, elementName,
+  factorLine, battleLine, shownName, label, elementName, questList, questLines,
 };
