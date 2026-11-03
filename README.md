@@ -32,6 +32,7 @@ Pick the easiest one for you:
 
 - **In VS Code (one click):** search for **Bug Zoo** in the Extensions view. Nothing else to install.
 - **Try it without installing** (needs Node.js 18+): `npx bug-zoo run node app.js`. Works with any command, e.g. `npx bug-zoo run python main.py`.
+- **No Node.js? Download one file** from the [latest release](https://github.com/MilkteaTW1/bug-zoo/releases/latest): `bugzoo-win-x64.exe`, `bugzoo-macos-arm64` or `bugzoo-linux-x64`, then run it in a terminal (`./bugzoo-linux-x64 run python main.py`). It is not code-signed, so Windows SmartScreen or macOS may warn once. Everything works except `setup --auto` and `setup --ai`, which hook into Node and need the npm install. Verify it with the `.sha256` file next to it.
 - **Install for good:**
 
 ```bash
@@ -343,6 +344,7 @@ MIT
 
 - **在 VS Code 裡(一鍵):**在擴充功能搜尋 **Bug Zoo**,不用再裝別的東西。
 - **先試玩、不安裝**(需要 Node.js 18 以上):`npx bug-zoo run node app.js`。任何指令都能用,例如 `npx bug-zoo run python main.py`。
+- **沒有 Node.js?下載一個檔案就好**:到[最新版本](https://github.com/MilkteaTW1/bug-zoo/releases/latest)下載 `bugzoo-win-x64.exe`、`bugzoo-macos-arm64` 或 `bugzoo-linux-x64`,在終端機執行(`./bugzoo-linux-x64 run python main.py`)。沒有程式碼簽章,Windows SmartScreen 或 macOS 可能警告一次。除了 `setup --auto` 和 `setup --ai`(需要掛進 Node,請用 npm 安裝)之外功能都能用。旁邊的 `.sha256` 檔可以驗證檔案。
 - **正式安裝:**
 
 ```bash

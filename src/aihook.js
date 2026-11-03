@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { stripAnsi } = require('./parse');
+const sea = require('./sea');
 
 /**
  * Bug Zoo for AI coding sessions. Claude Code reports every Bash tool call to a hook:
@@ -204,6 +205,7 @@ function write(file, settings) {
 
 /** Returns { ok, file, error? }. Idempotent; leaves every other setting and hook alone. */
 function enable(file = defaultSettingsFile(), command = hookCommand()) {
+  if (sea.isSea()) return { ok: false, file, error: sea.NEEDS_NPM };
   try {
     const { settings } = readSettings(file);
     write(file, withOurs(settings, command));

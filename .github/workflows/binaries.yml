@@ -1,0 +1,69 @@
+name: Binaries
+
+# Standalone programs (no Node needed) for the latest GitHub release. They are built after the Release workflow
+# finishes (a release made with the workflow token does not start other workflows on its own), or by hand for a given tag.
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to attach the programs to (default - the latest release)
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: binaries
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.pick.outputs.tag }}
+      needed: ${{ steps.pick.outputs.needed }}
+    steps:
+      - id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          tag="${INPUT_TAG:-$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName)}"
+          have="$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '[.assets[].name] | index("bugzoo-win-x64.exe") != null')"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ "$have" = "true" ] && [ -z "$INPUT_TAG" ]; then echo "needed=false" >> "$GITHUB_OUTPUT"; else echo "needed=true" >> "$GITHUB_OUTPUT"; fi
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.needed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/build-binary.js
+      - name: Smoke test (the program starts and knows its languages)
+        shell: bash
+        env:
+          BUGZOO_HOME: ${{ runner.temp }}/bugzoo-smoke
+        run: |
+          exe="$(ls dist/bugzoo-* | grep -v sha256 | head -1)"
+          "$exe" lang | grep -q English
+          "$exe" --help | head -3
+      - name: Attach to the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ needs.plan.outputs.tag }}" dist/bugzoo-* --clobber --repo "$GITHUB_REPOSITORY"
