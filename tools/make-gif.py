@@ -243,6 +243,7 @@ def build(lang, out):
     (project / "lib" / "db.js").write_text(DB_GOOD)
     scene("node app.js", [node, "app.js"], note=TEXT[lang]["fix"])
     scene("bugzoo team", [node, str(BIN), "team"], hold=1900)
+    scene("bugzoo shop", [node, str(BIN), "shop"], hold=2800)
     scene("bugzoo battle", [node, str(BIN), "battle"], hold=3600, answer="3")
 
     # one shared palette keeps the GIF small and the colours stable

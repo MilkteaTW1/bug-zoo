@@ -108,7 +108,7 @@ function encode(listFile, gif, mp4) {
   const base = `http://127.0.0.1:${server.address().port}`;
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--force-device-scale-factor=1'] });
   try {
-    for (const name of ['catch', 'fight', 'friends']) {
+    for (const name of (process.env.SCENES ? process.env.SCENES.split(',') : ['catch', 'fight', 'friends', 'shop', 'solo'])) {
       const r = await record(browser, base, name);
       const gif = path.join(outDir, `${name}${ZH ? '.zh' : ''}.gif`);
       const mp4 = process.env.MP4_DIR ? path.join(process.env.MP4_DIR, `${name}${ZH ? '.zh' : ''}.mp4`) : null;

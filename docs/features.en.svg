@@ -58,9 +58,9 @@
 <rect x="320" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
 <rect x="320" y="560" width="270" height="6" rx="3" fill="#f472b6"/>
 <text x="344" y="628" font-size="40">✨</text>
-<text x="344" y="675" font-size="22" font-weight="700" fill="#f8fafc">Evolve and achieve</text>
-<text x="344" y="708" font-size="16" fill="#cbd5e1">Catch again to evolve.</text>
-<text x="344" y="732" font-size="16" fill="#cbd5e1">13 achievements to earn.</text>
+<text x="344" y="675" font-size="22" font-weight="700" fill="#f8fafc">Shop, evolve, achieve</text>
+<text x="344" y="708" font-size="16" fill="#cbd5e1">Feed monsters to evolve them.</text>
+<text x="344" y="732" font-size="16" fill="#cbd5e1">50 species, 30 achievements.</text>
 <rect x="610" y="560" width="270" height="210" rx="16" fill="#1e293b"/>
 <rect x="610" y="560" width="270" height="6" rx="3" fill="#34d399"/>
 <text x="634" y="628" font-size="40">🃏</text>
@@ -71,8 +71,8 @@
 <rect x="900" y="560" width="270" height="6" rx="3" fill="#fb923c"/>
 <text x="924" y="628" font-size="40">🌐</text>
 <text x="924" y="675" font-size="22" font-weight="700" fill="#f8fafc">Zero dependencies</text>
-<text x="924" y="708" font-size="16" fill="#cbd5e1">One npm install. English</text>
-<text x="924" y="732" font-size="16" fill="#cbd5e1">and Traditional Chinese.</text>
+<text x="924" y="708" font-size="16" fill="#cbd5e1">One npm install, or one file.</text>
+<text x="924" y="732" font-size="16" fill="#cbd5e1">English, 中文, Español, 한국어.</text>
 <rect x="320" y="796" width="560" height="52" rx="26" fill="#0b1220" stroke="#334155"/>
 <text x="600" y="830" text-anchor="middle" font-size="22" font-family="Consolas,'Courier New',monospace" fill="#5eead4">npm install -g bug-zoo</text>
 <text x="600" y="872" text-anchor="middle" font-size="16" fill="#64748b">github.com/MilkteaTW1/bug-zoo</text>
