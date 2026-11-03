@@ -2,7 +2,7 @@
 
 const path = require('node:path');
 const {
-  store, power, remote, i18n, creature, achievements, quests, tower, battle, element, species, companion, shop,
+  store, power, i18n, creature, achievements, quests, tower, battle, element, species, companion, shop,
 } = require('./engine');
 
 /**
@@ -136,22 +136,4 @@ function diffStates(prev, next) {
   };
 }
 
-/** The public ladder as plain rows for the zoo view. Never throws: offline gives the cached copy or nothing. */
-async function loadLadderRows() {
-  const dex = store.load();
-  const me = (dex.profile && dex.profile.name) || '';
-  const l = await remote.loadLadder();
-  const order = l.order.length ? l.order : [...l.players.values()].sort((a, b) => b.score - a.score).map((p) => p.name);
-  const rows = order
-    .map((name, i) => ({ name, p: l.players.get(String(name).toLowerCase()), rank: i + 1 }))
-    .filter((r) => r.p)
-    .map(({ name, p, rank }) => ({
-      rank, name: p.name || name,
-      power: p.team.reduce((s, m) => s + m.power, 0),
-      team: p.team.map((m) => m.name),
-      me: !!me && String(p.name).toLowerCase() === me.toLowerCase(),
-    }));
-  return { rows, me, source: l.source, offline: l.source === 'cache' || l.source === 'none' };
-}
-
-module.exports = { buildState, diffStates, loadLadderRows, say, sayKey, creatureName };
+module.exports = { buildState, diffStates, say, sayKey, creatureName };

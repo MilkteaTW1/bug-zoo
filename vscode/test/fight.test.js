@@ -8,7 +8,6 @@ const path = require('node:path');
 
 const home = fs.mkdtempSync(path.join(os.tmpdir(), 'bugzoo-fight-'));
 process.env.BUGZOO_HOME = home;
-process.env.BUGZOO_LADDER_DIR = path.join(__dirname, '..', '..', 'leaderboard'); // the repo's own ladder, no network
 
 const { recordCommand } = require('../lib/capture');
 const fight = require('../lib/fight');
@@ -24,63 +23,77 @@ function catchOne(word) {
   recordCommand({ commandLine: `node ${word}.js`, exitCode: 0, cwd: home, output: '' });
 }
 
-test('without a team the ladder is shown but nobody can be fought', async () => {
+test('without a team nobody can be fought', async () => {
   const arena = await fight.loadArena();
   assert.strictEqual(arena.me.canFight, false);
-  assert.ok(arena.rows.length >= 1);
-  assert.deepStrictEqual(fight.fight('ladder', arena.rows[0].name), { error: 'noTeam' });
+  assert.deepStrictEqual(fight.fight('practice', 'Legacy Codebase'), { error: 'noTeam' });
 });
 
-test('with a team the list has ladder, practice and a numbered fight', async () => {
+test('with a team the list has the practice dummy', async () => {
   catchOne('alpha');
   catchOne('beta');
   const arena = await fight.loadArena();
   assert.strictEqual(arena.me.canFight, true);
   assert.ok(arena.rows.some((r) => r.section === 'practice'));
-  assert.ok(arena.rows.filter((r) => r.section === 'ladder').length >= 1);
   assert.ok(arena.rows.every((r) => r.team.every((m) => Array.isArray(m.art) && m.art.length > 0)));
 });
 
-test('a practice fight returns a full replay and does not count', async () => {
+// Play a fight to the end, always picking the first monster still standing.
+function playOut(start, earlier = []) {
+  const alive = start.me.team.map(() => true);
+  for (const ev of earlier) if (ev.faint && ev.side === 'foe') alive[ev.di] = false;
+  let r = null;
+  let guard = 0;
+  while ((!r || !r.over) && guard++ < 100) {
+    const i = alive.indexOf(true);
+    r = fight.pick(i);
+    assert.ok(!r.error, `pick ${i}: ${r.error}`);
+    for (const ev of r.events) if (ev.faint && ev.side === 'foe') alive[ev.di] = false; // a foe hit on my side fainted
+  }
+  return r;
+}
+
+test('a practice fight is steered round by round and does not count', async () => {
   await fight.loadArena();
   const before = store.load().battles;
-  const b = fight.fight('practice', 'Legacy Codebase');
-  assert.ok(b.log.length > 0);
-  assert.ok(['practice'].includes(b.outcome));
-  assert.strictEqual(b.canSubmit, false);
+  const start = fight.fight('practice', 'Legacy Codebase');
+  assert.strictEqual(start.interactive, true);
+  assert.ok(start.foeIdx >= 0);
+  const first = fight.pick(0);
+  assert.ok(first.events.length > 0);
+  assert.ok(first.events.some((e) => (e.side === 'me' && e.ai === 0) || (e.side === 'foe' && e.di === 0)), 'the monster picked is the one in the round');
+  const end = first.over ? first : playOut(start, first.events);
+  assert.strictEqual(end.result.outcome, 'practice');
   assert.deepStrictEqual(store.load().battles, before);
 });
 
-test('a ladder fight counts, and joining the ladder offers a submission', async () => {
-  const arena = await fight.loadArena();
-  const foe = arena.rows.find((r) => r.section === 'ladder' && !r.isMe);
-  const before = store.load().battles;
-  const b = fight.fight('ladder', foe.name);
-  const after = store.load().battles;
-  assert.strictEqual(after.wins + after.losses, before.wins + before.losses + 1);
-  // the test player is not on the ladder yet, so any ladder fight can be submitted to join it
-  assert.strictEqual(b.canSubmit, true);
-  assert.strictEqual(fight.needsName(), true);
-  assert.strictEqual(fight.submissionUrl(), null, 'no name yet, no link');
-  assert.ok(fight.saveName('tester'));
-  assert.match(fight.submissionUrl(), /^https:\/\/github\.com\/.+\/issues\/new\?/);
+test('an unusable pick is refused and costs nothing', async () => {
+  await fight.loadArena();
+  fight.fight('practice', 'Legacy Codebase');
+  assert.deepStrictEqual(fight.pick(99), { error: 'badPick' });
+  assert.ok(fight.pick(0).events.length > 0, 'the fight carries on');
 });
 
-test('friends: add by ladder name, fight them, remove them', async () => {
-  const arena = await fight.loadArena();
-  const player = arena.rows.find((r) => r.section === 'ladder' && !r.isMe);
-  const added = await fight.addFriend(player.name);
+test('friends: add by code, fight them (it counts), remove them', async () => {
+  const mine = require('../lib/engine').friends.encodeCode('pal', require('../lib/engine').battle.topTeam(store.load().trophies, store.load().creatures));
+  const added = await fight.addFriend(mine);
   assert.strictEqual(added.ok, true);
   const after = await fight.loadArena();
   const friend = after.rows.find((r) => r.section === 'friend');
   assert.ok(friend);
-  const b = fight.fight('friend', friend.name);
-  assert.strictEqual(b.outcome, 'friendly');
+  const before = store.load().battles;
+  const start = fight.fight('friend', friend.name);
+  assert.strictEqual(start.outcome, 'friendly');
+  const end = playOut(start);
+  assert.strictEqual(end.result.outcome, 'friendly');
+  const now = store.load().battles;
+  assert.strictEqual(now.wins + now.losses, before.wins + before.losses + 1);
   assert.strictEqual(fight.removeFriend(friend.name), true);
   assert.strictEqual((await fight.addFriend('definitely-not-a-player-zzz')).ok, false);
 });
 
 test('my friend code decodes back to my team', async () => {
+  assert.ok(fight.saveName('tester'));
   const code = fight.myCode();
   assert.match(code, /^BZ1\./);
   const added = await fight.addFriend(code);

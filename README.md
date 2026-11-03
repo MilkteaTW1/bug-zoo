@@ -28,7 +28,7 @@ A monster appears when the program fails. Fix your code, run the same command ag
 
 - **Fix to catch**: a crash spawns a monster; fix the code and re-run the command to catch it.
 - **Power from your real project**: stack depth, blast radius, size and failure rate decide how strong it is.
-- **Battle friends, no server**: climb a ladder or fight a friend's code; no accounts, no database.
+- **Battle friends, no server**: pick who fights each round against a friend's code; no accounts, no database.
 
 *For developers who stare at stack traces all day (their own, or their AI assistant's) and would like it to feel a bit more like a game.*
 
@@ -56,7 +56,7 @@ bugzoo setup
 
 Setup is optional: the first run asks the same questions by itself.
 
-Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / 简体中文 / English) and a player name for the leaderboards. It changes nothing on your machine except Bug Zoo's own data file.
+Requires Node.js 18+. No dependencies. `bugzoo setup` asks for your language (繁體中文 / 简体中文 / English) and a player name. It changes nothing on your machine except Bug Zoo's own data file.
 
 Change the language any time with one line: `bugzoo lang zh-CN` (`bugzoo lang` lists them). In VS Code use the globe button in the Bug Zoo view header.
 
@@ -72,7 +72,7 @@ Works with any command (`bugzoo run python main.py`, `bugzoo run npm test`, ...)
 
 ## VS Code extension
 
-Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode/) turns failing terminal commands into monsters in the side bar, with the ladder, friends and animated fights built in. It shares the same data file as the CLI.
+Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode/) turns failing terminal commands into monsters in the side bar, with friends and fights, friends and animated fights built in. It shares the same data file as the CLI.
 
 **Install:** search for **Bug Zoo** in the VS Code Extensions view, or [get it from the Marketplace](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode).
 
@@ -84,9 +84,9 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 
 ![A failing command spawns a wild monster; the fix catches it](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.gif)
 
-**Climb the ladder with a turn-by-turn battle replay.**
+**Pick who fights every round.**
 
-![Fighting a ladder player and submitting the win](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
+![Choosing who answers in a fight against a friend](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.gif)
 
 **Add friends, fight them any time, share your team with a code.**
 
@@ -113,16 +113,12 @@ Prefer to watch your bugs roam around the editor? The [VS Code extension](vscode
 | `bugzoo brag [catches\|power\|tower]` | A short text to paste when you want to show off (VS Code: the share button) |
 | `bugzoo shop` / `buy <item>` / `feed <monster> <food>` | Spend coins on food and furniture; affection makes monsters evolve |
 | `bugzoo achievements` | Your 30 achievements |
-| `bugzoo battle` | Shows the ladder, your friends and a practice opponent; type a number to fight. `--card f.svg` saves a shareable result card |
-| `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or ladder player directly |
+| `bugzoo battle` | Shows your friends and a practice opponent; type a number to fight, then pick who answers each round. `--card f.svg` saves a shareable result card |
+| `bugzoo battle <code\|url\|file\|name>` | Fight one friend code, link, file or saved friend directly |
 | `bugzoo friend` | List friends. Also `code`, `add <code\|url\|file\|name>`, `remove <name>`, `refresh` |
-| `bugzoo ladder` | Show the ladder |
-| `bugzoo ladder join` | Join the ladder in one step: prints (and offers to open) the pre-filled GitHub issue for your entry fight |
 | `bugzoo rank` | Your score and title |
 | `bugzoo lang [code]` | Show the languages, or switch in one line: `bugzoo lang zh-CN` (changes nothing else) |
 | `bugzoo setup` | Language, player name, optional automatic capture and the AI-assistant hook (`--lang`, `--name`, `--auto on\|off`, `--ai on\|off`) |
-| `bugzoo share` | Write a shareable score + team file (counts only, no error text) |
-| `bugzoo leaderboard <dir>` | Build a score leaderboard from shared files |
 | `bugzoo scan` | Scan this project: size and most-depended-on modules |
 | `bugzoo hook <shell>` | Print a wrapper snippet for bash, zsh, fish or PowerShell |
 | `bugzoo export` | Export the bestiary as an SVG for your profile |
@@ -158,7 +154,7 @@ Every monster has one of five elements, worked out from its error type (a `Synta
 | Network | Syntax, Crash |
 | Crash | Syntax, Logic |
 
-You choose who fights: `bugzoo team` lists your monsters with numbers, `bugzoo team set 3 1 2` sends those three, `bugzoo team auto` goes back to the three strongest. Battle lines show every opponent's elements, and a friend's or ladder player's monsters get theirs from their error type too, so nobody can claim a different one. Fights are still deterministic, but the same two teams now fight differently than in versions before this one.
+You choose who fights: `bugzoo team` lists your monsters with numbers, `bugzoo team set 3 1 2` sends those three, `bugzoo team auto` goes back to the three strongest. Battle lines show every opponent's elements, and a friend's monsters get theirs from their error type too, so nobody can claim a different one. In a fight you also pick who answers each round, so the same two teams can go either way.
 
 ## The Tower (solo)
 
@@ -169,7 +165,7 @@ No friends yet? Climb the Tower: twelve floors, the same enemies for everybody (
 - **Quests:** every day brings three small goals (catch a bug, meet a new kind, get clean runs of commands you fixed, fight or win a battle). `bugzoo quests` shows them; finishing one is announced right after the run or fight that did it. Everyone gets the same three on the same date.
 - **Shiny catch:** fix a bug within 10 minutes of it appearing and the catch is shiny. It is a badge only; it never changes power.
 - **Clean runs:** a command you once fixed keeps counting every time it runs clean, which feeds the quests and the *Steady hands* achievement. Commands that never failed are not tracked, so healthy builds cost nothing.
-- Quests, shiny catches and clean runs never change power or the ladder.
+- Quests, shiny catches and clean runs never change power.
 
 ## Species, companions and nicknames
 
@@ -259,7 +255,7 @@ Every bug has a power, snapshotted while it is alive and banked as a trophy when
 
 Base: common 10, uncommon 25, rare 60, legendary 150. Your top 3 trophies form your team.
 
-**This is a game, not a skill test.** Power rewards bugs that keep failing, so it can be gamed by breaking things on purpose. Failures of one command count at most once a minute, which only slows that down. Scores and teams are self-reported: the ladder replays fights from the teams you submit but cannot verify how you earned them. Treat rankings as fun between friends, not as proof of how well you debug.
+**This is a game, not a skill test.** Power rewards bugs that keep failing, so it can be gamed by breaking things on purpose. Failures of one command count at most once a minute, which only slows that down. Teams are self-reported and cannot be verified, so treat fights as fun between friends, not as proof of how well you debug.
 
 ## Evolution and achievements
 
@@ -282,35 +278,31 @@ The bonus is applied when a team is formed (`battle`, `friend code`, `share`); a
 
 `bugzoo achievements` lists 30 achievements, from your first catch to a 7-day streak, a legendary, or your first win. They are unlocked as you play and announced right after the run that earned them.
 
-## Battles and the ladder
+## Battles and friends
 
 ```bash
 bugzoo battle
 ```
 
-lists the **ladder**, your **friends** and a **practice** opponent; type a number to fight.
+lists your **friends** and a **practice** opponent; type a number to fight. In a terminal you choose who fights every round.
 
 ```
-Ladder
- 1. #1   bugslayer          power  160  <counts for ranking>
- 2. #2   dev-dana           power  110  <counts for ranking>
- 3. #3   rookie             power   10  <counts for ranking>
-  . #4   you                power   16  <you>
-
 Friends
- 4.      xiaoming           power   25  <code>
+ 1.      xiaoming           power   25  <code>
 
 Practice
- 5.      Legacy Codebase    power  195
+ 2.      Legacy Codebase    power  195
 Fight whom? (number, or q to quit)
+
+Round 1: Crumbite [Crash] comes out (40/40 hp). Who answers?
+  1. Wobblebat [Logic] hp 64/64 (16)
+  2. Zapwisp [Network] hp 52/52 (13)
+Pick your fighter (number):
 ```
 
-- Teams fight one at a time; the survivor keeps its remaining HP. The fight is seeded from both teams, so both players get the same result and nobody can re-roll luck.
-- **The ladder is read straight from this GitHub repo** (`leaderboard/`). No clone, no server of ours. If GitHub is unreachable the last saved copy is used.
-- **New here? Run `bugzoo ladder join`.** It needs a player name and one catch, fights last place for you and prints the pre-filled issue link. You land on the ladder win or lose, then climb. (`bugzoo battle` does the same through a fight you pick.)
-- **Beat someone up to 3 ranks above you to take their spot.** The CLI prints a pre-filled GitHub issue link; press *Submit new issue* and a workflow replays the fight from your shared team, then updates the ladder within a minute or two.
-- Fighting friends and the practice opponent is friendly: it never changes the ladder.
-- A player name belongs to the first GitHub account that submits with it, so nobody can submit as someone else.
+- **You steer every round.** The opponent shows who it sends out first, you pick which of your living monsters answers, and both hit (the stronger one first). Elements matter: a good match-up hits 1.4 times as hard. When you are not at a terminal (a pipe, or `--auto`) the best match-up is picked for you.
+- There is no global ladder and nothing to submit: fights are against friends' teams and the practice dummy, and there is no server or GitHub account involved.
+- Every fight but the practice one pays coins and counts for quests and achievements.
 
 ## Friends
 
@@ -319,25 +311,14 @@ No accounts and no server: a friend is a team you can reach.
 ```bash
 bugzoo friend code                 # your friend code: send it in any chat
 bugzoo friend add BZ1.xxxxxxxx     # add a friend from their code
-bugzoo friend add alice            # add anyone on the ladder; their team stays current
 bugzoo friend add https://…/bob.json   # a link to a shared score file, refreshed each time
 bugzoo friend add ./carol.json     # a local file
 bugzoo friend remove alice
 ```
 
-A code is a snapshot of a team (name and up to 3 monsters). Ladder names, links and files are refreshed when you open `bugzoo battle`. Power in anything you import is clamped to what each rarity can reach.
+A code is a snapshot of a team (name and up to 3 monsters). Links and files are refreshed when you open `bugzoo battle`. Power in anything you import is clamped to what each rarity can reach.
 
-## Score leaderboard (no database)
-
-Scores are first catches by rarity (common 10, uncommon 25, rare 60, legendary 200) plus 2 per repeat catch.
-
-```bash
-bugzoo share --name alice --out leaderboard/scores/alice.json
-```
-
-The file contains only counts and your team: no error messages, paths or commands. A GitHub Action runs `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` and commits the table.
-
-Running your own ladder? Fork the repo and set `BUGZOO_LADDER_REPO=owner/repo` (or `BUGZOO_LADDER_DIR` for a local folder).
+**Show off.** `bugzoo brag [catches|power|tower]` prints a short text about what you have caught, your team's power or how far up the Tower you are. In VS Code the 📤 button in the panel header copies it for you.
 
 ## How it works
 
@@ -415,7 +396,7 @@ MIT
 
 - **修好才抓得到**：程式一壞就出現怪物，修好程式、重跑同一條指令就能捕捉。
 - **戰鬥力來自你的真實專案**：堆疊深度、影響範圍、專案規模與失敗頻率，決定牠有多強。
-- **和朋友對戰，不需要伺服器**：爬天梯，或直接挑戰朋友的代碼；沒有帳號、沒有資料庫。
+- **和朋友對戰，不需要伺服器**：每回合自己選誰出戰，對手是朋友的代碼；沒有帳號、沒有資料庫。
 
 *給每天盯著錯誤堆疊的開發者（不管是自己寫的，還是 AI 寫的），讓它多一點遊戲的感覺。*
 
@@ -441,7 +422,7 @@ bugzoo setup
 
 `setup` 可以不做:第一次執行時會自己問同樣的問題。
 
-需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／简体中文／English）和排行榜用的玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
+需要 Node.js 18 以上，沒有任何相依套件。`bugzoo setup` 會詢問語言（繁體中文／简体中文／English）和玩家名稱，除了 Bug Zoo 自己的資料檔，不會改動你電腦上的任何東西。
 
 之後想換語言，一行就好：`bugzoo lang zh-CN`（`bugzoo lang` 會列出所有語言）。在 VS Code 裡則按 Bug Zoo 面板標題列的地球按鈕。
 
@@ -457,7 +438,7 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 
 ## VS Code 擴充套件
 
-想看 bug 在編輯器裡跑來跑去？[VS Code 擴充套件](vscode/)會把終端機裡失敗的指令變成側邊欄的怪物，內建天梯、好友和動畫對戰，和 CLI 共用同一份資料檔。
+想看 bug 在編輯器裡跑來跑去？[VS Code 擴充套件](vscode/)會把終端機裡失敗的指令變成側邊欄的怪物，內建好友對戰和動畫對戰，和 CLI 共用同一份資料檔。
 
 **安裝:**在 VS Code 擴充套件面板搜尋 **Bug Zoo**,或[到 Marketplace 安裝](https://marketplace.visualstudio.com/items?itemName=MilkteaTW1.bug-zoo-vscode)。
 
@@ -469,9 +450,9 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 
 ![指令失敗出現野生怪物，修好後捕獲](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/catch.zh.gif)
 
-**爬天梯，還有逐回合的戰鬥重播。**
+**每回合自己選誰出戰。**
 
-![挑戰天梯玩家並提交勝利](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
+![在對戰中選擇誰來應戰](https://raw.githubusercontent.com/MilkteaTW1/bug-zoo/main/vscode/docs/fight.zh.gif)
 
 **加好友、隨時開戰、用代碼分享你的隊伍。**
 
@@ -498,16 +479,12 @@ bugzoo run node app.js    # 3. 同一條指令，乾淨通過：捕捉成功！
 | `bugzoo brag [catches\|power\|tower]` | 產生一段炫耀文字（VS Code：分享按鈕） |
 | `bugzoo shop` / `buy <物品>` / `feed <怪物> <食物>` | 用金幣買食物和家具；好感度讓怪物進化 |
 | `bugzoo achievements` | 你的 30 個成就 |
-| `bugzoo battle` | 列出天梯、好友與練習對手，輸入編號就開打；`--card f.svg` 會存成可分享的戰鬥結果卡 |
-| `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或天梯玩家對戰 |
+| `bugzoo battle` | 列出好友與練習對手，輸入編號就開打，之後每回合選誰出戰；`--card f.svg` 會存成可分享的戰鬥結果卡 |
+| `bugzoo battle <代碼\|網址\|檔案\|名稱>` | 直接和某個好友代碼、連結、檔案或已儲存的好友對戰 |
 | `bugzoo friend` | 列出好友。也可用 `code`、`add <代碼\|網址\|檔案\|名稱>`、`remove <名稱>`、`refresh` |
-| `bugzoo ladder` | 查看天梯 |
-| `bugzoo ladder join` | 一行加入天梯：產生（並可直接開啟）入場賽的 GitHub issue 連結 |
 | `bugzoo rank` | 你的分數與稱號 |
 | `bugzoo lang [代碼]` | 查看語言清單，或一行切換：`bugzoo lang zh-CN`（不會動到其他設定） |
 | `bugzoo setup` | 語言、玩家名稱、選用的自動捕捉與 AI 助手 hook（`--lang`、`--name`、`--auto on\|off`、`--ai on\|off`） |
-| `bugzoo share` | 輸出可分享的分數與隊伍檔（只有數量，不含錯誤內容） |
-| `bugzoo leaderboard <資料夾>` | 用分享檔產生分數排行榜 |
 | `bugzoo scan` | 掃描這個專案：規模與最多檔案依賴的模組 |
 | `bugzoo hook <shell>` | 輸出 bash、zsh、fish、PowerShell 的包裝設定片段 |
 | `bugzoo export` | 把圖鑑匯出成 SVG，放到你的個人頁 |
@@ -543,7 +520,7 @@ bugzoo rank              # 你的分數與稱號
 | 網路 | 語法、崩潰 |
 | 崩潰 | 語法、邏輯 |
 
-誰出戰由你決定:`bugzoo team` 列出帶編號的怪物,`bugzoo team set 3 1 2` 派這三隻,`bugzoo team auto` 改回最強的三隻。對戰時會顯示對手的屬性;朋友或天梯玩家送來的新怪物,也會依錯誤類型自動帶上屬性,沒有人能自己宣稱不同的屬性。對戰結果仍然是確定性的,但同樣兩支隊伍在這個版本之後的打法,會跟舊版不同。
+誰出戰由你決定:`bugzoo team` 列出帶編號的怪物,`bugzoo team set 3 1 2` 派這三隻,`bugzoo team auto` 改回最強的三隻。對戰時會顯示對手的屬性;朋友送來的新怪物,也會依錯誤類型自動帶上屬性,沒有人能自己宣稱不同的屬性。對戰時每回合還要選誰應戰，所以同樣兩支隊伍也可能打出不同結果。
 
 ## 高塔(單人)
 
@@ -554,7 +531,7 @@ bugzoo rank              # 你的分數與稱號
 - **任務:**每天有三個小目標(抓一隻 bug、遇見新種類、讓修好過的指令乾淨執行、打或贏一場對戰)。`bugzoo quests` 可以查看;完成時會在那次執行或對戰結束後立刻通知。同一天所有人拿到的任務相同。
 - **閃光捕捉:**bug 出現後 10 分鐘內修好,這次捕捉就是閃光。只是徽章,不影響戰鬥力。
 - **乾淨執行:**修好過的指令之後每次乾淨執行都會計數,算進任務和「穩穩的」成就。從沒失敗過的指令不會被追蹤,所以健康的建置不會有任何負擔。
-- 任務、閃光與乾淨執行都不會改變戰鬥力和天梯。
+- 任務、閃光與乾淨執行都不會改變戰鬥力。
 
 ## 物種、夥伴與暱稱
 
@@ -644,7 +621,7 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 基礎值：普通 10、罕見 25、稀有 60、傳說 150。前三強戰利品組成你的隊伍。
 
-**這是遊戲，不是能力測驗。** 戰鬥力獎勵「一直失敗的 bug」，所以可以靠故意弄壞程式來灌水。同一條指令的失敗每分鐘最多只算一次，這只能讓灌水變慢。分數與隊伍都是自行回報：天梯會用你送出的隊伍重播戰鬥，但無法驗證你是怎麼得到的。排名請當作朋友之間的樂趣，不要當成除錯能力的證明。
+**這是遊戲，不是能力測驗。** 戰鬥力獎勵「一直失敗的 bug」，所以可以靠故意弄壞程式來灌水。同一條指令的失敗每分鐘最多只算一次，這只能讓灌水變慢。隊伍都是自行回報、無法驗證，請把對戰當作朋友之間的樂趣，不要當成除錯能力的證明。
 
 ## 進化與成就
 
@@ -667,36 +644,31 @@ bugzoo setup --ai on     # 把 Bash hook 加進 ~/.claude/settings.json；--ai o
 
 `bugzoo achievements` 列出 30 個成就，從第一隻捕捉、連續 7 天、傳說級，到第一場勝利。成就在你玩的過程中解鎖，並在達成的那次執行後立刻通知你。
 
-## 對戰與天梯
+## 對戰與好友
 
 ```bash
 bugzoo battle
 ```
 
-會列出**天梯**、你的**好友**和**練習**對手，輸入編號就開打。
+會列出你的**好友**和**練習**對手，輸入編號就開打。在終端機裡每一回合都由你決定誰出戰。
 
 ```
-天梯
- 1. #1   bugslayer          戰鬥力  160  <計入排名>
- 2. #2   dev-dana           戰鬥力  110  <計入排名>
- 3. #3   rookie             戰鬥力   10  <計入排名>
-  . #4   你                 戰鬥力   16  <你>
-
 好友
- 4.      小明               戰鬥力   25  <代碼>
+ 1.      小明               戰鬥力   25  <代碼>
 
 練習
- 5.      Legacy Codebase    戰鬥力  195
+ 2.      Legacy Codebase    戰鬥力  195
 要跟誰對戰？（輸入編號，q 離開）
+
+第 1 回合:對手派出 Crumbite〔崩潰〕(血量 40/40)。誰出戰?
+  1. Wobblebat〔邏輯〕 血量 64/64 (16)
+  2. Zapwisp〔網路〕 血量 52/52 (13)
+選擇出戰的怪物(編號):
 ```
 
-- 隊伍依序單挑，存活者保留剩餘血量。戰鬥用雙方隊伍當亂數種子，所以雙方算出的結果一致，也不能重複洗運氣。
-- **新玩家？執行 `bugzoo ladder join`。** 需要玩家名稱和一隻捕獲，它會替你和最後一名打一場並印出預填好的 issue 連結，不論輸贏都會上榜，之後再往上爬。
-- **天梯直接從這個 GitHub repo 讀取**（`leaderboard/`），不用 clone、也沒有我們自己的伺服器。連不上 GitHub 時會用上次儲存的副本。
-- **新玩家第一次打天梯，不論輸贏都會加入天梯。** 從最底下開始往上爬。
-- **打贏排名在你上面 3 名以內的人，就奪下他的名次。** CLI 會印出一個預先填好的 GitHub Issue 連結，按下 *Submit new issue*，工作流程會用你分享的隊伍重新播放戰鬥，一兩分鐘內更新天梯。
-- 和好友、練習對手對戰只是切磋，不會影響天梯。
-- 玩家名稱歸第一個用它送出的 GitHub 帳號所有，沒有人能冒用別人的名字。
+- **每回合由你決定。**對手會先亮出派誰出場，你從還活著的怪物裡選一隻應戰，雙方各攻擊一次（戰鬥力高的先出手）。屬性有影響：剋制的一方傷害 ×1.4。不在終端機裡（管線或加 `--auto`）時，會自動幫你選最好的對位。
+- 沒有全球天梯，也沒有任何要提交的東西：對手是好友的隊伍和練習假人，不需要伺服器或 GitHub 帳號。
+- 除了練習以外的對戰都會給金幣，也計入任務與成就。
 
 ## 好友
 
@@ -705,25 +677,14 @@ bugzoo battle
 ```bash
 bugzoo friend code                 # 你的好友代碼，貼到任何聊天室
 bugzoo friend add BZ1.xxxxxxxx     # 用對方的代碼加好友
-bugzoo friend add alice            # 加天梯上的任何人，隊伍會保持最新
 bugzoo friend add https://…/bob.json   # 分享檔的連結，每次都會更新
 bugzoo friend add ./carol.json     # 本機檔案
 bugzoo friend remove alice
 ```
 
-好友代碼是隊伍的快照（名稱加上最多 3 隻怪物）。天梯名稱、連結與檔案會在你開啟 `bugzoo battle` 時更新。匯入的內容，戰鬥力都會被限制在該稀有度能達到的上限內。
+好友代碼是隊伍的快照（名稱加上最多 3 隻怪物）。連結與檔案會在你開啟 `bugzoo battle` 時更新。匯入的內容，戰鬥力都會被限制在該稀有度能達到的範圍內。
 
-## 分數排行榜（不用資料庫）
-
-首次捕捉依稀有度給分（普通 10、罕見 25、稀有 60、傳說 200），重複捕捉每次 +2。
-
-```bash
-bugzoo share --name alice --out leaderboard/scores/alice.json
-```
-
-分享檔只含數量與隊伍，不含錯誤訊息、路徑或指令。GitHub Action 會執行 `bugzoo leaderboard leaderboard/scores --out LEADERBOARD.md` 並提交表格。
-
-想自己架一個天梯？Fork 這個 repo，並設定 `BUGZOO_LADDER_REPO=owner/repo`（或用 `BUGZOO_LADDER_DIR` 指向本機資料夾）。
+**炫耀一下。**`bugzoo brag [catches|power|tower]` 會印出一段短文字，說你抓了多少怪物、隊伍戰力多少、或爬到高塔第幾層。VS Code 面板標題列的 📤 按鈕會直接幫你複製。
 
 ## 運作原理
 

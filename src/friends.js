@@ -63,10 +63,8 @@ async function getJson(url, { fetchImpl = globalThis.fetch, timeoutMs = 5000 } =
  *   BZ1.…            code    (snapshot)
  *   http(s)://…      url     (live; refreshed when fetched)
  *   path to a file   file    (re-read every time)
- *   anything else    ladder  (a player name; looked up in the ladder each time)
- * `lookupLadder(name)` returns { name, team } or null.
  */
-async function parseFriend(input, { fetchImpl, lookupLadder } = {}) {
+async function parseFriend(input, { fetchImpl } = {}) {
   const text = String(input || '').trim();
   if (!text) return null;
   const now = new Date().toISOString();
@@ -86,15 +84,14 @@ async function parseFriend(input, { fetchImpl, lookupLadder } = {}) {
     }
   } catch { /* not a file */ }
 
-  const found = lookupLadder ? await lookupLadder(text) : null;
-  return found && { name: found.name, team: found.team, kind: 'ladder', updated: now };
+  return null;
 }
 
 /**
  * Bring a friend's team up to date. Never throws: on failure the saved snapshot is kept.
  * Returns { friend, ok }.
  */
-async function refreshFriend(friend, { fetchImpl, lookupLadder } = {}) {
+async function refreshFriend(friend, { fetchImpl } = {}) {
   try {
     if (friend.kind === 'url') {
       const f = normalizeFriend(await getJson(friend.source, { fetchImpl }));
@@ -102,11 +99,8 @@ async function refreshFriend(friend, { fetchImpl, lookupLadder } = {}) {
     } else if (friend.kind === 'file') {
       const f = normalizeFriend(JSON.parse(fs.readFileSync(friend.source, 'utf8')));
       if (f) return { friend: { ...friend, team: f.team, updated: new Date().toISOString() }, ok: true };
-    } else if (friend.kind === 'ladder' && lookupLadder) {
-      const f = await lookupLadder(friend.name);
-      if (f) return { friend: { ...friend, team: f.team, updated: new Date().toISOString() }, ok: true };
-    } else if (friend.kind === 'code') {
-      return { friend, ok: true }; // a code is a fixed snapshot
+    } else if (friend.kind === 'code' || friend.kind === 'ladder') {
+      return { friend, ok: true }; // a code is a fixed snapshot (so is a friend saved from the old ladder)
     }
   } catch { /* keep the snapshot */ }
   return { friend, ok: false };

@@ -258,6 +258,9 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'battle.faint': ' - {def}은(는) 쓰러졌다!', // EN: ' - {def} faints!'
     'battle.left': ' (남은 HP {hp})', // EN: ' ({hp} hp left)'
     'battle.you': '나', // EN: 'You'
+    'battle.round': '{n}라운드: 상대가 {foe} [{element}]을(를) 내보냈습니다 ({hp}/{max} HP). 누가 나갈까요?',
+    'battle.hp': 'HP {hp}/{max}',
+    'battle.pickFighter': '출전할 몬스터를 고르세요 (번호): ',
     'battle.win': '승리! {winner}이(가) {loser}을(를) 이겼습니다.', // EN: 'You win! {winner} defeated {loser}.'
     'battle.lose': '패배. {winner}이(가) {loser}을(를) 이겼습니다.', // EN: 'You lose. {winner} defeated {loser}.'
     'battle.noTrophy': '아직 트로피가 없습니다. 먼저 버그를 잡으세요: 고친 뒤 같은 명령을 다시 실행해주세요.', // EN: 'You have no trophies yet. Catch a bug first: fix it, then re-run the same command.'
@@ -446,6 +449,7 @@ Beating someone up to 3 ranks above you on the ladder takes their spot.
     'vs.pickPower': '팀 전투력',
     'vs.pickTower': '탑 진행도',
     'vs.shareCopied': '복사했어요. 어디든 붙여넣으세요.',
+    'vs.pickRound': '{n}라운드: 상대가 {foe}을(를) 내보냈습니다. 누가 나갈지 고르세요.',
     'vs.shopTab': '상점',
     'vs.feedBtn': '먹이기',
     'vs.feedTitle': '몬스터 먹이기',

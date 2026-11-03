@@ -120,6 +120,9 @@ body {
 .bt-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
 .bt-name { text-align: center; opacity: .75; }
 .side { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.bcard.next { outline: 2px solid #e8b923; border-radius: 6px; }
+.bcard.pickable { cursor: pointer; outline: 2px dashed var(--vscode-button-background, #0e639c); border-radius: 6px; }
+.bcard.pickable:hover { background: rgba(128,128,128,.2); }
 .bcard { position: relative; width: 84px; text-align: center; transition: opacity .4s, filter .4s; }
 .bcard pre {
   margin: 0; font: 600 12px/1.05 var(--vscode-editor-font-family, monospace); color: var(--tone); text-shadow: 0 0 6px var(--tone);

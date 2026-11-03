@@ -1,5 +1,16 @@
 # Changelog / 更新紀錄
 
+## Unreleased
+
+- **No more global ladder.** Fights are against friends' share codes and the practice dummy, with no GitHub account, issue or server. `bugzoo ladder`, `ladder join`, `leaderboard` and `share` are gone, along with the Ladder tab and the submit button.
+  不再有全球天梯：對手是朋友的分享代碼與練習假人，不需要 GitHub 帳號、issue 或伺服器。移除 `bugzoo ladder`、`ladder join`、`leaderboard`、`share` 與 VS Code 的天梯分頁和提交按鈕。
+- **You pick who fights every round.** The opponent shows who it sends out, you choose which living monster answers (in the terminal and in VS Code). Without a terminal the best match-up is picked.
+  每回合由你選誰出戰：對手先亮出派誰，你從還活著的怪物裡選一隻應戰（終端機與 VS Code 都是）。不在終端機時會自動選最佳對位。
+- **Focus bonus.** Thirty active minutes without an error earn a companion (two a day); idle time, a repeated command and, in VS Code, a lack of edits do not count.
+  專注獎勵：連續 30 分鐘有效工作且沒出錯送一隻夥伴（每天 2 隻）；閒置、重複同一指令、VS Code 沒有編輯都不算。
+- **Bulk buy and feed** (`bugzoo buy pizza 5`, `feed Wobblebat pizza max`, x5 and Max buttons), **`bugzoo brag`** and a share button, and a caught monster dropped in the wild area now stays there.
+  批次購買與餵食、`bugzoo brag` 與分享按鈕，被拖到野外區的已捕捉怪物現在會留在那裡。
+
 ## 0.3.7
 
 - **`bugzoo ladder join`**: join the ladder in one command. It fights last place for you and prints (and offers to open) the pre-filled GitHub issue; you land on the ladder win or lose. Your very first catch now tells you about it.

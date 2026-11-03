@@ -63,10 +63,8 @@ async function onWebviewMessage(view, msg) {
     else refreshLadder();
   } else if (msg.type === 'fight') {
     post(view, { type: 'battle', battle: fight.fight(msg.section, msg.name) });
-  } else if (msg.type === 'submit') {
-    if (fight.needsName() && !(await askName())) return;
-    const url = fight.submissionUrl();
-    if (url) await vscode.env.openExternal(vscode.Uri.parse(url));
+  } else if (msg.type === 'pick') {
+    post(view, { type: 'round', round: fight.pick(msg.index) });
   } else if (msg.type === 'addFriend') {
     const input = await vscode.window.showInputBox({
       title: say('addTitle'),

@@ -14,14 +14,14 @@
   let data = null;
   let achs = [];
   let S = null; // the latest state: quests, tower and team come from it
-  let tab = 'ladder';
+  let tab = 'friends';
   let collapsed = false;
   let notice = '';
 
   // ---- ladder / friends panel -------------------------------------------------------------------------
   function row(r, canFight) {
     const mine = r.isMe ? ' me' : '';
-    const rk = r.section === 'ladder' ? r.rank : (r.section === 'practice' ? '·' : '♥');
+    const rk = r.section === 'practice' ? '·' : '♥';
     const tags = [];
     if (r.isMe) tags.push(tr('you'));
     if (r.kind) tags.push(tr('kind.' + r.kind) || r.kind);
@@ -118,21 +118,15 @@
       body = teamBody();
     } else if (tab === 'shop') {
       body = shopBody();
-    } else if (tab === 'ladder') {
-      body = d.rows.filter((r) => r.section === 'ladder').slice(0, 50).map((r) => row(r, canFight)).join('');
     } else {
       body = d.rows.filter((r) => r.section === 'friend' || r.section === 'practice').map((r) => row(r, canFight)).join('') +
         '<div class="btns"><button class="btn" id="add">' + tr('addFriend') + '</button><button class="btn" id="copy">' + tr('copyCode') + '</button></div>';
     }
     const notes = [];
-    if (tab === 'ladder' || tab === 'friends') {
-      if (!canFight) notes.push(tr('noTeam'));
-      if (tab === 'ladder' && !d.rows.some((r) => r.section === 'ladder')) notes.push(tr('noladder'));
-      else if (d.offline) notes.push(tr('offline'));
-    }
+    if (tab === 'friends' && !canFight) notes.push(tr('noTeam'));
     if (notice) notes.push(notice);
     const tabs = [
-      ['ladder', '🏆', tr('ladder')], ['friends', '👥', tr('friends')], ['team', '🛡', tr('team')], ['tower', '🗼', tr('tower')], ['shop', '🛒', tr('shopTab')],
+      ['friends', '👥', tr('friends')], ['team', '🛡', tr('team')], ['tower', '🗼', tr('tower')], ['shop', '🛒', tr('shopTab')],
       ['quests', '📋', tr('questsTab') + (S ? ' ' + S.quests.list.filter((q) => q.done).length + '/' + S.quests.list.length : '')],
       ['achievements', '🏅', tr('achievements') + ' ' + achs.filter((x) => x.at).length + '/' + achs.length],
     ];
@@ -202,12 +196,11 @@
     setTimeout(() => f.remove(), 900);
   }
 
-  function playBattle(b) {
-    if (!b || b.error) {
-      notice = b && b.error === 'noTeam' ? tr('noTeam') : b && b.error === 'towerDone' ? tr('towerDone') : tr('gone');
-      renderPanel();
-      return;
-    }
+  // One animator for every fight. `b` carries both teams; the events (side, attacker index, defender index,
+  // damage, hp left) come either all at once (the Tower) or one round at a time (a fight you steer).
+  let bt = null;
+
+  function buildArena(b) {
     clearInterval(timer);
     arenaEl.hidden = false;
     const cards = (team, side) => team.map((m, i) => card(m, side, i)).join('');
@@ -217,58 +210,93 @@
       '<div class="bt-log" id="log">&nbsp;</div>' +
       '<div class="side">' + cards(b.me.team, 'me') + '</div><div class="bt-name">' + esc(b.me.name) + '</div>' +
       '<div class="bt-foot" id="foot"></div>';
+    bt = { b, team: { me: b.me.team, foe: b.foe.team }, queue: [], done: null };
+  }
 
-    const team = { me: b.me.team, foe: b.foe.team };
-    const hp = { me: team.me.map(maxHp), foe: team.foe.map(maxHp) };
-    const front = { me: 0, foe: 0 };
-    const firstMe = !b.log.length || b.log[0].att === team.me[0].name;
+  function showResult(b) {
+    document.getElementById('skip').hidden = true;
+    const note = b.outcome === 'towerWin' ? fill(tr('towerWin'), { n: b.floor })
+      : b.outcome === 'towerLose' ? fill(tr('towerLose'), { n: b.floor })
+        : (tr(b.outcome === 'practice' ? 'practiceNote' : b.outcome) || '');
+    const ach = (b.earned || []).map((a) => '<div class="ach">🏅 ' + tr('achievement') + ': ' + esc(a.name) + '<br><small>' + esc(a.desc) + '</small></div>').join('');
+    const coin = b.coins ? '<div class="ach">🪙 ' + esc(fill(tr('coinsEarned'), { n: b.coins })) + '</div>' : '';
+    const qs = (b.quests || []).map((q) => '<div class="ach">📋 ' + tr('questDone') + ': ' + esc(q) + '</div>').join('');
+    document.getElementById('foot').innerHTML =
+      '<div class="res ' + (b.won ? 'win' : 'lose') + '">' + (b.won ? '🏆 ' + tr('win') : '💔 ' + tr('lose')) + '</div>' +
+      '<div class="rnote">' + esc(note) + '</div>' + coin + qs + ach +
+      '<div class="btns">' + (b.log ? '<button class="btn" id="replay">' + tr('replay') + '</button>' : '') + '<button class="btn" id="close">' + tr('close') + '</button></div>';
+    document.getElementById('close').onclick = closeBattle;
+    const rp = document.getElementById('replay');
+    if (rp) rp.onclick = () => playBattle(b);
+  }
+
+  function hit(ev) {
+    const att = ev.side;
+    const def = att === 'me' ? 'foe' : 'me';
+    const ac = document.getElementById('c-' + att + '-' + ev.ai);
+    const dc = document.getElementById('c-' + def + '-' + ev.di);
+    if (ac && !reduce) { ac.classList.remove('lunge'); void ac.offsetWidth; ac.classList.add('lunge'); }
+    if (dc && !reduce) { dc.classList.remove('hurt'); void dc.offsetWidth; dc.classList.add('hurt'); }
+    float(def, ev.di, '-' + ev.dmg + (ev.crit ? '!' : ''), ev.crit);
+    const bar = document.getElementById('h-' + def + '-' + ev.di);
+    if (bar) bar.style.width = Math.round((ev.hp / maxHp(bt.team[def][ev.di])) * 100) + '%';
+    if (ev.faint && dc) dc.classList.add('dead');
+    document.getElementById('log').textContent = ev.att + ' ' + tr('hits') + ' ' + ev.def + ' · -' + ev.dmg + (ev.crit ? ' ' + tr('crit') : '') +
+      (ev.mult > 1 ? ' · ' + tr('super') : ev.mult < 1 ? ' · ' + tr('weak') : '');
+  }
+
+  // Play a list of events, one after another, then call `done`.
+  function animate(events, done) {
+    clearInterval(timer);
     let k = 0;
+    const finishNow = () => { clearInterval(timer); while (k < events.length) hit(events[k++]); bt.done = null; done(); };
+    bt.done = finishNow;
+    document.getElementById('skip').onclick = finishNow;
+    timer = setInterval(() => {
+      if (k >= events.length) { clearInterval(timer); bt.done = null; done(); return; }
+      hit(events[k++]);
+    }, reduce ? 150 : 650);
+  }
 
-    function finish() {
-      clearInterval(timer);
-      document.getElementById('skip').hidden = true;
-      const note = b.outcome === 'towerWin' ? fill(tr('towerWin'), { n: b.floor })
-        : b.outcome === 'towerLose' ? fill(tr('towerLose'), { n: b.floor })
-        : b.outcome === 'promote' ? fill(tr('promote'), { name: b.foe.name })
-        : b.outcome === 'outOfReach' ? fill(tr('outOfReach'), { reach: b.reach })
-          : (tr(b.outcome === 'practice' ? 'practiceNote' : b.outcome) || '');
-      const ach = (b.earned || []).map((a) => '<div class="ach">🏅 ' + tr('achievement') + ': ' + esc(a.name) + '<br><small>' + esc(a.desc) + '</small></div>').join('');
-      const coin = b.coins ? '<div class="ach">🪙 ' + esc(fill(tr('coinsEarned'), { n: b.coins })) + '</div>' : '';
-      const qs = (b.quests || []).map((q) => '<div class="ach">📋 ' + tr('questDone') + ': ' + esc(q) + '</div>').join('');
-      document.getElementById('foot').innerHTML =
-        '<div class="res ' + (b.won ? 'win' : 'lose') + '">' + (b.won ? '🏆 ' + tr('win') : '💔 ' + tr('lose')) + '</div>' +
-        '<div class="rnote">' + esc(note) + '</div>' + coin + qs + ach +
-        '<div class="btns">' + (b.canSubmit ? '<button class="btn primary" id="submit">' + tr('submit') + '</button>' : '') +
-        '<button class="btn" id="replay">' + tr('replay') + '</button><button class="btn" id="close">' + tr('close') + '</button></div>';
-      document.getElementById('close').onclick = closeBattle;
-      document.getElementById('replay').onclick = () => playBattle(b);
-      const sub = document.getElementById('submit');
-      if (sub) sub.onclick = () => vscode.postMessage({ type: 'submit' });
+  // The player's turn: the opponent's fighter is marked, and the living monsters on the player's side are the buttons.
+  function askPick(state) {
+    for (const el of arenaEl.querySelectorAll('.bcard.next, .bcard.pickable')) el.classList.remove('next', 'pickable');
+    const fc = document.getElementById('c-foe-' + state.foeIdx);
+    if (fc) fc.classList.add('next');
+    let living = 0;
+    bt.team.me.forEach((m, i) => {
+      const c = document.getElementById('c-me-' + i);
+      if (c && !c.classList.contains('dead')) { c.classList.add('pickable'); living += 1; }
+    });
+    document.getElementById('log').textContent = fill(tr('pickRound'), { n: state.round + 1, foe: bt.team.foe[state.foeIdx].name });
+    return living;
+  }
+
+  function playBattle(b) {
+    if (!b || b.error) {
+      notice = b && b.error === 'noTeam' ? tr('noTeam') : b && b.error === 'towerDone' ? tr('towerDone') : tr('gone');
+      renderPanel();
+      return;
     }
+    buildArena(b);
+    if (b.interactive) { askPick(b); return; }
+    animate(b.log, () => showResult(b));
+  }
 
-    function step() {
-      if (k >= b.log.length) { finish(); return; }
-      const ev = b.log[k];
-      const meAttacks = firstMe ? k % 2 === 0 : k % 2 === 1;
-      const att = meAttacks ? 'me' : 'foe';
-      const def = meAttacks ? 'foe' : 'me';
-      const ai = front[att];
-      const di = front[def];
-      const ac = document.getElementById('c-' + att + '-' + ai);
-      const dc = document.getElementById('c-' + def + '-' + di);
-      if (ac && !reduce) { ac.classList.remove('lunge'); void ac.offsetWidth; ac.classList.add('lunge'); }
-      if (dc && !reduce) { dc.classList.remove('hurt'); void dc.offsetWidth; dc.classList.add('hurt'); }
-      float(def, di, '-' + ev.dmg + (ev.crit ? '!' : ''), ev.crit);
-      const bar = document.getElementById('h-' + def + '-' + di);
-      if (bar) bar.style.width = Math.round((ev.hp / maxHp(team[def][di])) * 100) + '%';
-      if (ev.faint && dc) { dc.classList.add('dead'); front[def] += 1; }
-      document.getElementById('log').textContent = ev.att + ' ' + tr('hits') + ' ' + ev.def + ' · -' + ev.dmg + (ev.crit ? ' ' + tr('crit') : '') +
-        (ev.mult > 1 ? ' · ' + tr('super') : ev.mult < 1 ? ' · ' + tr('weak') : '');
-      k += 1;
-    }
+  arenaEl.addEventListener('click', (e) => {
+    const c = e.target instanceof Element ? e.target.closest('.bcard.pickable') : null;
+    if (!c || !bt || !bt.b.interactive || bt.waiting) return;
+    bt.waiting = true;
+    for (const el of arenaEl.querySelectorAll('.bcard.next, .bcard.pickable')) el.classList.remove('next', 'pickable');
+    vscode.postMessage({ type: 'pick', index: Number(c.id.split('-')[2]) });
+  });
 
-    document.getElementById('skip').onclick = () => { while (k < b.log.length) step(); finish(); };
-    timer = setInterval(step, reduce ? 150 : 650);
+  function playRound(r) {
+    if (!bt) return;
+    animate(r.events, () => {
+      bt.waiting = false;
+      if (r.over) { bt.b.interactive = false; bt.b.log = null; Object.assign(bt.b, r.result); showResult(bt.b); } else askPick(r);
+    });
   }
 
   window.addEventListener('message', (e) => {
@@ -276,6 +304,7 @@
     if (!msg) return;
     if (msg.type === 'ladder') { data = msg.ladder; renderPanel(); }
     if (msg.type === 'battle') playBattle(msg.battle);
+    if (msg.type === 'round') playRound(msg.round);
     if (msg.type === 'state') { S = msg.state; achs = (S && S.achievements) || []; renderPanel(); }
   });
 })();

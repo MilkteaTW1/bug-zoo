@@ -129,4 +129,96 @@ function duel(s1, s2) {
   return { winner: winner.name, loser: loser.name, log };
 }
 
-module.exports = { TEAM_SIZE, BOT, boostTrophies, roster, lineup, topTeam, validateTeam, duel, rng };
+/**
+ * A match the player steers. Each round the opponent shows who it sends out, the player picks which of their
+ * living monsters answers, and both hit (the stronger one first). The opponent's choice never reacts to the
+ * player's pick, so the pick is a real decision. Deterministic for a given sequence of picks.
+ *   const m = startMatch(me, foe); while (!m.over) playRound(m, pickIndex);
+ */
+function startMatch(me, foe) {
+  const mk = (s) => s.team.map((x) => ({ ...x, hp: Math.max(40, x.power * 4), maxHp: Math.max(40, x.power * 4) }));
+  const m = {
+    me: { name: me.name, team: mk(me) }, foe: { name: foe.name, team: mk(foe) },
+    round: 0, over: false, winner: null, loser: null, log: [], picks: [], foeIdx: 0,
+  };
+  m.foeIdx = foePick(m);
+  return m;
+}
+
+const alive = (team) => team.map((x, i) => (x.hp > 0 ? i : -1)).filter((i) => i >= 0);
+
+/** Who the opponent sends: the living monster that does best against what the player last used (else the first). */
+function foePick(m) {
+  const mine = alive(m.me.team);
+  const last = m.picks.length ? m.me.team[m.picks[m.picks.length - 1]] : m.me.team[mine[0]];
+  const target = last && last.hp > 0 ? last : m.me.team[mine[0]];
+  let best = -1;
+  let bestScore = -Infinity;
+  for (const i of alive(m.foe.team)) {
+    const f = m.foe.team[i];
+    const score = multiplier(elementOf(f.type), elementOf(target.type)) * 1000 + f.power;
+    if (score > bestScore) { best = i; bestScore = score; }
+  }
+  return best;
+}
+
+/** The pick a hands-off player would make: the living monster best matched against the one coming out. */
+function autoPick(m) {
+  const f = m.foe.team[m.foeIdx];
+  let best = -1;
+  let bestScore = -Infinity;
+  for (const i of alive(m.me.team)) {
+    const x = m.me.team[i];
+    const score = (multiplier(elementOf(x.type), elementOf(f.type)) - multiplier(elementOf(f.type), elementOf(x.type)) * 0.5) * 1000 + x.power;
+    if (score > bestScore) { best = i; bestScore = score; }
+  }
+  return best;
+}
+
+/** Play one round with the player's pick (an index into their team). Returns the events of this round. */
+function playRound(m, pickIndex) {
+  if (m.over) return [];
+  const me = m.me.team[pickIndex];
+  if (!me || me.hp <= 0) throw new Error('that monster cannot fight');
+  const fi = m.foeIdx;
+  const foe = m.foe.team[fi];
+  const rand = rng(`${m.me.name}|${m.foe.name}|${m.round}|${m.picks.join('')}${pickIndex}|${fi}|${me.name}${me.power}|${foe.name}${foe.power}`);
+  const first = me.power >= foe.power ? 'me' : 'foe';
+  const events = [];
+  const hit = (side) => {
+    const att = side === 'me' ? me : foe;
+    const def = side === 'me' ? foe : me;
+    const ai = side === 'me' ? pickIndex : fi;
+    const di = side === 'me' ? fi : pickIndex;
+    if (att.hp <= 0 || def.hp <= 0) return;
+    const crit = rand() < 0.1;
+    const mult = multiplier(elementOf(att.type), elementOf(def.type));
+    const dmg = Math.max(1, Math.round(att.power * (0.75 + rand() * 0.5) * (crit ? 1.5 : 1) * mult));
+    def.hp -= dmg;
+    events.push({ side, ai, di, att: att.name, def: def.name, dmg, crit, mult, faint: def.hp <= 0, hp: Math.max(0, def.hp), round: m.round });
+  };
+  hit(first);
+  hit(first === 'me' ? 'foe' : 'me');
+  m.log.push(...events);
+  m.picks.push(pickIndex);
+  m.round += 1;
+  if (alive(m.foe.team).length === 0 || alive(m.me.team).length === 0) {
+    m.over = true;
+    const won = alive(m.foe.team).length === 0;
+    m.winner = won ? m.me.name : m.foe.name;
+    m.loser = won ? m.foe.name : m.me.name;
+  } else {
+    m.foeIdx = foePick(m);
+  }
+  return events;
+}
+
+/** The whole match with the automatic pick, for callers with nobody at the controls. */
+function autoMatch(me, foe) {
+  const m = startMatch(me, foe);
+  let guard = 0;
+  while (!m.over && guard++ < 200) playRound(m, autoPick(m));
+  return m;
+}
+
+module.exports = { startMatch, playRound, autoPick, autoMatch, TEAM_SIZE, BOT, boostTrophies, roster, lineup, topTeam, validateTeam, duel, rng };
